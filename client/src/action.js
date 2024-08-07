@@ -79,7 +79,7 @@ export async function get_with_token(url) {
         }, {
             cache: 'force-cache'
         },
-            { next: { revalidate: 6000 } }
+            { next: { revalidate: 60000 } }
         )
         try {
             const json = await response.json()
@@ -142,10 +142,32 @@ export async function uploadImage(formData)
     await post_with_token('jwt/updateProfileImage', { 'profile_image_url': url })
     .then((res) => {
         console.log(res)
-        revalidatePath('/profile')
+        revalidatePath('/profile/edit')
     })
     .catch((error) => {
         console.error(error)
     })
 
+}
+
+export async function applyChef(formData) {
+    const rawFormData = Object.fromEntries(formData)
+    const response = await post_with_token('jwt/applyChef', rawFormData)
+    if (response.error !== undefined)
+        return {
+            message: response.error
+        }
+    redirect('/success')
+}
+
+export async function updateProfile(formData) {
+    const rawFormData = Object.fromEntries(formData)
+    console.log(rawFormData)
+    const response = await post_with_token('jwt/updateProfile', rawFormData)
+    if (response.error !== undefined)
+        return {
+            message: response.error
+        }
+    revalidatePath('/profile')
+    redirect('/profile')
 }

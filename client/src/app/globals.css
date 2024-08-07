@@ -19,3 +19,7 @@ body {
   background: var(--background);
   font-synthesis: none;
 }
+
+input {
+  color-scheme: dark;
+}

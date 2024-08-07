@@ -97,10 +97,24 @@ app.get('/jwt/Profile', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   console.log(payload)
-  const result = await runQuery('SELECT * FROM USERS WHERE ID = :id AND EMAIL = :email', { id, email });
+  const result = await runQuery('SELECT FIRST_NAME, LAST_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL, TYPE, PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY, RATING FROM USERS,CHEF WHERE USERS.ID = :id AND USERS.EMAIL = :email AND CHEF.USER_ID(+) = USERS.ID', { id, email });
   if (result !== undefined && result.length)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
+})
+
+app.post('/jwt/updateProfile', async (c) => {
+  const payload = c.get('jwtPayload');
+  const { id } = payload;
+  const { firstName, lastName, dob, address, mobileNumber, cityCode, email } = await c.req.json<Signup>();
+  if (payload.email !== email) {
+    console.log(payload.email, email)
+    return c.json({ error: 'Invalid Token' });
+  }
+  console.log(address)
+  const formattedDob = new Date(dob).toISOString().split('T')[0];
+  const result = await runQuery('UPDATE USERS SET FIRST_NAME = :firstName, LAST_NAME = :lastName, DOB = TO_DATE(:formattedDob, \'YYYY-MM-DD\'), ADDRESS = :address, MOBILE = :mobileNumber, CITY_CODE = :cityCode WHERE ID = :id AND EMAIL = :email', { id, email, firstName, lastName, formattedDob, address, mobileNumber, cityCode });
+  return c.json({ result });
 })
 
 app.post('/jwt/updateProfileImage', async (c) => {
@@ -113,52 +127,45 @@ app.post('/jwt/updateProfileImage', async (c) => {
   return c.json({ result });
 })
 
-/**
- * A chef is a user who applied to become a chef, so it will have a reference of the user id also it has its own chef id
- * 
- * now extra fields are added to the chef table will be
- * speciality: string,
- * experience: number,
- * rating: number,
- * 
- * now the certification table will have the following fields
- * chef_id: string,
- * certification: string,
- * issue_date: string,
- * expiry_date: string,
- * link: string,
- * 
- * first create the chef table and certification table
- * CREATE TABLE CHEF (
- * ID VARCHAR2(36) PRIMARY KEY,
- * USER_ID VARCHAR2(36) NOT NULL,
- * SPECIALITY VARCHAR2(100) NOT NULL,
- * EXPERIENCE NUMBER NOT NULL,
- * RATING NUMBER NOT NULL,
- * FOREIGN KEY (USER_ID) REFERENCES USERS(ID)
- * );
- * 
- * CREATE TABLE CERTIFICATION (
- * ID VARCHAR2(36) PRIMARY KEY,
- * CHEF_ID VARCHAR2(36) NOT NULL,
- * CERTIFICATION VARCHAR2(100) NOT NULL,
- * ISSUE_DATE VARCHAR2(10) NOT NULL,
- * EXPIRY_DATE VARCHAR2(10) NOT NULL,
- * LINK VARCHAR2(100) NOT NULL,
- * FOREIGN KEY (CHEF_ID) REFERENCES CHEF(ID)
- * );
- * 
- */
-interface ChefRequest { speciality: string, experience: string, rating: string, [key: string]: string }
+interface ChefRequest { speciality: string, experience: string, [key: string]: string }
 app.post('/jwt/applyChef', async (c) => {
   const payload = c.get('jwtPayload')
-  const { uid, email } = payload
-  const { speciality, experience, rating } = await c.req.json<ChefRequest>()
-  const chef_id = uuidv7();
-  const result = await runQuery('INSERT INTO CHEF VALUES(:chef_id, :uid, :speciality, :experience, :rating)', { chef_id, uid, speciality, experience, rating });
+  const { id, email } = payload
+  const { speciality, experience } = await c.req.json<ChefRequest>()
+  // console.log(speciality, experience)
+  // return c.json({ speciality, experience });
+  const result = await runQuery('INSERT INTO CHEF(USER_ID,SPECIALITY,EXPERIENCE) VALUES(:id,:speciality, :experience)', { id, speciality, experience });
   if (result !== undefined && result.length)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
+})
+
+app.get('/jwt/getChef', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id } = payload
+  const result = await runQuery('SELECT FIRST_NAME, LAST_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL,  PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY, RATING FROM USERS ,CHEF WHERE USERS.ID = CHEF.USER_ID AND CHEF.USER_ID = :id', { id });
+  if (result !== undefined && result.length)
+    return c.json({ result });
+  return c.json({ error: 'Invalid Token' });
+})
+
+app.get('/jwt/chefDetails', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id } = payload
+  const result = await runQuery('SELECT * FROM USERS, CHEF, CERTIFICATION WHERE USERS.ID = CHEF.USER_ID AND USERS.ID = :id AND CHEF.ID = CERTIFICATION.CHEF_ID', { id });
+  console.log(result)
+  if (result !== undefined)
+    return c.json({ result });
+  return c.json({ error: 'Invalid Token' });
+})
+
+app.get('/jwt/amIAChef', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { uid, email } = payload
+  const result = await runQuery('SELECT * FROM CHEF WHERE USER_ID = :uid', { uid });
+  if (result !== undefined && result.length)
+    return c.json({ message: 'Chef' });
+  return c.json({ message: 'No Chef' });
 })
 
 app.get('/jwt/chefProfile', async (c) => {
@@ -169,6 +176,8 @@ app.get('/jwt/chefProfile', async (c) => {
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
 })
+
+
 
 interface CertificationRequest { certification: string, issue_date: string, expiry_date: string, link: string, [key: string]: string }
 app.post('/jwt/addCertification', async (c) => {

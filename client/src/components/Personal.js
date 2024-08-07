@@ -1,0 +1,45 @@
+import { get_with_token } from "@/action";
+import { PencilIcon } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+
+async function Personal({ mine = true, path, res }) {
+    if(mine===false)
+        res = await get_with_token(path);
+
+  return (
+      <div>
+          {
+              res.result ? (
+                  <div className="border border-[#ffffff1c] p-7 rounded-md m-7 flex flex-row w-full justify-around gap-5">
+                      <div className="relative group m-auto">
+                          <h1 className="text-[4rem] font-extrabold">{`${res.result[0]['FIRST_NAME']} ${res.result[0]['LAST_NAME']}`}</h1>
+                          <h2 className="italic font-mono font-extralight">{res.result[0]['EMAIL']}</h2>
+                          <h2 className="italic font-mono font-extralight">
+                              {res.result[0]['ADDRESS']}
+                          </h2>
+                          <h2 className="italic font-mono font-extralight">
+                              {`${res.result[0]['CITY_CODE']} ${res.result[0]['MOBILE']}`}
+                          </h2>
+                          {mine ? (
+                              <Link href="/profile/edit">
+                                  <PencilIcon className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-0 right-0" />
+                              </Link>
+                          ) : null}
+                          
+                      </div>
+                      <div className="grid place-content-center">
+                          <Image src={res.result[0]['PROFILE_IMAGE']} alt="Food plate" width={600} height={400} className="rounded-full bg-cover max-w-72 max-h-max" />
+
+
+                      </div>
+                  </div>
+              ) : (
+                  <h1>{res.error}</h1>
+              )
+          }
+    </div>
+  )
+}
+
+export default Personal
