@@ -5,7 +5,7 @@ function page() {
     <div className="m-auto w-full">
       <div className="h-20"></div>
       <div className="justify-center grid grid-cols-2 place-content-center m-auto">
-        <div className="rounded-lg border bg-card text-card-foreground shadow-sm  mx-auto border-[#ffffff27] " >
+        <div className="rounded-lg bg-[#0e1216] border bg-card text-card-foreground shadow-sm  mx-auto border-[#ffffff1c] " >
           <div className="flex flex-col space-y-1.5 p-6">
             <h3 className="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Register Your Beautiful Kitchen!</h3>
             <p className="text-sm text-muted-foreground">Register Your New Kitchen (Image and Approval will be processed later).</p>

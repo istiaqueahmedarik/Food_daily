@@ -11,14 +11,14 @@ async function Personal({ mine = true, path, res }) {
       <div>
           {
               res.result ? (
-                  <div className="border border-[#ffffff1c] p-7 rounded-md m-7 flex flex-row w-full justify-around gap-5">
+                  <div className="border border-[#ffffff1c] bg-[#0e1216] p-9 rounded-md m-8 flex flex-row w-full justify-around gap-5">
                       <div className="relative group m-auto">
                           <h1 className="text-[4rem] font-extrabold">{`${res.result[0]['FIRST_NAME']} ${res.result[0]['LAST_NAME']}`}</h1>
-                          <h2 className="italic font-mono font-extralight">{res.result[0]['EMAIL']}</h2>
-                          <h2 className="italic font-mono font-extralight">
+                          <h2 className="italic font-mono  text-[#727A83] font-medium">{res.result[0]['EMAIL']}</h2>
+                          <h2 className="italic font-mono text-[#727A83] font-medium">
                               {res.result[0]['ADDRESS']}
                           </h2>
-                          <h2 className="italic font-mono font-extralight">
+                          <h2 className="italic font-mono text-[#727A83] font-medium">
                               {`${res.result[0]['CITY_CODE']} ${res.result[0]['MOBILE']}`}
                           </h2>
                           {mine ? (

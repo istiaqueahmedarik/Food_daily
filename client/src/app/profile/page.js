@@ -15,8 +15,8 @@ async function page() {
   console.log(res.result[0]['CHEF_ID'])
 
   return (
-    <div className="">
-      <div className="h-[80vh] m-auto grid place-content-center">
+    <div className="flex flex-col gap-8">
+      <div className="h-[100vh] m-auto grid place-content-center">
           <Personal res={res}/>
       </div>
     {res.result[0]['CHEF_ID'] && <ChefProfile mine={true} chef={res} />}

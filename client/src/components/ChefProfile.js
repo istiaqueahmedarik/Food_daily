@@ -58,14 +58,14 @@ async function ChefProfile({profile=false, mine = true, path, chef }) {
                                 
                             </div>
                             {profile && <div className="">
-                                <Link href={"/add_kitchen"} className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6 border-[#ffffff2a]'>
+                                <Link href={"/add_kitchen"} className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6 border-[#ffffff15] bg-[#0e1216]'>
                                     Add Kitchen
                                 </Link>
                             </div>}
                         </div>
-                        {profile ? <div>
+                        {profile ? <div className='m-auto'>
 
-                            <Image src={data['PROFILE_IMAGE']} width="500" height="500" alt={data['FIRST_NAME']} className="rounded-lg object-cover" />
+                            <Image src={data['PROFILE_IMAGE']} width="400" height="400" alt={data['FIRST_NAME']} className="rounded-lg object-cover" />
                         </div>:
                         <div className={`grid grid-cols-2 gap-4`}>
                             <Image
