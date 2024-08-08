@@ -7,7 +7,7 @@ function Button({txt="Submit"}) {
       <button
           type="submit"
             disabled={pending}
-          className={`w-full bg-black text-[#ffffff6f] hover:text-white font-semibold py-2 px-4 rounded-md border border-[#ffffff1e] transition duration-300 ease-in-out hover:bg-[#ffffff1e]`}
+          className={`w-full bg-background text-[#ffffff6f] hover:text-white font-semibold py-2 px-4 rounded-md border border-[#ffffff1e] transition duration-300 ease-in-out hover:bg-[#ffffff1e]`}
       >
             {pending ? 'Loading...' : txt}
       </button>

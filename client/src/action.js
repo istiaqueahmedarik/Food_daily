@@ -171,3 +171,15 @@ export async function updateProfile(formData) {
     revalidatePath('/profile')
     redirect('/profile')
 }
+
+
+export async function add_kitchen(prevState, formData)
+{
+    const rawFormData = Object.fromEntries(formData)
+    const response = await post_with_token('jwt/addKitchen', rawFormData)
+    if (response.error !== undefined)
+        return {
+            message: response.error
+        }
+    redirect('/succeess_kitchen')
+}

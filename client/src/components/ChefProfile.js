@@ -2,9 +2,10 @@ import { get_with_token } from '@/action';
 import Link from 'next/link';
 import Image from 'next/image'
 import React from 'react'
+import KitchenCard from './ui/KitchenCard';
 
 
-async function ChefProfile({profile=false, mine = true, path, chef }) {
+async function ChefProfile({ profile = false, mine = true, path, chef }) {
     if (mine === false)
         chef = await get_with_token(path);
     console.log(mine)
@@ -14,15 +15,15 @@ async function ChefProfile({profile=false, mine = true, path, chef }) {
     const stars = []
     for (let i = 0; i < 5; i++) {
         if (i < data['RATING'])
-            stars.push(<FullStar />)
+            stars.push(<FullStar key={i} />)
         else if (i === data['RATING'] && data['RATING'] % 1 !== 0)
-            stars.push(<HalfStar />)
+            stars.push(<HalfStar key={i}/>)
         else
-            stars.push(<EmptyStar />)
+            stars.push(<EmptyStar key={i}/>)
     }
-    stars.push(<span className="ml-2">{data['RATING']}</span>)
+    stars.push(<span className="ml-2" key={data['RATING']}>{data['RATING']}</span>)
     return (
-        <div className="h-[80vh] m-auto grid place-content-center">
+        <div className=" m-auto grid place-content-center">
 
             <div className="bg-background text-foreground">
                 <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -103,8 +104,21 @@ async function ChefProfile({profile=false, mine = true, path, chef }) {
                         </div>
                         }
                         
+                        
                     </div>
                 </div>
+            </div>
+            <div className='m-5'>
+                <h1 className='text-2xl font-medium mb-3'>Your Kitchens</h1>
+                {chef !== undefined && chef.result.length > 1 && <div className='w-full flex flex-wrap gap-6'>
+                    {chef.result.map((kitchen) => { 
+                        return (
+                            <KitchenCard name={kitchen['KITCHEN_NAME']} image={kitchen['KITCHEN_IMAGE']} address={kitchen['KITCHEN_ADDRESS']} />
+
+
+                        );
+                    })}
+                </div>}
             </div>
         </div>
 

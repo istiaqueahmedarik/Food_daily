@@ -32,7 +32,7 @@ function Login() {
                                   placeholder="m@example.com"
                                   autoComplete="off"
                                   required
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-black text-white focus:outline-[#ffffff25] outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
                               />
                           </div>
                           <div className="grid gap-2">
@@ -46,7 +46,7 @@ function Login() {
                                   </Link>
                               </div>
                               <input id="password" type="password" required
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-black text-white focus:outline-[#ffffff25] outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
                                     name="password"
                               />
                           </div>
@@ -64,7 +64,7 @@ function Login() {
                       </div>
                   </div>
               </div>
-              <div className="hidden bg-muted lg:block">
+              <div className="bg-muted lg:block">
                   <Image
                       src="/login.svg"
                       alt="Image"

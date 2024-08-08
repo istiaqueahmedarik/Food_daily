@@ -17,19 +17,19 @@ function Hero() {
                       <input
                           type="text"
                           placeholder="Enter delivery address"
-                          className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-black text-white focus:outline-[#ffffff25] outline-none"
+                          className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
                       />
                       <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white text-black p-2 rounded-full">
                           <ArrowRight size={20} />
                       </button>
                   </div>
                   {cookies().get('token') ? (
-                      <button type="submit" className="flex items-center justify-center mx-auto text-[#ffffff9d] border bg-black rounded-md border-[#ffffff39] hover:text-white px-4 py-2">
+                      <button type="submit" className="flex items-center justify-center mx-auto text-[#ffffff9d] border bg-background rounded-md border-[#ffffff39] hover:text-white px-4 py-2">
                       <Search size={20} className="mr-2" />
                       Search
                   </button>
                   ) : (
-                          <Link href={"/login"} className="flex items-center justify-center mx-auto text-[#ffffff9d] border bg-black rounded-md border-[#ffffff39] hover:text-white px-4 py-2">
+                          <Link href={"/login"} className="flex items-center justify-center mx-auto text-[#ffffff9d] border bg-background rounded-md border-[#ffffff39] hover:text-white px-4 py-2">
                               <User size={20} className="mr-2" />
                               Sign in
                           </Link>   

@@ -152,7 +152,7 @@ app.get('/jwt/getChef', async (c) => {
 app.get('/jwt/chefDetails', async (c) => {
   const payload = c.get('jwtPayload')
   const { id } = payload
-  const result = await runQuery('SELECT * FROM USERS, CHEF, CERTIFICATION WHERE USERS.ID = CHEF.USER_ID AND USERS.ID = :id AND CHEF.ID = CERTIFICATION.CHEF_ID', { id });
+  const result = await runQuery('SELECT USERS.FIRST_NAME, USERS.LAST_NAME, USERS.DOB, USERS.ADDRESS, USERS.MOBILE, USERS.CITY_CODE, USERS.EMAIL, USERS.PROFILE_IMAGE, CHEF.ID AS CHEF_ID, CHEF.SPECIALITY, CHEF.RATING, CHEF.EXPERIENCE, KITCHEN.ID AS KITCHEN_ID, KITCHEN.ADDRESS AS KITCHEN_ADDRESS, KITCHEN.RATING AS KITCHEN_RATING, APPROVED, KITCHEN_IMAGE, KITCHEN.NAME AS KITCHEN_NAME, KITCHEN.CITY_NAME FROM USERS, CHEF, KITCHEN WHERE USERS.ID = CHEF.USER_ID AND USERS.ID = :id AND CHEF.ID = KITCHEN.CHEF_ID(+)', { id });
   console.log(result)
   if (result !== undefined)
     return c.json({ result });
@@ -177,6 +177,19 @@ app.get('/jwt/chefProfile', async (c) => {
   return c.json({ error: 'Invalid Token' });
 })
 
+interface KitchenRequest { name: string, address: string, city_name: string }
+app.post('/jwt/addKitchen', async (c) => {
+  const { id, email } = c.get('jwtPayload')
+  const { name, address, city_name } = await c.req.json<KitchenRequest>()
+  const result = await runQuery('SELECT ID FROM CHEF WHERE USER_ID = :id', { id });
+  const chefId = result[0]['ID'];
+  try {
+    await runQuery('INSERT INTO KITCHEN (NAME, ADDRESS, CITY_NAME, CHEF_ID) VALUES(:name, :address, :city_name, :chefId)', { name, address, city_name, chefId });
+    return c.json({ message: 'Kitchen Added' });
+  } catch (error) {
+    return c.json({ error });
+  }
+})
 
 
 interface CertificationRequest { certification: string, issue_date: string, expiry_date: string, link: string, [key: string]: string }

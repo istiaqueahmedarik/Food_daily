@@ -17,7 +17,7 @@ function SignUp() {
       <div>
           <div className='flex flex-wrap pt-10'>
               <Image src="/signup.svg" alt="logo" width={500} height={100} className="mx-auto" />
-              <div className="max-w-md mx-auto mt-8 p-6 bg-black rounded-lg shadow-md ">
+              <div className="max-w-md mx-auto mt-8 p-6 bg-background rounded-lg shadow-md ">
                   <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
                   <p className="text-center mb-6">
                       Already have an account?{' '}
@@ -35,7 +35,7 @@ function SignUp() {
                                   type="text"
                                   id="firstName"
                                   name='firstName'
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-black text-white focus:outline-[#ffffff25] outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
                                   required
 
                               />
@@ -48,7 +48,7 @@ function SignUp() {
                                   type="text"
                                   id="lastName"
                                     name='lastName'
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-black text-white focus:outline-[#ffffff25] outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
                                   required
                               />
                           </div>
@@ -61,7 +61,7 @@ function SignUp() {
                               type="email"
                               id="email"
                                 name='email'
-                              className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-black text-white focus:outline-[#ffffff25] outline-none"
+                              className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
                               required
                           />
                       </div>
@@ -74,7 +74,7 @@ function SignUp() {
                                   <select
                                       id="country"
                                         name="cityCode"
-                                      className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-black text-white focus:outline-[#ffffff25] outline-none appearance-none"
+                                      className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none appearance-none"
                                   >
                                       <option  value="44" Selected>UK (+44)</option>
                                       <option  value="1">USA (+1)</option>
@@ -306,7 +306,7 @@ function SignUp() {
                                   type="tel"
                                   id="mobileNumber"
                                     name='mobileNumber'
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-black text-white focus:outline-[#ffffff25] outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
                                   required
                               />
                           </div>
@@ -318,7 +318,7 @@ function SignUp() {
                                     type="date"
                                     id="dob"
                                         name='dob'
-                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-black text-white focus:outline-[#ffffff25] outline-none"
+                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
                                   required
                               />
                               
@@ -331,7 +331,7 @@ function SignUp() {
                                     type="text"
                                     id="address"
                                         name='address'
-                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-black text-white focus:outline-[#ffffff25] outline-none"
+                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
                                   required
                               />
                               </div>
@@ -346,7 +346,7 @@ function SignUp() {
                                   type={showPassword ? 'text' : 'password'}
                                   id="password"
                                     name='password'
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-black text-white focus:outline-[#ffffff25] outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
                                   required
                               />
                               <button
@@ -372,7 +372,7 @@ function SignUp() {
                                     type={showPassword ? 'text' : 'password'}
                                     id="confirmPassword"
                                         name='confirmPassword'
-                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-black text-white focus:outline-[#ffffff25] outline-none"
+                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
                                     required
                                 />
                                 <button

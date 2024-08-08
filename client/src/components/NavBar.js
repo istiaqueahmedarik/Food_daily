@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 function NavBar(){
     return (
-        <header className={` transition-all will-change-transform flex justify-between items-center mb-12 z-10 fixed bg-transparent backdrop-brightness-[0.6] backdrop-blur-lg bg-blend-darken w-full p-6`}>
+        <header className={` transition-all will-change-transform flex justify-between items-center mb-12 z-10 fixed bg-background backdrop-brightness-[0.6] backdrop-blur-lg  w-full p-6`}>
             <Link href={"/"} className="text-2xl font-bold">Food-Daily</Link>
                 {cookies().get('token') ? (
                     <div>
