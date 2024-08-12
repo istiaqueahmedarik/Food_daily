@@ -4,7 +4,7 @@ import dbConfig from './config.ts'
 export const connect = async () => {
   try {
     const connection = await oracledb.getConnection(dbConfig)
-    console.log('Connected to Oracle Database')
+
     return connection
   } catch (err) {
     console.error(err)

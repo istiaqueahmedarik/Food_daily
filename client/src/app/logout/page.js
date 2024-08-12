@@ -1,3 +1,4 @@
+import Button from "@/components/ui/Button";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers"
 import Link from "next/link"
@@ -23,9 +24,7 @@ function page() {
               </div>
               <div className="p-6">
                   <form action={handleSignOut} className="flex flex-col items-center gap-4">
-                      <button type="submit" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 px-4 py-2 w-full hover:bg-[#161616] border border-[#ffffff23]">
-                          Sign Out
-                      </button>
+                      <Button txt="Sign Out"/>
                       <Link className="text-sm text-muted-foreground hover:underline" href="/">
                           Cancel
                       </Link>

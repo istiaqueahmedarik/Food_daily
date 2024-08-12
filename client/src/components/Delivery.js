@@ -235,7 +235,7 @@ function Delivery() {
                                       <div class="font-medium">Liam Johnson</div>
                                       <div>123 Main St, Anytown USA</div>
                                       <div>
-                                          <a href="#">+1 (234) 567-890</a>
+                                          <Link href="#">+1 (234) 567-890</Link>
                                       </div>
                                   </div>
                               </div>

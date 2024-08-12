@@ -3,6 +3,9 @@ const nextConfig = {
     experimental: {
         reactCompiler: true,
         ppr: 'incremental',
+        serverActions: {
+            bodySizeLimit: '10mb',
+        },
     },
     transpilePackages: ["geist"],
     images: {

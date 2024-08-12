@@ -1,18 +1,33 @@
 'use client'
 const prevState = {
-    message: ''
+    message: '',
+    kid: '',
 }
-import { add_kitchen } from "@/action";
+import { add_kitchen, editKitchen } from "@/action";
 import { useFormState } from "react-dom"
 
-function ApplyKitchen() {
-    const [state, formAction] = useFormState(add_kitchen, prevState);
+function ApplyKitchen({ edit = false, kid, header = "Register Your Beautiful Kitchen!", subheader = "Register Your New Kitchen (Image and Approval will be processed later).", data = {
+    KICHEN_NAME: "",
+    KITCHEN_CITY_NAME: "",
+    KITCHEN_ADDRESS: "",
+    kitchen_id: ""
+}, button = "Register Kitchen" }) {
+    let [state, formAction] = useFormState(add_kitchen, prevState);
+    if (edit) {
+        prevState.kid = kid;
+        [state, formAction] = useFormState(editKitchen, prevState);
+        button = "Update Kitchen"
+        header = "Update Your Beautiful Kitchen!"
+        subheader = "Update Your Kitchen (Image and Approval will be processed later)."
+    }
+    
+    
 
   return (
       <div className="rounded-lg bg-[#0e1216] border bg-card text-card-foreground shadow-sm  mx-auto border-[#ffffff1c] " >
           <div className="flex flex-col space-y-1.5 p-6">
-              <h3 className="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Register Your Beautiful Kitchen!</h3>
-              <p className="text-sm text-muted-foreground">Register Your New Kitchen (Image and Approval will be processed later).</p>
+              <h3 className="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">{header}</h3>
+              <p className="text-sm text-muted-foreground">{subheader}</p>
           </div>
           <div className="p-5">
               <form action={formAction} className="grid gap-4">
@@ -27,10 +42,11 @@ function ApplyKitchen() {
                           <input
                               className="flex bg-background h-10 w-full rounded-md border border-input  px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-background file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-[#ffffff27]"
                               id="name"
-                              name="name"
+                              name="KICHEN_NAME"
+                              defaultValue={data['KICHEN_NAME']}
                               placeholder="Enter kitchen name"
                               maxlength="100"
-                              required=""
+                              required
                           />
                       </div>
                       <div className="grid gap-2">
@@ -43,10 +59,11 @@ function ApplyKitchen() {
                           <input
                               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-background file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-[#ffffff27]"
                               id="city_name"
-                              name="city_name"
+                              name="KITCHEN_CITY_NAME"
+                                defaultValue={data['KITCHEN_CITY_NAME']}
                               placeholder="Enter City Name"
                               maxlength="100"
-                              required=""
+                              required
                           />
                       </div>
                   </div>
@@ -61,17 +78,18 @@ function ApplyKitchen() {
                           <input
                               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-background file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-[#ffffff27]"
                               id="address"
-                              name="address"
+                              name="KITCHEN_ADDRESS"
+                                defaultValue={data['KITCHEN_ADDRESS']}
                               placeholder="Enter Address"
                               maxlength="100"
-                              required=""
+                              required
                           />
                       </div>
 
                   </div>
                   <div className="m-auto w-full flex items-center p-6">
                       <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 m-auto border border-[#ffffff27]">
-                          Register Kitchen
+                         {button}
                       </button>
                   </div>
                   <p className="text-red-500">
