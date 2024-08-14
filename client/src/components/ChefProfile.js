@@ -6,7 +6,6 @@ import KitchenCard from './ui/KitchenCard';
 
 
 async function ChefProfile({ profile = false, mine = true, path, chef }) {
-    
     if (mine === false)
         chef = await get_with_token(path);
     
@@ -70,10 +69,10 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                         </div>
                         {profile ? <div className='m-auto'>
 
-                            <Image src={data['PROFILE_IMAGE']} width="400" height="400" alt={data['FIRST_NAME']} className="rounded-lg object-cover" />
+                            <Image quality={60} src={data['PROFILE_IMAGE']} width="400" height="400" alt={data['FIRST_NAME']} className="rounded-lg object-cover" />
                         </div>:
                         <div className={`grid grid-cols-2 gap-4`}>
-                            <Image
+                                <Image quality={60}
                                 src="/vercel.svg"
                                 width="300"
                                 height="300"
@@ -81,7 +80,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                                 className="rounded-lg object-cover"
 
                             />
-                            <Image
+                            <Image 
                                 src="/vercel.svg"
                                 width="300"
                                 height="300"
@@ -118,7 +117,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                     {
                         chef.result.map((kitchen,index) => { 
                         return (
-                            <KitchenCard key={index} name={kitchen['KITCHEN_NAME']} image={kitchen['KITCHEN_IMAGE']} address={kitchen['KITCHEN_ADDRESS']} edit={kitchen['KITCHEN_ID']} profile={profile} />
+                            <KitchenCard key={index} name={kitchen['KITCHEN_NAME']} image={kitchen['KITCHEN_IMAGE']} address={kitchen['KITCHEN_ADDRESS']} edit={kitchen['KITCHEN_ID']} profile={profile} approved={kitchen['APPROVED']} />
 
 
                         );

@@ -6,7 +6,7 @@ async function page({ params }) {
     return (
         <div>
             <Suspense fallback={<Loading />}>
-                <FoodCat id={params.id} />
+                <FoodCat id={params.id} edit={true} />
             </Suspense>
        </div>
     )

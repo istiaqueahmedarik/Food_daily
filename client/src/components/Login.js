@@ -65,7 +65,7 @@ function Login() {
                   </div>
               </div>
               <div className="bg-muted lg:block">
-                  <Image
+                  <Image quality={60}
                       src="/login.svg"
                       alt="Image"
                       width="1920"

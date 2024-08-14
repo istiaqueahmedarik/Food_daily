@@ -29,7 +29,7 @@ async function Personal({ mine = true, path, res }) {
                           
                       </div>
                       <div className="grid place-content-center">
-                          <Image src={res.result[0]['PROFILE_IMAGE']} alt="Food plate" width={600} height={400} className="rounded-full bg-cover max-w-72 max-h-max" />
+                          <Image quality={60} src={res.result[0]['PROFILE_IMAGE']} alt="Food plate" width={600} height={400} className="rounded-full bg-cover max-w-72 max-h-max" />
 
 
                       </div>

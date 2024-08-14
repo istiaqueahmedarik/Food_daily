@@ -31,3 +31,12 @@ input {
       #000000,
       #1f1f1f);
 }
+
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0);
+}

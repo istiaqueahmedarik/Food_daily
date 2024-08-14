@@ -8,7 +8,7 @@ import { del } from '@vercel/blob';
 import { decrypt } from "./util";
 import { cache } from "react";
 const server_url = 'http://localhost:5001/'
-const post = cache(async(url, data)=>{
+export const post = cache(async(url, data)=>{
     url = server_url + url
 
     try {
@@ -31,7 +31,34 @@ const post = cache(async(url, data)=>{
     }
 })
 
-export const post_with_token = cache(async(url, data) => {
+export const get = cache(async (url) => { 
+    url = server_url + url
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+            , {
+                cache: 'force-cache'
+            },
+            { next: { revalidate: 6000 } }
+        )
+        try {
+            const json = await response.json()
+            return json
+        }
+        catch (error) {
+            console.error('Error:', error)
+        }
+    } catch (error) {
+        console.error('Error:', error)
+    }
+})
+
+export const post_with_token = cache(async (url, data) => {
+    
     const token = cookies().get('token')
     if (token === undefined)
         return {
@@ -364,4 +391,54 @@ export async function disapproveKitchen(st, formData) {
     revalidatePath('/admin/qa')
 }
 
+export async function addCategory(st, formData)
+{
+    const rawFormData = Object.fromEntries(formData)
+    
+    // make st to uppercase
+    const kitchen_id = st.toUpperCase()
+    const {url} = await put(rawFormData.categoryImage.name, rawFormData.categoryImage, { access: 'public' });
+    const response = await post_with_token('jwt/addCategory', { 'kitchen_id': kitchen_id, 'name': rawFormData.category, 'description': rawFormData.description, 'category_image': url })
+    
+    redirect(`/chef/my/${kitchen_id}`)
+}
 
+
+export async function addDish(st, formData)
+{
+    let foodImage = formData.get('foodImage')
+    const foodImageName = foodImage.name;
+    const { url } = await put(foodImageName, foodImage, { access: 'public' });
+    const foodName = formData.get('foodName')
+    const foodDescription = formData.get('foodDescription')
+    const foodPrice = formData.get('foodPrice')
+    
+
+    const response = await post_with_token('jwt/addDish', { 'kitchen_id': st.id, 'category_id': st.cid, 'name': foodName, 'description': foodDescription, 'price': foodPrice, 'image': url });
+    
+    const fid = response.fid[0]['ID'];
+    redirect(`/chef/my/food/${fid}/ingredient`)
+}
+
+export async function addIngredient(st, formData)
+{
+    const name = formData.get('name')
+    const quantity = formData.get('quantity')
+    const calories = formData.get('calories')
+    const food_id = st
+    const raw = {
+        name: name,
+        quantity: quantity,
+        calories: calories,
+        food_id: food_id
+    }
+    const response = await post_with_token('jwt/addIngredient', raw)
+    
+    revalidatePath(`/chef/my/food/${food_id}/ingredient`)
+}
+
+export async function deleteIngredient(st, formData)
+{
+    const response = await post_with_token('jwt/deleteIngredient', { iid: st.iid })
+    revalidatePath(`/chef/my/food/${st.fid}/ingredient`)
+}

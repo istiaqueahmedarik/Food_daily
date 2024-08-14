@@ -1,0 +1,41 @@
+import { addCategory } from '@/action'
+import Button from '@/components/ui/Button'
+import Image from 'next/image'
+import React from 'react'
+
+function page({ params }) {
+    const formAction = addCategory.bind(null, params.id)
+  return (
+      <div>
+          <div className='grid grid-cols-2'>
+              <div className='m-auto'>
+                  <Image quality={60} src='/foodCat.svg' width={500} height={500} />
+              </div>
+              <div class="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-md border-[#ffffff21] m-auto" >
+                  <div class="flex flex-col space-y-1.5 p-6">
+                      <h3 class="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Add New Category</h3>
+                      <div>
+                          <form action={formAction} className="grid gap-4">
+                              <div className="grid gap-2">
+                                  <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70' htmlFor="name">Category Name</label>
+                                  <input className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-[#ffffff21]' id="name" placeholder="Enter category name" name='category' />
+                              </div>
+                              <div className="grid gap-2">
+                                  <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70' htmlFor="description">Description</label>
+                                  <textarea className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-[#ffffff21]' id="description" placeholder="Enter category description" name='description' />
+                              </div>
+                              <div className="grid gap-2">
+                                  <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70' htmlFor="image">Image</label>
+                                  <input className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-[#ffffff21]' type="file" name='categoryImage' />
+                              </div>
+                              <Button />
+                          </form>
+                      </div>
+                  </div>
+              </div>
+         </div>
+    </div>
+  )
+}
+
+export default page

@@ -21,9 +21,9 @@ export default function ProfileImage(props) {
     <form action={formAction} className="grid place-content-center">
       <label htmlFor="profileImageInput">
         {selectedFile ? (
-          <Image width={600} height={400} src={selectedFile} alt="Selected file" className="rounded-full bg-cover cursor-pointer max-w-72 max-h-max" />
+          <Image quality={60} width={600} height={400} src={selectedFile} alt="Selected file" className="rounded-full bg-cover cursor-pointer max-w-72 max-h-max" />
         ) : (
-            <Image src={props.img} alt="Food plate" width={600} height={400} className="rounded-full bg-cover cursor-pointer max-w-72 max-h-max" />
+            <Image quality={60} src={props.img} alt="Food plate" width={600} height={400} className="rounded-full bg-cover cursor-pointer max-w-72 max-h-max" />
         )}
       </label>
       <input

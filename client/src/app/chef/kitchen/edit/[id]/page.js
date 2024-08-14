@@ -1,4 +1,4 @@
-import { post_with_token } from '@/action'
+import { post, post_with_token } from '@/action'
 import ApplyKitchen from '@/components/ApplyKitchen'
 import ImageUploader from '@/components/ImageUploader'
 import KitchenImage from '@/components/ui/KitchenImage'
@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation'
 
 async function page({params}) {
     // const data = await post_with_token('jwt/getKitchen', { kitchenId: params.id })
-    const [kitchen, kitchen_images] = await Promise.all([post_with_token('jwt/getKitchen', { kitchenId: params.id }), post_with_token('jwt/getKitchenImage', { kitchenId: params.id })])
+    const [kitchen, kitchen_images] = await Promise.all([post('getKitchen', { kitchenId: params.id }), post_with_token('jwt/getKitchenImage', { kitchenId: params.id })])
     if (kitchen.error !== undefined || kitchen.result.length === 0) {
         redirect('/404')
     }
@@ -33,7 +33,7 @@ async function page({params}) {
               </div>
               <div className='m-5 flex flex-wrap p-5'>
                   <div>
-                      <Image src={'/update_kitchen.svg'} alt='update kitchen' width={600} height={400} />
+                      <Image quality={60} src={'/update_kitchen.svg'} alt='update kitchen' width={600} height={400} />
                   </div>
                   <div className='m-auto'>
                       <ApplyKitchen edit={true} kid={params.id} data={{

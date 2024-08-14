@@ -13,7 +13,7 @@ const [isDeleted, setIsDeleted] = React.useState(false)
   const img_enc = encrypt(img)
   return (
     <div className='relative border border-[#ffffff1f] rounded-lg overflow-hidden w-auto h-52 group m-5'>
-      <Image src={img} alt="kitchen image" width={300} height={300} className='group-hover:scale-125 transition-all duration-500 h-52 w-fit m-auto' />
+      <Image quality={60} src={img} alt="kitchen image" width={300} height={300} className='group-hover:scale-125 transition-all duration-500 h-52 w-fit m-auto' />
       {isDeleted ? <ConfirmDelete imageId={imageId} onDelete={onDelete} url={img_enc} kid={kid} /> :
         <Trash2
           className='absolute top-2 right-2 text-[#1a1a1a] opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer'

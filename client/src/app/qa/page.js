@@ -59,7 +59,7 @@ async function page() {
                     </div>
                 </form>
                 <div className='m-auto'>
-                    <Image src='/qa_.svg' width={500} height={500} />
+                    <Image quality={60} src='/qa_.svg' width={500} height={500} />
                 </div>
             </div>
         </div>
