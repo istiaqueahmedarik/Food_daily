@@ -1,0 +1,20 @@
+input {
+    color-scheme: dark;
+}
+
+/* #161b22 */
+
+.white_grad {
+    background: radial-gradient(67.87% 1366.67% at 50% 0,
+            #000000,
+            #1f1f1f);
+}
+
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0);
+}

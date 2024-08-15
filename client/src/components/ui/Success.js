@@ -4,7 +4,7 @@ import React from 'react'
 
 function Success({message}) {
   return (
-      <div className="flex items-center justify-center h-screen bg-background">
+      <div className="flex items-center justify-center h-screen dark bg-background">
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-md p-6 sm:p-8 border-[#ffffff2f]">
               <div className="flex flex-col items-center justify-center gap-4">
                   <Check className="w-16 h-16 text-primary" />

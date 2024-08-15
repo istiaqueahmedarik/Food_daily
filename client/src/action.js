@@ -7,9 +7,32 @@ import { revalidatePath } from "next/cache";
 import { del } from '@vercel/blob';
 import { decrypt } from "./util";
 import { cache } from "react";
+import { uuidv7 } from "uuidv7";
 const server_url = 'http://localhost:5001/'
 export const post = cache(async(url, data)=>{
     url = server_url + url
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        try {
+            const json = await response.json()
+            return json
+        }
+        catch (error) {
+            console.error('Error:', error)
+        }
+    } catch (error) {
+        console.error('Error:', error)
+    }
+})
+
+export const basic_post = cache(async (url, data) => {
 
     try {
         const response = await fetch(url, {
@@ -441,4 +464,86 @@ export async function deleteIngredient(st, formData)
 {
     const response = await post_with_token('jwt/deleteIngredient', { iid: st.iid })
     revalidatePath(`/chef/my/food/${st.fid}/ingredient`)
+}
+
+export async function addCart(st, formData)
+{
+    const raw = Object.fromEntries(formData)
+    
+    const response = await post_with_token('jwt/addToCart', { 'food_id': st.fid, 'quantity': raw.quantity })
+    
+}
+
+export async function deleteCart(st, formData)
+{
+    
+    const response = await post_with_token('jwt/deleteFromCart', { 'food_id': st })
+    revalidatePath('/cart')
+}
+
+export async function checkout(formData)
+{
+    const raw = Object.fromEntries(formData)
+    
+
+    const cart = await get_with_token('jwt/getCart');
+    const res = await get_with_token('jwt/chefDetails');
+    const token = cookies().get('token')
+    if (token === undefined)
+        return {
+            error: 'Unauthorized'
+        }
+    const store_id = process.env.SSL_STORE_ID || 'mrs6579e610249a7'
+    const store_passwd = process.env.SSL_PASS || 'mrs6579e610249a7@ssl'
+    const is_live = false
+    const unique = uuidv7()
+    const data = {
+        total_amount: cart.sm[0]['TOTAL'],
+        currency: raw.currency,
+        tran_id: unique, 
+        success_url: server_url +'sslcommerz/success',
+        fail_url: server_url + 'sslcommerz/fail',
+        cancel_url: server_url + 'sslcommerz/cancel',
+        ipn_url: server_url + 'sslcommerz/ipn',
+        shipping_method: 'Courier',
+        product_name: 'Food.',
+        product_category: 'Food',
+        product_profile: 'Food',
+        cus_name: res.result[0]['FIRST_NAME'] + ' ' + res.result[0]['LAST_NAME'],
+        cus_email: res.result[0]['EMAIL'],
+        cus_add1: res.result[0]['ADDRESS'],
+        cus_add2: '',
+        cus_city: '',
+        cus_state: '',
+        cus_postcode: '',
+        cus_country: '',
+        cus_phone: res.result[0]['CITY_CODE']+' '+res.result[0]['PHONE'],
+        cus_fax: '',
+        ship_name: raw.ship_name,
+        ship_add1: raw.ship_add1,
+        ship_add2: '',
+        ship_city: raw.ship_city,
+        ship_state: '',
+        ship_postcode: raw.ship_postcode,
+        ship_country: raw.ship_country,
+        value_a: token.value,
+        value_b: raw.ship_add1 + ' ' + raw.ship_city + ' ' + raw.ship_country + ' ' + raw.ship_postcode,
+        value_c: raw.ship_mobile,
+        value_d: raw.ship_name
+    };
+
+    const rawbody = 'store_id=' + store_id + '&store_passwd=' + store_passwd + '&total_amount=' + data.total_amount + '&currency=' + data.currency + '&tran_id=' + data.tran_id + '&success_url=' + data.success_url + '&fail_url=' + data.fail_url + '&cancel_url=' + data.cancel_url + '&ipn_url=' + data.ipn_url + '&shipping_method=' + data.shipping_method + '&product_name=' + data.product_name + '&product_category=' + data.product_category + '&product_profile=' + data.product_profile + '&cus_name=' + data.cus_name + '&cus_email=' + data.cus_email + '&cus_add1=' + data.cus_add1 + '&cus_add2=' + data.cus_add2 + '&cus_city=' + data.cus_city + '&cus_state=' + data.cus_state + '&cus_postcode=' + data.cus_postcode + '&cus_country=' + data.cus_country + '&cus_phone=' + data.cus_phone + '&cus_fax=' + data.cus_fax + '&ship_name=' + data.ship_name + '&ship_add1=' + data.ship_add1 + '&ship_add2=' + data.ship_add2 + '&ship_city=' + data.ship_city + '&ship_state=' + data.ship_state + '&ship_postcode=' + data.ship_postcode + '&ship_country=' + data.ship_country + '&value_a=' + data.value_a + '&value_b=' + data.value_b + '&value_c=' + data.value_c + '&value_d=' + data.value_d;
+   
+    const response = await fetch('https://sandbox.sslcommerz.com/gwprocess/v4/api.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Bearer ${token.value}`
+
+        },
+        body: rawbody
+    });
+
+    const dt = await response.json();
+    redirect(dt.GatewayPageURL);
 }

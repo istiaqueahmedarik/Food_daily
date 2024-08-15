@@ -53,16 +53,16 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                                 </div>
                             </div>
                             <div className={`${profile===true?'hidden':''}`}>
-                                 <Link href={mine?'/chef/my':"/"} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6 border-[#ffffff2a]">
+                                 <Link href={mine?'/chef/my':"/"} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6">
                                     {mine?'Your Dashboard':'View Menu'}
                                 </Link> 
                                 
                             </div>
                             {profile && <div className="flex flex-wrap gap-5">
-                                <Link href={"/add_kitchen"} className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6 border-[#ffffff15] bg-[#0e1216]'>
+                                <Link href={"/add_kitchen"} className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6  bg-[#0e1216]'>
                                     Add Kitchen
                                 </Link>
-                                <Link href={"/chef/add_certificate"} className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6 border-[#ffffff15] bg-[#0e1216]'>
+                                <Link href={"/chef/add_certificate"} className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6  bg-[#0e1216]'>
                                     Add Certificate
                                 </Link>
                             </div>}
@@ -111,7 +111,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                     </div>
                 </div>
             </div>
-            <div className='m-5'>
+            <div className='m-5 dark:text-white'>
                 <h1 className={`text-2xl font-medium mb-3 ${(chef !== undefined && chef.result[0]['KITCHEN_ID'] !== null && ((profile === false && chef.result[0]['APPROVED']) === 0) === false) ?'':'hidden'}`}>Your Kitchens</h1>
                 {(chef !== undefined && chef.result[0]['KITCHEN_ID'] !== null  && ((profile===false && chef.result[0]['APPROVED'])===0)===false) && <div className='w-full flex flex-wrap gap-6'>
                     {

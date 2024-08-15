@@ -8,6 +8,9 @@ import { prettyJSON } from 'hono/pretty-json'
 import { cors } from 'hono/cors'
 var jwt_ = require('jsonwebtoken');
 dotenv.config()
+const SSLCommerzPayment = require('sslcommerz-lts')
+
+
 
 type Variables = JwtVariables
 
@@ -24,6 +27,7 @@ app.use(
 app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
+
 
 app.get('/ping', async (c) => {
   const result = await runQuery('SELECT * FROM PING', {});
@@ -560,6 +564,90 @@ app.post('/jwt/deleteIngredient', async (c) => {
   return c.json({ result });
 })
 
+
+/**
+ * 
+ * CREATE TABLE CART (
+    ID VARCHAR2(36) PRIMARY KEY,
+    USER_ID VARCHAR2(36) NOT NULL,
+    FOOD_ID VARCHAR2(36) NOT NULL,
+    QUANTITY NUMBER NOT NULL,
+    DATE_ADDED DATE DEFAULT SYSDATE,
+    FOREIGN KEY (USER_ID) REFERENCES USERS(ID),
+    FOREIGN KEY (FOOD_ID) REFERENCES FOOD(ID)
+);
+ */
+
+interface CartRequest { food_id: string, quantity: string }
+app.post('/jwt/addToCart', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const { food_id, quantity } = await c.req.json<CartRequest>()
+  const result = await runQuery('INSERT INTO CART(USER_ID, FOOD_ID, QUANTITY) VALUES(:id, :food_id, :quantity)', { id, food_id, quantity });
+  return c.json({ result });
+})
+
+app.post('/jwt/deleteFromCart', async (c) => {
+  const { food_id } = await c.req.json<{ food_id: string }>()
+
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('DELETE FROM CART WHERE USER_ID = :id AND FOOD_ID = :food_id', { id, food_id });
+  return c.json({ result });
+})
+
+app.get('/jwt/getCart', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('SELECT FOOD.ID, FOOD.NAME, CART.QUANTITY, DATE_ADDED, FOOD.DESCRIPTION, FOOD.PRICE, FOOD_IMAGE FROM CART,FOOD WHERE USER_ID = :id AND CART.FOOD_ID = FOOD.ID AND CART.DELETED = 0', { id });
+  const sm = await runQuery('SELECT SUM(FOOD.PRICE * CART.QUANTITY) AS TOTAL FROM CART,FOOD WHERE USER_ID = :id AND CART.FOOD_ID = FOOD.ID AND CART.DELETED = 0', { id });
+
+  return c.json({ result, sm });
+})
+
+app.get('/jwt/getOrder', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('SELECT * FROM ORDERS WHERE USER_ID = :id ORDER BY DATE_ADDED DESC FETCH FIRST 1 ROWS ONLY', { id });
+  return c.json({ result });
+})
+
+
+app.post('/sslcommerz/success', async (c) => {
+  const data = await c.req.formData();
+  const tran_id = data.get('tran_id');
+  const val_id = data.get('val_id');
+  const store_id = process.env.SSL_STORE_ID || 'mrs6579e610249a7'
+  const store_passwd = process.env.SSL_PASS || 'mrs6579e610249a7@ssl'
+  const is_live = false
+  const response = await fetch(`https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id=${val_id}&store_id=${store_id}&store_passwd=${store_passwd}&format=json`);
+  const res = await response.json();
+  const valid = res['status'] === 'VALID';
+  const validated = res['validated'] === 'VALIDATED';
+  if (validated)
+    return c.redirect('http://localhost:3000/success_payment');
+  const token = res.value_a;
+  const { id, email } = jwt_.verify(token, process.env.JWT_SECRET);
+  const address = res.value_b;
+  const name = res.value_d;
+  const mobile = res.value_c;
+  const ammount = res.amount;
+  const ord_id = res.tran_id;
+  if (valid) {
+    await runQuery('INSERT INTO ORDERS(ID,USER_ID, TOTAL, SHIPPING_ADD, SHIPPING_PHONE,SHIPPING_NAME) VALUES(:ord_id, :id, :ammount, :address, :mobile,:name)', { ord_id, id, ammount, address, mobile, name });
+    const cart = await runQuery('SELECT CART.ID as CART_ID, FOOD.ID, FOOD.NAME, CART.QUANTITY, DATE_ADDED, FOOD.DESCRIPTION, FOOD.PRICE, FOOD_IMAGE FROM CART,FOOD WHERE USER_ID = :id AND CART.FOOD_ID = FOOD.ID AND CART.DELETED = 0', { id });
+    const placeOrderId = uuidv7();
+    for (const element of cart) {
+      console.log("element", element);
+      const cid = element['CART_ID'];
+      await runQuery('UPDATE CART SET DELETED = 1, DELETED_ID = :placeOrderId WHERE ID = :cid', { placeOrderId, cid });
+    }
+    return c.redirect('http://localhost:3000/success_payment');
+
+  }
+  return c.json({ res });
+
+})
 
 
 export default {

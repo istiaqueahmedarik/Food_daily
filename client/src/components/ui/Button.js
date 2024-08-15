@@ -1,16 +1,18 @@
 'use client'
 import React from 'react'
 import { useFormStatus } from 'react-dom'
-function Button({txt="Submit"}) {
+import { Button3 } from './button3'
+function Button({txt="Submit",variant}) {
     const { pending } = useFormStatus()
   return (
-      <button
+      <Button3
           type="submit"
-            disabled={pending}
-          className={`w-full bg-background text-[#ffffff6f] hover:text-white font-semibold py-2 px-4 rounded-md border border-[#ffffff1e] transition duration-300 ease-in-out hover:bg-[#ffffff1e]`}
+      disabled={pending}
+      variant={variant} 
+        
       >
             {pending ? 'Loading...' : txt}
-      </button>
+      </Button3>
   )
 }
 

@@ -12,7 +12,7 @@ async function page() {
   const res = await get_with_token('jwt/chefDetails');
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="dark bg-background flex flex-col gap-8">
       <div className="h-[100vh] m-auto grid place-content-center">
           <Personal res={res}/>
       </div>

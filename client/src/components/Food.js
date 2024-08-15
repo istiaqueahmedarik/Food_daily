@@ -1,10 +1,12 @@
 import Image from "next/image"
 import Ingredients from "./Ingredients"
 import Button from "./ui/Button";
+import { addCart } from "@/action";
 
 function Food({ res, params }) {
+    const binded = addCart.bind(null, params);
     const data = res.result[0];
-    console.log(data)
+    
     const stars = []
     for (let i = 0; i < 5; i++) {
         if (i < data['RATING'])
@@ -23,7 +25,6 @@ function Food({ res, params }) {
                       alt="Food Image"
                       width="300"
                       height="200"
-                      quality={50}
                       className="object-cover w-full h-full rounded-lg aspect-w-3 aspect-h-2"
                   />
                   <div className="p-6 md:p-8 flex flex-col gap-4">
@@ -45,7 +46,8 @@ function Food({ res, params }) {
                           <div className="text-3xl font-bold">৳ { data['PRICE']}</div>
                       </div>
                       <div>
-                          <form>
+                          <form action={binded} className="flex flex-col gap-5">
+                              <input type="number" name="quantity" placeholder="Quantity" className="w-full h-10 rounded-md border border-[#ffffff2e] bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" defaultValue={1}/>
                               <Button txt={"Add to Cart"}/>
                           </form>
 

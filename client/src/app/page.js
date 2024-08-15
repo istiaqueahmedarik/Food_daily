@@ -6,7 +6,7 @@ import ProductList from "@/components/ProductList";
 export const runtime = 'edge'
 export default function Home() {
   return (
-    <div>
+    <div className="dark bg-background">
       <Hero />
       {/* <Option />    */}
 
