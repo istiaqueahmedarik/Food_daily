@@ -547,3 +547,39 @@ export async function checkout(formData)
     const dt = await response.json();
     redirect(dt.GatewayPageURL);
 }
+
+export async function applyDelivery(formData)
+{
+    const raw = Object.fromEntries(formData)
+    const {url} = await put(raw.driver_license.name, raw.driver_license, { access: 'public' });
+    const rawData = {
+        'license': url,
+        'vehicle': raw.vehicle
+    }
+    const response = await post_with_token('jwt/applyDelivery', rawData)
+    if (response.error !== undefined)
+        return {
+            message: response.error
+        }
+    redirect('/success_delivery')
+}
+
+export async function acceptOrder(st, formData)
+{
+    const response = await post_with_token('jwt/acceptOrder', { 'oid': st })
+    revalidatePath('/delivery')
+}
+
+
+
+export async function completeOrder(st, formData)
+{
+    const response = await post_with_token('jwt/completeOrder', { 'oid': st })
+    revalidatePath('/delivery')
+}
+
+export async function cancelOrder(st, formData)
+{
+    const response = await post_with_token('jwt/cancelOrder', { 'oid': st })
+    revalidatePath('/delivery')
+}

@@ -1,11 +1,12 @@
 import { get_with_token, uploadImage } from "@/action"
 import CertList from "@/components/CertList";
 import ChefProfile from "@/components/ChefProfile";
+import OrderList from "@/components/OrderList";
 import Personal from "@/components/Personal";
 import Image from "next/image";
 import Link from "next/link";
 
-export const runtime = 'edge'
+
 
 
 async function page() {
@@ -16,7 +17,7 @@ async function page() {
       <div className="h-[100vh] m-auto grid place-content-center">
           <Personal res={res}/>
       </div>
-      {(res.result[0]['CHEF_ID'] !== undefined && res.result[0]['CHEF_ID']!==null) && <ChefProfile mine={true} chef={res} />}
+      {(res.result[0]['CHEF_ID'] !== undefined && res.result[0]['CHEF_ID'] !== null) && <ChefProfile mine={true} chef={res} />}
       
     </div>
   )

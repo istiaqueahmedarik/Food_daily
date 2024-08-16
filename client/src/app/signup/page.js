@@ -1,6 +1,6 @@
 import SignUp from "@/components/SignUp"
 export const dynamic = 'force-static'
-export const runtime = 'edge'
+
 export const experimental_ppr = true
 function page() {
   return (

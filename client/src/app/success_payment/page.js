@@ -9,7 +9,7 @@ async function page() {
     const res = await get_with_token('jwt/getOrder');
     const data = res.result[0];
     const date = new Date(data['DATE_ADDED']).toLocaleDateString()+' '+ new Date(data['DATE_ADDED']).toLocaleTimeString();
-    console.log(date);
+    
   return (
       <div className='p-5'>
           <div className='h-20'></div>

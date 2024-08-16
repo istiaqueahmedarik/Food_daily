@@ -2,17 +2,28 @@
 import React from 'react'
 import { useFormStatus } from 'react-dom'
 import { Button3 } from './button3'
-function Button({txt="Submit",variant}) {
+function Button({txt="Submit",variant,disabled=false}) {
     const { pending } = useFormStatus()
-  return (
-      <Button3
-          type="submit"
-      disabled={pending}
-      variant={variant} 
-        
-      >
-            {pending ? 'Loading...' : txt}
-      </Button3>
+    return (
+        <>
+        {
+            !disabled ? (<Button3
+          type = "submit"
+      disabled = { pending }
+      variant = { variant }
+
+            >
+            { pending ? 'Loading...' : txt }
+      </Button3>): (<Button3
+        type="submit"
+        disabled={true}
+        variant={variant}
+
+    >
+        Not Now
+    </Button3>) }
+        </>
+
   )
 }
 

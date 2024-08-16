@@ -612,6 +612,112 @@ app.get('/jwt/getOrder', async (c) => {
   return c.json({ result });
 })
 
+app.get('/jwt/getOrders', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, LISTAGG(F.NAME,  ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI WHERE KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'PAID' AND O.DATE_SHIPPED IS NULL     AND O.DATE_DELIVERED IS NULL AND O.DATE_ADDED <= SYSDATE ORDER BY O.DATE_ADDED", {});
+  return c.json({ result });
+})
+
+
+app.get('/jwt/activeOrders', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, LISTAGG(F.NAME,  ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI,     ACTIVE_DELIVERY ACD WHERE ACD.DELIVERY_PARTNER_ID = :id AND ACD.ORDER_ID = O.ID AND KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'SHIPPED' AND O.DATE_DELIVERED IS NULL AND O.DATE_ADDED <= SYSDATE ORDER BY O.DATE_ADDED", { id });
+  return c.json({ result });
+})
+
+
+
+
+app.get('/jwt/orderHistory', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, LISTAGG(F.NAME,  ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI,     ACTIVE_DELIVERY ACD WHERE ACD.DELIVERY_PARTNER_ID = :id AND ACD.ORDER_ID = O.ID AND KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'DELIVERED' ORDER BY O.DATE_ADDED DESC", { id });
+  return c.json({ result });
+
+})
+
+
+
+app.post('/jwt/acceptOrder', async (c) => {
+  const { oid } = await c.req.json<{ oid: string }>()
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery("UPDATE ORDERS SET DATE_SHIPPED = SYSDATE, STATUS = 'SHIPPED' WHERE ID = :oid", { oid });
+
+  await runQuery("INSERT INTO ACTIVE_DELIVERY(ORDER_ID, DELIVERY_PARTNER_ID) VALUES(:oid, :id)", { oid, id });
+
+  return c.json({ result });
+})
+
+
+
+app.post('/jwt/completeOrder', async (c) => {
+  const { oid } = await c.req.json<{ oid: string }>()
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery("UPDATE ORDERS SET DATE_DELIVERED = SYSDATE, STATUS = 'DELIVERED' WHERE ID = :oid", { oid });
+  await runQuery("UPDATE ACTIVE_DELIVERY SET STATUS = 'COMPLETED' WHERE ORDER_ID = :oid", { oid });
+  return c.json({ result });
+})
+
+app.post('/jwt/cancelOrder', async (c) => {
+  const { oid } = await c.req.json<{ oid: string }>()
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery("UPDATE ORDERS SET STATUS = 'CANCELLED' WHERE ID = :oid", { oid });
+  await runQuery("UPDATE ACTIVE_DELIVERY SET STATUS = 'REJECTED' WHERE ORDER_ID = :oid", { oid });
+  return c.json({ result });
+})
+
+/**
+ * CREATE TABLE ORDERS (
+    ID VARCHAR2(255) PRIMARY KEY,
+    USER_ID VARCHAR2(36) NOT NULL,
+    TOTAL NUMBER DEFAULT 0,
+    DATE_ADDED DATE DEFAULT SYSDATE,
+    DATE_SHIPPED DATE,
+    DATE_DELIVERED DATE,
+    SHIPPING_ADD VARCHAR2(3255) NOT NULL,
+    SHIPPING_PHONE VARCHAR2(255) NOT NULL,
+    SHIPPING_NAME VARCHAR2(255) NOT NULL,
+    STATUS VARCHAR2(255) DEFAULT 'PAID' NOT NULL,
+    FOREIGN KEY (USER_ID) REFERENCES USERS(ID)
+);
+
+CREATE TABLE ACTIVE_DELIVERY (
+    ID VARCHAR2(36) PRIMARY KEY,
+    ORDER_ID VARCHAR2(36) NOT NULL,
+    DELIVERY_PARTNER_ID VARCHAR2(36) NOT NULL,
+    STATUS VARCHAR2(255) DEFAULT 'PENDING' NOT NULL,
+    FOREIGN KEY (ORDER_ID) REFERENCES ORDERS(ID),
+    FOREIGN KEY (DELIVERY_PARTNER_ID) REFERENCES USERS(ID)
+);
+ */
+app.get('/jwt/deliverySummary', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+
+
+  const totalOrder = await runQuery('SELECT COUNT(*) AS TOTAL_ORDER FROM ORDERS WHERE STATUS = \'DELIVERED\'', {});
+
+  const totalEarning = await runQuery('SELECT SUM(TOTAL) AS TOTAL_EARNING FROM ORDERS WHERE STATUS = \'DELIVERED\'', {});
+
+  const avgDeliveryTime = await runQuery('SELECT AVG(DATE_DELIVERED - DATE_SHIPPED) AS AVG_DELIVERY_TIME FROM ORDERS WHERE STATUS = \'DELIVERED\'', {});
+
+
+  return c.json({ totalOrder, totalEarning, avgDeliveryTime });
+
+})
+
+app.get('/jwt/earningByDay/:days', async (c) => {
+  const { days } = c.req.param();
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery("SELECT SUM(TOTAL) AS TOTAL_EARNING, TRUNC(DATE_ADDED) AS DAY FROM ORDERS WHERE DATE_ADDED >= TRUNC(SYSDATE) - :days  AND ORDERS.USER_ID = :id AND ORDERS.STATUS = 'DELIVERED' GROUP BY TRUNC(DATE_ADDED) ORDER BY TRUNC(DATE_ADDED)", { days, id });
+  return c.json({ result });
+})
 
 app.post('/sslcommerz/success', async (c) => {
   const data = await c.req.formData();
@@ -635,18 +741,38 @@ app.post('/sslcommerz/success', async (c) => {
   const ord_id = res.tran_id;
   if (valid) {
     await runQuery('INSERT INTO ORDERS(ID,USER_ID, TOTAL, SHIPPING_ADD, SHIPPING_PHONE,SHIPPING_NAME) VALUES(:ord_id, :id, :ammount, :address, :mobile,:name)', { ord_id, id, ammount, address, mobile, name });
-    const cart = await runQuery('SELECT CART.ID as CART_ID, FOOD.ID, FOOD.NAME, CART.QUANTITY, DATE_ADDED, FOOD.DESCRIPTION, FOOD.PRICE, FOOD_IMAGE FROM CART,FOOD WHERE USER_ID = :id AND CART.FOOD_ID = FOOD.ID AND CART.DELETED = 0', { id });
-    const placeOrderId = uuidv7();
-    for (const element of cart) {
-      console.log("element", element);
-      const cid = element['CART_ID'];
-      await runQuery('UPDATE CART SET DELETED = 1, DELETED_ID = :placeOrderId WHERE ID = :cid', { placeOrderId, cid });
-    }
+
+    await runQuery('UPDATE CART SET DELETED = 1, DELETED_ID = :ord_id WHERE USER_ID = :id AND DELETED=0', { ord_id, id });
+
     return c.redirect('http://localhost:3000/success_payment');
 
   }
   return c.json({ res });
 
+})
+
+/**
+ * CREATE TABLE DELIVERY_PARTNER (
+    ID VARCHAR2(36) PRIMARY KEY,
+    USER_ID VARCHAR2(36) NOT NULL,
+    LICENCE VARCHAR2(255) NOT NULL,
+    VEHICLE VARCHAR2(255) NOT NULL,
+    FOREIGN KEY (USER_ID) REFERENCES USERS(ID)
+);
+ */
+app.post('/jwt/applyDelivery', async (c) => {
+  const { license, vehicle } = await c.req.json<{ license: string, vehicle: string }>();
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('INSERT INTO DELIVERY_PARTNER(USER_ID, LICENSE, VEHICLE) VALUES(:id, :license, :vehicle)', { id, license, vehicle });
+  return c.json({ result });
+})
+
+app.post('/jwt/getDelivery', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('SELECT D.ID, D.LICENSE, D.VEHICLE, U.FIRST_NAME, U.LAST_NAME, U.ADDRESS, U.MOBILE, U.CITY_CODE, U.EMAIL, U.PROFILE_IMAGE  FROM DELIVERY_PARTNER  D,USERS U WHERE USER_ID = :id AND USER_ID = U.ID', { id });
+  return c.json({ result });
 })
 
 

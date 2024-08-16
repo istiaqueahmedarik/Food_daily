@@ -5,7 +5,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation";
 
 export const dynamic = 'force-static';
-export const runtime = 'edge'
+
 
 function page() {
     async function handleSignOut() { 
