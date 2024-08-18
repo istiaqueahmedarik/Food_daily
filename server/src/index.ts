@@ -192,6 +192,44 @@ app.get('/jwt/chefDetails', async (c) => {
   return c.json({ error: 'Invalid Token' });
 })
 
+app.get('/getChef/:cid', async (c) => {
+  const { cid } = c.req.param();
+  const result = await runQuery(`
+    SELECT 
+      USERS.FIRST_NAME, 
+      USERS.LAST_NAME, 
+      USERS.DOB, 
+      USERS.ADDRESS, 
+      USERS.MOBILE, 
+      USERS.CITY_CODE, 
+      USERS.EMAIL, 
+      USERS.PROFILE_IMAGE, 
+      CHEF.ID AS CHEF_ID, 
+      CHEF.SPECIALITY, 
+      CHEF.RATING, 
+      CHEF.EXPERIENCE, 
+      KITCHEN.ID AS KITCHEN_ID, 
+      KITCHEN.ADDRESS AS KITCHEN_ADDRESS, 
+      KITCHEN.RATING AS KITCHEN_RATING, 
+      APPROVED, 
+      (SELECT IMAGE FROM KITCHEN_IMAGES WHERE KITCHEN_IMAGES.KITCHEN_ID = KITCHEN.ID AND ROWNUM = 1) AS KITCHEN_IMAGE, 
+      KITCHEN.NAME AS KITCHEN_NAME, 
+      KITCHEN.CITY_NAME 
+    FROM 
+      USERS, 
+      CHEF, 
+      KITCHEN 
+    WHERE 
+      USERS.ID = CHEF.USER_ID 
+      AND CHEF.ID = :cid 
+      AND CHEF.ID = KITCHEN.CHEF_ID(+)
+  `, { cid });
+  console.log(result)
+  if (result !== undefined)
+    return c.json({ result });
+  return c.json({ error: 'Invalid Token' });
+})
+
 app.get('/jwt/amIAChef', async (c) => {
   const payload = c.get('jwtPayload')
   const { uid, email } = payload
@@ -317,6 +355,15 @@ app.get('/jwt/getCertifications', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   const result = await runQuery('SELECT * FROM CHEF C JOIN CERTIFICATION CE ON C.ID = CE.CHEF_ID WHERE C.USER_ID = :id ORDER BY CE.ISSUE_DATE', { id });
+  if (result !== undefined && result.length)
+    return c.json({ result });
+  return c.json({ error: 'Invalid Token' });
+})
+
+app.get('/getCertifications/:cid', async (c) => {
+  const { cid } = c.req.param();
+  const result = await runQuery('SELECT * FROM CHEF C, CERTIFICATION CE WHERE  C.ID = :cid AND CE.CHEF_ID = C.ID ORDER BY CE.ISSUE_DATE', { cid });
+  console.log(result)
   if (result !== undefined && result.length)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -796,13 +843,12 @@ interface SearchRequest { search: string, city: string, chef: string, kitchen: s
 app.post('/search', async (c) => {
   const { search, city, chef, kitchen, price, rating, sort, page } = await c.req.json<SearchRequest>();
 
-  console.log(city);
 
   const searchVals = search ? search.split(' ') : [];
   const cityVals = city ? city.split(',') : [];
   const chefVals = chef ? chef.split(',') : [];
   const kitchenVals = kitchen ? kitchen.split(',') : [];
-  let query = 'SELECT FOOD.ID AS FOOD_ID, KITCHEN.ID AS KITCHEN_ID, FOOD.NAME,FOOD.PRICE,  FOOD.RATING, FOOD.FOOD_IMAGE, KITCHEN.CITY_NAME, KITCHEN.NAME AS KITCHEN_NAME, CATEGORY.NAME AS CATEGORY_NAME, USERS.FIRST_NAME || \' \' || USERS.LAST_NAME AS CHEF_NAME, USERS.PROFILE_IMAGE FROM FOOD, KITCHEN, CATEGORY, CHEF, USERS WHERE FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND KITCHEN.APPROVED = 1 AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID  :where';
+  let query = 'SELECT  FOOD.ID AS FOOD_ID, CHEF.ID AS CHEF_ID,  KITCHEN.ID AS KITCHEN_ID, FOOD.NAME,FOOD.PRICE,  FOOD.RATING, FOOD.FOOD_IMAGE, KITCHEN.CITY_NAME, KITCHEN.NAME AS KITCHEN_NAME, CATEGORY.NAME AS CATEGORY_NAME, USERS.FIRST_NAME || \' \' || USERS.LAST_NAME AS CHEF_NAME, USERS.PROFILE_IMAGE FROM FOOD, KITCHEN, CATEGORY, CHEF, USERS WHERE FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND KITCHEN.APPROVED = 1 AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID  :where';
 
 
   let where = '';
@@ -811,29 +857,33 @@ app.post('/search', async (c) => {
     // for (let i = 1; i < searchVals.length; i++) {
     //   where += ` OR UTL_MATCH.JARO_WINKLER_SIMILARITY(FOOD.NAME, :search${i}) > 60`;
     // }
-    where += ` AND UPPER(FOOD.NAME) LIKE UPPER('%' || :SEARCH0 || '%')`;
+    where += ` AND ( UPPER(FOOD.NAME) LIKE UPPER('%' || :search0 || '%')`;
     for (let i = 1; i < searchVals.length; i++) {
-      where += ` OR UPPER(FOOD.NAME) LIKE UPPER('%' || :search${i} '%')`;
+      where += ` OR UPPER(FOOD.NAME) LIKE UPPER('%' || :search${i} || '%')`;
     }
+    where += ')';
   }
   if (cityVals !== undefined && cityVals.length > 0) {
-    where += ` AND UPPER(KITCHEN.CITY_NAME) LIKE UPPER('%' || :city0 || '%')`;
+    where += ` AND ( UPPER(KITCHEN.CITY_NAME) LIKE UPPER('%' || :city0 || '%')`;
     for (let i = 1; i < cityVals.length; i++) {
       where += ` OR UPPER(KITCHEN.CITY_NAME) LIKE UPPER('%' || :city${i} || '%')`;
     }
+    where += ')';
   }
   if (chefVals !== undefined && chefVals.length > 0) {
-    where += ` AND USERS.FIRST_NAME || ' ' || USERS.LAST_NAME = :chef0`;
+    where += ` AND ( USERS.FIRST_NAME || ' ' || USERS.LAST_NAME = :chef0`;
     for (let i = 1; i < chefVals.length; i++) {
       where += ` OR USERS.FIRST_NAME || ' ' || USERS.LAST_NAME = :chef${i}`;
     }
+    where += ')';
   }
 
   if (kitchenVals !== undefined && kitchenVals.length > 0) {
-    where += ` AND KITCHEN.NAME = :kitchen0`;
+    where += ` AND ( KITCHEN.NAME = :kitchen0`;
     for (let i = 1; i < kitchenVals.length; i++) {
       where += ` OR KITCHEN.NAME = :kitchen${i}`;
     }
+    where += ')';
   }
 
   let priceWhere1 = price === undefined ? 0 : price.split(',')[0];

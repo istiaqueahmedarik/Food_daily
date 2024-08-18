@@ -1,7 +1,13 @@
+import { get } from "@/action"
 import Image from "next/image"
 import Link from "next/link"
 
-function CertList({ chef, res }) {
+async function CertList({ chef, res, mine, path, path2 }) {
+    if (mine===false)
+    {
+        chef = await get(path)
+        res = await get(path2)
+    }
     if(res.result===undefined ) return <div></div>
     return (
         <div className="mx-auto max-w-[1960px] p-12">

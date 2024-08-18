@@ -44,8 +44,8 @@ export default function Rating() {
     return (
         <Card className="w-full lg:max-w-7xl md:max-w-6xl sm:max-w-5xl mx-auto mb-5">
             <CardHeader>
-                <CardTitle>Rate Your Order</CardTitle>
-                <CardDescription>How was your food delivery experience?</CardDescription>
+                <CardTitle>Rate This Food</CardTitle>
+                <CardDescription>How was your experience related to this food?</CardDescription>
             </CardHeader>
             <div className="flex flex-col md:flex-row">
                 <form onSubmit={handleSubmit} className="w-full md:w-1/2 p-6 md:border-r">
@@ -59,7 +59,7 @@ export default function Rating() {
                                     <button
                                         key={star}
                                         type="button"
-                                        className={`text-2xl focus:outline-none focus:ring-2 focus:ring-primary rounded-full ${star <= rating ? 'text-primary' : 'text-muted'
+                                        className={`text-2xl focus:outline-none focus:ring-2 focus:ring-input rounded-full ${star <= rating ? 'text-primary' : 'text-muted'
                                             }`}
                                         onClick={() => setRating(star)}
                                         aria-label={`Rate ${star} star${star !== 1 ? 's' : ''}`}

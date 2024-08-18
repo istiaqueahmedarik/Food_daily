@@ -8,7 +8,7 @@ import React from 'react'
 
 async function page({ params, searchParams }) {
     const res = await post('search', searchParams);
-    if (res.result.length === 0) {
+    if (res.result===undefined ||  res.result.length === 0) {
         return <div className="text-center">No results found</div>
     }
   
@@ -25,7 +25,7 @@ async function page({ params, searchParams }) {
 
                       <Link href={`chef/kitchen/${item['KITCHEN_ID']}`} className="text-md text-gray-300">{item['KITCHEN_NAME']}</Link>
                       <div className="flex justify-between items-center mt-2">
-                          <Link href={"/"} className="text-sm text-gray-500 flex flex-wrap">
+                          <Link href={`/chef/${item['CHEF_ID']}`} className="text-sm text-gray-500 flex flex-wrap">
                               <Avatar>
                                   <AvatarImage src={item['PROFILE_IMAGE']} alt="alt={item['CHEF_NAME']}" />
                                   <AvatarFallback>{item['CHEF_NAME'][0]}{item['CHEF_NAME'][1]}</AvatarFallback>

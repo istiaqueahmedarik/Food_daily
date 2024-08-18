@@ -1,4 +1,4 @@
-import { get_with_token } from '@/action';
+import { get, get_with_token } from '@/action';
 import Link from 'next/link';
 import Image from 'next/image'
 import React from 'react'
@@ -7,9 +7,9 @@ import KitchenCard from './ui/KitchenCard';
 
 async function ChefProfile({ profile = false, mine = true, path, chef }) {
     if (mine === false)
-        chef = await get_with_token(path);
+        chef = await get(path);
     
-    if (chef.error !== undefined)
+    if (chef.error !== undefined || chef.result === undefined || chef.result.length === 0)
         return null
     const data = chef.result[0]
     const stars = []
@@ -53,7 +53,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                                 </div>
                             </div>
                             <div className={`${profile===true?'hidden':''}`}>
-                                 <Link href={mine?'/chef/my':"/"} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6">
+                                <Link href={`${mine ? '/chef/my' :'#kitchen'}`} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6">
                                     {mine?'Your Dashboard':'View Menu'}
                                 </Link> 
                                 
@@ -111,8 +111,8 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                     </div>
                 </div>
             </div>
-            <div className='m-5 dark:text-white'>
-                <h1 className={`text-2xl font-medium mb-3 ${(chef !== undefined && chef.result[0]['KITCHEN_ID'] !== null && ((profile === false && chef.result[0]['APPROVED']) === 0) === false) ?'':'hidden'}`}>Your Kitchens</h1>
+            <div id='kitchen' className='m-5 dark:text-white'>
+                <h1 className={`text-2xl font-medium mb-3 ${(chef !== undefined && chef.result[0]['KITCHEN_ID'] !== null && ((profile === false && chef.result[0]['APPROVED']) === 0) === false) ? '' : 'hidden'}`}>{profile ?'Your':'Chef\'s'} Kitchens</h1>
                 {(chef !== undefined && chef.result[0]['KITCHEN_ID'] !== null  && ((profile===false && chef.result[0]['APPROVED'])===0)===false) && <div className='w-full flex flex-wrap gap-6'>
                     {
                         chef.result.map((kitchen,index) => { 

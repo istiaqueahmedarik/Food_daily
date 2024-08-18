@@ -19,7 +19,7 @@ function KitchenCard({ name = "Hungry", image = "/food.svg", address = "123, Foo
                 height="400"
                 style={{ aspectRatio: 300 / 400, objectFit: "cover" }}
               />
-      <div className="absolute opacity-0 group-hover:opacity-100 transition-all duration-700 top-4 right-4 z-20 flex flex-wrap gap-5">
+      <div className={`${profile ? '' : 'hidden'} absolute opacity-0 group-hover:opacity-100 transition-all duration-700 top-4 right-4 z-20 flex flex-wrap gap-5`}>
         
         <Suspense fallback={<div>Loading...</div>}>
           <DeleteKitchen edit={edit} profile={profile} />

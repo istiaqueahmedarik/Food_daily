@@ -4,25 +4,32 @@ import NavBar from "./NavBar"
 import Link from "next/link"
 import { cookies } from "next/headers"
 import HeroCover from "./HeroCover"
+import { redirect } from "next/navigation"
 
 export const dynamic = 'force-static';
 
-function Hero() {
+async function Hero() {
+    async function search(formData) {
+        "use server"
+        const city = formData.get('city').split(' ').join(',')
+        redirect(`/search?city=${city}`)
+    }
     return (
       
         
       <div className="min-h-screen relative  text-white ">
             
           <div className="grid place-content-center h-[80vh]">
-              <form className="max-w-3xl my-auto mx-auto text-center">
+                <form action={search} className="max-w-3xl my-auto mx-auto text-center">
                   <h1 className="text-4xl  mb-8">Discover Home cooked food and more...</h1>
                   <div className="relative mb-4">
                       <input
                           type="text"
                           placeholder="Enter delivery address"
-                          className="w-full py-3 px-4 pr-12 rounded-md border-[0.2px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                            className="w-full py-3 px-4 pr-12 rounded-md border-[0.2px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                            name="city"
                       />
-                      <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white text-black p-2 rounded-full">
+                      <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white text-black p-2 rounded-full">
                           <ArrowRight size={20} />
                       </button>
                   </div>

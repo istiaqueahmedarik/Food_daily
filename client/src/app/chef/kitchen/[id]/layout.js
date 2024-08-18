@@ -1,13 +1,26 @@
-import { post, post_with_token } from "@/action"
+import { post, post_with_token, searchFood } from "@/action"
 import { ArrowRight, Star } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { redirect } from "next/navigation"
 
 async function layout({ params, children }) {
     const res = await post('getKitchen', { kitchenId: params.id })
     const data = res.result[0]
     const img = res.image
     const front = img.length > 0 ? img[0]['IMAGE'] : '/food.svg'
+
+    async function searchFood(formData)
+    {
+        'use server'
+        const search = formData.get('search')
+        const city = data['KITCHEN_CITY_NAME']
+        const chef_name = data['FIRST_NAME'] + ' ' + data['LAST_NAME']
+        // ?city=DHAKA&chef=Istiaque%20Ahmed&kitchen=Hungry%20hungry&price=34,235
+        const query = `?city=${city}&chef=${chef_name}&kitchen=${data['KICHEN_NAME']}&search=${search}`
+        redirect(`/search${query}`)
+    }
+    
   return (
       <div>
           <div className='h-20'></div>
@@ -31,7 +44,7 @@ async function layout({ params, children }) {
                       </p>
                       <p class="text-muted-foreground">{data['KITCHEN_ADDRESS']}</p>
                       </div>
-                  <form className="max-w-3xl my-auto text-center">
+                  <form action={searchFood} className="max-w-3xl my-auto text-center">
                       <div className="relative mb-4">
                           <input
                               type="text"
