@@ -11,7 +11,7 @@ function FoodCatCard(props) {
                   src={props.cat['CATEGORY_IMAGE']}
                   alt="Background"
                   className="absolute inset-0  h-full object-cover"
-                  layout="fill"
+                  fill
               />
               <div
                   className="absolute inset-0 bg-[linear-gradient(transparent_0%,rgb(69,69,69)_100%)]"

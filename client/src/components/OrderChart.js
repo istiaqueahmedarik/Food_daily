@@ -4,7 +4,7 @@ import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "./ui/chart"
 
 export default function OrderChart(props) {
-    console.log(props.earning)
+    
     return (
             <ChartContainer
                 config={{

@@ -2,6 +2,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
 import { GeistSans } from "geist/font/sans";
+import { Toaster } from "@/components/ui/toaster"
 const geistSans = localFont({
   src: "./fonts/Geist-Light.woff",
   variable: "--font-geist-sans",
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
       <body className={`${GeistSans.className} dark bg-background`}>
         <NavBar/>
         {children}
+        <Toaster/>
       </body>
     </html>
   );

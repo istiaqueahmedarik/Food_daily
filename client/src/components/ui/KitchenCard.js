@@ -1,7 +1,10 @@
-import { CheckCheck, CheckCircle2, PackagePlus, PencilIcon, Plus, PlusCircle, PlusSquareIcon } from 'lucide-react'
+import { CheckCheck, CheckCircle2, Delete, PackagePlus, PencilIcon, Plus, PlusCircle, PlusSquareIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
+import React, { Suspense } from 'react'
+import DeleteKitchen from './DeleteKitchen'
+export const experimental_ppr = true
+
 
 function KitchenCard({ name = "Hungry", image = "/food.svg", address = "123, Food Street", edit = "", profile, approved=false }) {
   if(image===null || image===undefined){ image="/food.svg" }
@@ -17,12 +20,10 @@ function KitchenCard({ name = "Hungry", image = "/food.svg", address = "123, Foo
                 style={{ aspectRatio: 300 / 400, objectFit: "cover" }}
               />
       <div className="absolute opacity-0 group-hover:opacity-100 transition-all duration-700 top-4 right-4 z-20 flex flex-wrap gap-5">
-        <Link href={`/chef/kitchen/${edit}/add_food`} className={`${profile ? '' : 'hidden'}`}>
-          <AddBurgerIcon size={24} className="text-white" />
-        </Link>
-        <Link href={`/chef/kitchen/${edit}/add_category`} className={`${profile?'':'hidden'}`}>
-          <PlusCircle size={24} className="text-white" />
-        </Link>
+        
+        <Suspense fallback={<div>Loading...</div>}>
+          <DeleteKitchen edit={edit} profile={profile} />
+        </Suspense>
         <Link href={`/chef/kitchen/edit/${edit}`} className={`${profile ? '' : 'hidden'}`}>
           <PencilIcon size={20} className="text-white" />
         </Link>

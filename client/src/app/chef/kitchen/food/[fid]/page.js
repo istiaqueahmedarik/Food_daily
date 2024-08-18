@@ -1,16 +1,18 @@
 import { get } from '@/action'
 import Food from '@/components/Food'
-import React from 'react'
+import Rating from '@/components/Rating'
+import React, { Suspense } from 'react'
 
+export const experimental_ppr = true
 async function page({params}) {
 
-  // const [res,ing] = await Promise.all([get(`getFood/${params.fid}`),get(`getIngredients/${params.fid}`)])
   const res = await get(`getFood/${params.fid}`)
 
     
   return (
     <div>
-      <Food res={res}  params={params} />
+      <Food res={res} params={params} />
+      <Rating />
     </div>
   )
 }

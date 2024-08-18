@@ -224,6 +224,20 @@ app.post('/jwt/addKitchen', async (c) => {
   }
 })
 
+app.post('/jwt/deleteKitchen', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const { kitchenId } = await c.req.json<{ kitchenId: string }>()
+  await runQuery('DELETE FROM KITCHEN_IMAGES WHERE KITCHEN_ID = :kitchenId', { kitchenId });
+  await runQuery("DELETE FROM INGREDIENT WHERE FOOD_ID IN (SELECT ID FROM FOOD WHERE CATEGORY_ID IN (SELECT ID FROM CATEGORY WHERE KITCHEN_ID = :kitchenId))", { kitchenId });
+  await runQuery("DELETE FROM CART WHERE FOOD_ID IN (SELECT ID FROM FOOD WHERE CATEGORY_ID IN (SELECT ID FROM CATEGORY WHERE KITCHEN_ID = :kitchenId))", { kitchenId });
+  await runQuery("DELETE FROM FOOD WHERE CATEGORY_ID IN (SELECT ID FROM CATEGORY WHERE KITCHEN_ID = :kitchenId)", { kitchenId });
+  await runQuery("DELETE FROM CATEGORY WHERE KITCHEN_ID = :kitchenId", { kitchenId });
+  await runQuery("DELETE FROM KITCHEN WHERE ID = :kitchenId", { kitchenId });
+
+  return c.json({ message: 'Kitchen Deleted' });
+})
+
 app.post('/jwt/editKitchen', async (c) => {
   const { id, email } = c.get('jwtPayload')
   const { kitchenId, KICHEN_NAME, KITCHEN_ADDRESS, KITCHEN_CITY_NAME } = await c.req.json<{ kitchenId: string, KICHEN_NAME: string, KITCHEN_ADDRESS: string, KITCHEN_CITY_NAME: string }>()
@@ -480,7 +494,7 @@ app.get('/getFoods/:cid', async (c) => {
 
 app.get('/getFood/:fid', async (c) => {
   const { fid } = c.req.param();
-  const result = await runQuery('SELECT * FROM FOOD WHERE ID = :fid', { fid });
+  const result = await runQuery('SELECT * FROM FOOD, CATEGORY WHERE FOOD.ID = :fid AND CATEGORY.ID = FOOD.CATEGORY_ID', { fid });
   const ingr = await runQuery('SELECT * FROM INGREDIENT WHERE FOOD_ID = :fid', { fid });
   let sm = await runQuery('SELECT SUM(CALORIES) AS CALORIES FROM INGREDIENT WHERE FOOD_ID = :fid', { fid });
   if (sm[0]['CALORIES'] === null)
@@ -489,6 +503,7 @@ app.get('/getFood/:fid', async (c) => {
     return c.json({ result, ingr, sm });
   return c.json({ error: 'Invalid Token' });
 })
+
 
 
 // CREATE TABLE CATEGORY(
@@ -711,6 +726,7 @@ app.get('/jwt/deliverySummary', async (c) => {
 
 })
 
+
 app.get('/jwt/earningByDay/:days', async (c) => {
   const { days } = c.req.param();
   const payload = c.get('jwtPayload')
@@ -773,6 +789,157 @@ app.post('/jwt/getDelivery', async (c) => {
   const { id, email } = payload
   const result = await runQuery('SELECT D.ID, D.LICENSE, D.VEHICLE, U.FIRST_NAME, U.LAST_NAME, U.ADDRESS, U.MOBILE, U.CITY_CODE, U.EMAIL, U.PROFILE_IMAGE  FROM DELIVERY_PARTNER  D,USERS U WHERE USER_ID = :id AND USER_ID = U.ID', { id });
   return c.json({ result });
+})
+
+
+interface SearchRequest { search: string, city: string, chef: string, kitchen: string, price: string, rating: string, sort: string, page: string }
+app.post('/search', async (c) => {
+  const { search, city, chef, kitchen, price, rating, sort, page } = await c.req.json<SearchRequest>();
+
+  console.log(city);
+
+  const searchVals = search ? search.split(' ') : [];
+  const cityVals = city ? city.split(',') : [];
+  const chefVals = chef ? chef.split(',') : [];
+  const kitchenVals = kitchen ? kitchen.split(',') : [];
+  let query = 'SELECT FOOD.ID AS FOOD_ID, KITCHEN.ID AS KITCHEN_ID, FOOD.NAME,FOOD.PRICE,  FOOD.RATING, FOOD.FOOD_IMAGE, KITCHEN.CITY_NAME, KITCHEN.NAME AS KITCHEN_NAME, CATEGORY.NAME AS CATEGORY_NAME, USERS.FIRST_NAME || \' \' || USERS.LAST_NAME AS CHEF_NAME, USERS.PROFILE_IMAGE FROM FOOD, KITCHEN, CATEGORY, CHEF, USERS WHERE FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND KITCHEN.APPROVED = 1 AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID  :where';
+
+
+  let where = '';
+  if (searchVals.length > 0) {
+    // where += ` AND UTL_MATCH.JARO_WINKLER_SIMILARITY(FOOD.NAME, :search0) > 60`;
+    // for (let i = 1; i < searchVals.length; i++) {
+    //   where += ` OR UTL_MATCH.JARO_WINKLER_SIMILARITY(FOOD.NAME, :search${i}) > 60`;
+    // }
+    where += ` AND UPPER(FOOD.NAME) LIKE UPPER('%' || :SEARCH0 || '%')`;
+    for (let i = 1; i < searchVals.length; i++) {
+      where += ` OR UPPER(FOOD.NAME) LIKE UPPER('%' || :search${i} '%')`;
+    }
+  }
+  if (cityVals !== undefined && cityVals.length > 0) {
+    where += ` AND UPPER(KITCHEN.CITY_NAME) LIKE UPPER('%' || :city0 || '%')`;
+    for (let i = 1; i < cityVals.length; i++) {
+      where += ` OR UPPER(KITCHEN.CITY_NAME) LIKE UPPER('%' || :city${i} || '%')`;
+    }
+  }
+  if (chefVals !== undefined && chefVals.length > 0) {
+    where += ` AND USERS.FIRST_NAME || ' ' || USERS.LAST_NAME = :chef0`;
+    for (let i = 1; i < chefVals.length; i++) {
+      where += ` OR USERS.FIRST_NAME || ' ' || USERS.LAST_NAME = :chef${i}`;
+    }
+  }
+
+  if (kitchenVals !== undefined && kitchenVals.length > 0) {
+    where += ` AND KITCHEN.NAME = :kitchen0`;
+    for (let i = 1; i < kitchenVals.length; i++) {
+      where += ` OR KITCHEN.NAME = :kitchen${i}`;
+    }
+  }
+
+  let priceWhere1 = price === undefined ? 0 : price.split(',')[0];
+  let priceWhere2 = price === undefined ? Infinity : price.split(',')[1];
+
+  where += ` AND FOOD.PRICE >= :price1 AND FOOD.PRICE <= :price2`;
+
+  let ratingWhere = rating === undefined ? 0 : rating;
+
+  where += ` AND KITCHEN.RATING >= :rating`;
+
+
+  const vals: { [key: string]: string | number } = {
+
+  }
+  if (searchVals.length > 0) {
+    for (let i = 0; i < searchVals.length; i++) {
+      vals[`search${i}`] = searchVals[i];
+    }
+  }
+  if (cityVals !== undefined && cityVals.length > 0) {
+    for (let i = 0; i < cityVals.length; i++) {
+      vals[`city${i}`] = cityVals[i];
+    }
+  }
+  if (chefVals !== undefined && chefVals.length > 0) {
+    for (let i = 0; i < chefVals.length; i++) {
+      vals[`chef${i}`] = chefVals[i];
+    }
+  }
+  if (kitchenVals !== undefined && kitchenVals.length > 0) {
+    for (let i = 0; i < kitchenVals.length; i++) {
+      vals[`kitchen${i}`] = kitchenVals[i];
+    }
+  }
+  vals['price1'] = priceWhere1;
+  vals['price2'] = priceWhere2;
+  vals['rating'] = ratingWhere;
+
+  let sortWhere = '';
+  if (sort === 'price-low-to-high') {
+    sortWhere = ' ORDER BY FOOD.PRICE ASC';
+  }
+  else if (sort === 'price-high-to-low') {
+    sortWhere = ' ORDER BY FOOD.PRICE DESC';
+  }
+  else if (sort === 'rating-high-to-low') {
+    sortWhere = ' ORDER BY FOOD.RATING DESC';
+  }
+  else {
+    // if (searchVals.length > 0) {
+    //   sortWhere = ' ORDER BY UTL_MATCH.JARO_WINKLER_SIMILARITY(FOOD.NAME, :search0) DESC';
+    //   for (let i = 1; i < searchVals.length; i++) {
+    //     sortWhere += ` , UTL_MATCH.JARO_WINKLER_SIMILARITY(FOOD.NAME, :search${i}) DESC`;
+    //   }
+    // }
+    // else {
+    //   sortWhere = ' ORDER BY FOOD.RATING DESC';
+    // }
+
+    sortWhere = ' ORDER BY FOOD.RATING DESC';
+
+
+  }
+  query += sortWhere;
+  const offset = 12;
+  const pageQ = page === undefined ? 0 : parseInt(page);
+  const limit = offset * pageQ;
+  query += ` OFFSET :limit ROWS FETCH NEXT :offset ROWS ONLY`;
+  vals['limit'] = limit;
+  vals['offset'] = offset;
+
+
+  const q = query.replace(':where', where);
+  const result = await runQuery(q, vals);
+  // const result = []
+
+  return c.json({ result });
+
+
+})
+
+app.get('/getAllKitchens', async (c) => {
+  const result = await runQuery('SELECT NAME FROM KITCHEN WHERE APPROVED = 1', {});
+  const names = result.map((r: any) => r['NAME']) || []
+  return c.json(names);
+});
+
+app.get('/getChefs', async (c) => {
+  const result = await runQuery('SELECT USERS.FIRST_NAME || \' \' || USERS.LAST_NAME AS NAME FROM CHEF,USERS WHERE CHEF.USER_ID = USERS.ID', {});
+  // create array of names from result
+  const names = result.map((r: any) => r['NAME']) || []
+  return c.json(names);
+})
+
+app.get('/getCities', async (c) => {
+  const result = await runQuery('SELECT DISTINCT UPPER(CITY_NAME) AS CITY_NAME FROM KITCHEN WHERE APPROVED = 1', {});
+  const cities = result.map((r: any) => r['CITY_NAME']) || [];
+  return c.json(cities);
+})
+
+app.get('/getPriceRange', async (c) => {
+  const result = await runQuery('SELECT MIN(PRICE) AS MIN, MAX(PRICE) AS MAX FROM FOOD', {});
+  const min = result[0]['MIN'];
+  const max = result[0]['MAX'];
+  return c.json([min, max]);
 })
 
 

@@ -4,7 +4,10 @@ import Button from "./ui/Button";
 import { addCart } from "@/action";
 
 function Food({ res, params }) {
-    const binded = addCart.bind(null, params);
+    const binded = addCart.bind(null, {
+        params: params,
+        kid: res.result[0]['KITCHEN_ID']
+    });
     const data = res.result[0];
     
     const stars = []
@@ -39,7 +42,7 @@ function Food({ res, params }) {
                               {data['DESCRIPTION']}
                           </p>
                       </div>
-                      <div className="grid gap-2 max-h-72 overflow-scroll">
+                      <div className="grid gap-2 max-h-72 ">
                           <Ingredients res={res} params={params} />
                       </div>
                       <div className="flex items-center justify-between">

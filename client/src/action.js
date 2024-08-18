@@ -455,9 +455,22 @@ export async function addIngredient(st, formData)
         calories: calories,
         food_id: food_id
     }
-    const response = await post_with_token('jwt/addIngredient', raw)
     
-    revalidatePath(`/chef/my/food/${food_id}/ingredient`)
+    await post_with_token('jwt/addIngredient', raw)
+        .then(() => {
+            revalidatePath(`/chef/my/food/${food_id}/ingredient`)
+            return {
+                message: 'Ingredient added'
+            }
+        })
+        .catch((error) => {
+            revalidatePath(`/chef/my/food/${food_id}/ingredient`)
+
+            return {
+                error: 'An error occurred'
+            }
+        })
+   
 }
 
 export async function deleteIngredient(st, formData)
@@ -469,9 +482,8 @@ export async function deleteIngredient(st, formData)
 export async function addCart(st, formData)
 {
     const raw = Object.fromEntries(formData)
-    
-    const response = await post_with_token('jwt/addToCart', { 'food_id': st.fid, 'quantity': raw.quantity })
-    
+    await post_with_token('jwt/addToCart', { 'food_id': st.params.fid, 'quantity': raw.quantity })
+    redirect(`/chef/kitchen/${st.kid}`)
 }
 
 export async function deleteCart(st, formData)
@@ -582,4 +594,31 @@ export async function cancelOrder(st, formData)
 {
     const response = await post_with_token('jwt/cancelOrder', { 'oid': st })
     revalidatePath('/delivery')
+}
+
+export async function deleteKitchen(edit, formData)
+{
+    
+    const response = await post_with_token('jwt/deleteKitchen', { 'kitchenId': edit });
+    revalidatePath('/chef/my')
+}
+
+export async function searchFood(prevState, formData) {
+    const searchQuery = formData.get('searchQuery')
+    const sortOption = formData.get('sortOption')
+    const selectedCities = formData.getAll('selectedCities')
+    const selectedChefs = formData.getAll('selectedChefs')
+    const priceRange = formData.getAll('priceRange')
+    const rating = formData.get('rating')
+
+    const searchParams = new URLSearchParams()
+    if (searchQuery) searchParams.set('query', searchQuery)
+    if (sortOption) searchParams.set('sort', sortOption)
+    if (selectedCities.length) searchParams.set('cities', selectedCities.join(','))
+    if (selectedChefs.length) searchParams.set('chefs', selectedChefs.join(','))
+    if (priceRange.length) searchParams.set('price', priceRange.join(','))
+    if (rating) searchParams.set('rating', rating)
+
+    const queryString = searchParams.toString()
+    redirect(`/?${queryString}`)
 }
