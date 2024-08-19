@@ -10,7 +10,7 @@ async function page() {
     
 
   return (
-    <div className="dark bg-background">
+    <div className="bg-background">
           {/* {user.result[0]['FIRST_NAME']} {user.result[0]['LAST_NAME']} {user.result[0]['RATING']} <Star size={30} /> */}
           <ChefProfile profile={true} chef={chef}/>
 

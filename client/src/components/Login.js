@@ -11,7 +11,7 @@ const prevState = {
 function Login() {
     const [state, formAction] = useFormState(login, prevState);
   return (
-      <div>
+      <div className="">
           {/* <NavBar vis={true} /> */}
           <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
               <div className="flex items-center justify-center py-12  border-r-2 border-r-[#ffffff2d]">
@@ -64,13 +64,13 @@ function Login() {
                       </div>
                   </div>
               </div>
-              <div className="bg-muted lg:block">
+              <div className="bg-background lg:block">
                   <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
                       src="/login.svg"
                       alt="Image"
                       width="1920"
                       height="1080"
-                      className="h-full w-72 m-auto  "
+                      className="h-full w-96 m-auto  "
                   />
               </div>
           </div>

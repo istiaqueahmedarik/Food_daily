@@ -1,7 +1,8 @@
 {
   "name": "server",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "dev_ws": "bun run --hot src/ws.ts",
   },
   "dependencies": {
     "dotenv": "^16.4.5",
@@ -10,7 +11,8 @@
     "oracledb": "^6.6.0",
     "server": "file:",
     "sslcommerz-lts": "^1.1.0",
-    "uuidv7": "^1.0.1"
+    "uuidv7": "^1.0.1",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/bun": "latest",
