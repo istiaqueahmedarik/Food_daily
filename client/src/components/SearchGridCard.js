@@ -38,7 +38,7 @@ async function SearchGridCard({ item }) {
                   <span className="font-bold">৳{item['PRICE']}</span>
                   <div className="flex items-center">
                       <StarIcon className="w-4 h-4 text-background fill-foreground mr-1" />
-                      <span>{item['RATING']}</span>
+                      <span>{item['RATING'] ? item['RATING']:0}</span>
                   </div>
               </div>
           </CardContent>

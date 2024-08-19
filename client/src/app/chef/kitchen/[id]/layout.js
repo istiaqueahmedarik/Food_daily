@@ -1,11 +1,11 @@
-import { post, post_with_token, searchFood } from "@/action"
+import { get, post, post_with_token, searchFood } from "@/action"
 import { ArrowRight, Star } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
 async function layout({ params, children }) {
-    const res = await post('getKitchen', { kitchenId: params.id })
+    const [res,rating] = await Promise.all([post('getKitchen', { kitchenId: params.id }), get(`getKitchenRating/${params.id}`)])
     const data = res.result[0]
     const img = res.image
     const front = img.length > 0 ? img[0]['IMAGE'] : '/food.svg'
@@ -20,6 +20,7 @@ async function layout({ params, children }) {
         const query = `?city=${city}&chef=${chef_name}&kitchen=${data['KICHEN_NAME']}&search=${search}`
         redirect(`/search${query}`)
     }
+    console.log(rating)
     
   return (
       <div>
@@ -35,7 +36,7 @@ async function layout({ params, children }) {
                       <p class="font-thin flex flex-wrap">
                           <span>
                               
-                              {data['KITCHEN_CITY_NAME']}, {data['KICHEN_RATING']}
+                              {data['KITCHEN_CITY_NAME']}, {rating['Rating']}
                           </span>
                           
                           <span className="my-[0.8] mx-1 ">

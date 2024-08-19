@@ -97,3 +97,7 @@ input {
 body {
   scroll-behavior: smooth;
 }
+
+.bg-vc-border-gradient {
+  background-image: radial-gradient(at left top, #71717a, 50px, #27272a 50%);
+}

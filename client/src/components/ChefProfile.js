@@ -12,17 +12,19 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
     const image = await getImage();
     if (chef.error !== undefined || chef.result === undefined || chef.result.length === 0)
         return null
+    const rating = await get(`getChefRating/${chef.result[0]['CHEF_ID']}`)
     const data = chef.result[0]
+    console.log(data)
     const stars = []
     for (let i = 0; i < 5; i++) {
-        if (i < data['RATING'])
+        if (i < rating.Rating)
             stars.push(<FullStar key={i} />)
-        else if (i === data['RATING'] && data['RATING'] % 1 !== 0)
+        else if (i === rating.Rating && rating.Rating % 1 !== 0)
             stars.push(<HalfStar key={i}/>)
         else
             stars.push(<EmptyStar key={i}/>)
     }
-    stars.push(<span className="ml-2" key={data['RATING']}>{data['RATING']}</span>)
+    stars.push(<span className="ml-2" key={rating.Rating}>{rating.Rating}</span>)
     return (
         <div className=" m-auto grid place-content-center">
 

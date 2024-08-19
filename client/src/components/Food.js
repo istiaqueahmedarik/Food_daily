@@ -7,7 +7,9 @@ import { getImage } from "@/util";
 async function Food({ params }) {
     
 
-    const res = await get(`getFood/${params.fid}`)
+    // const res = await get(`getFood/${params.fid}`)
+    // const rating = await get(`getFoodRating/${params.fid}`).Rating;
+    const [res, rating] = await Promise.all([get(`getFood/${params.fid}`), get(`getFoodRating/${params.fid}`)])
     const binded = addCart.bind(null, {
         params: params,
         kid: res.result[0]['KITCHEN_ID']
@@ -17,9 +19,9 @@ async function Food({ params }) {
 
     const stars = []
     for (let i = 0; i < 5; i++) {
-        if (i < data['RATING'])
+        if (i < rating.Rating)
             stars.push(<FullStar key={i} />)
-        else if (i === data['RATING'] && data['RATING'] % 1 !== 0)
+        else if (i === rating.Rating && rating.Rating % 1 !== 0)
             stars.push(<HalfStar key={i} />)
         else
             stars.push(<EmptyStar key={i} />)
@@ -40,7 +42,7 @@ async function Food({ params }) {
                           <h2 className="text-2xl font-bold">{data['NAME']}</h2>
                           <span className="flex flex-wrap">
                               <span className="flex gap-1">{stars}</span>
-                                <span className="text-muted-foreground">({data['RATING']})</span>
+                              <span className="text-muted-foreground">({rating.Rating})</span>
                           </span>
                           
                           <p className="text-muted-foreground">

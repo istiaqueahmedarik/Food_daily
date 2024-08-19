@@ -623,3 +623,13 @@ export async function searchFood(prevState, formData) {
     const queryString = searchParams.toString()
     redirect(`/?${queryString}`)
 }
+
+export async function reviewFood(formData)
+{
+    console.log(formData);
+    const res = await post_with_token('jwt/addRating', formData);
+    console.log(res);
+    revalidatePath(`/chef/my/food/${formData.food_id}`)
+    // const response = await post_with_token('jwt/reviewFood', { 'food_id': st, 'rating': raw.rating, 'review': raw.review })
+    // revalidatePath(`/chef/my/food/${st}`)
+}

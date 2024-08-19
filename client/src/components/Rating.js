@@ -1,10 +1,11 @@
-"use client"
-import { useState } from 'react'
 import { StarIcon } from 'lucide-react'
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button3 } from './ui/button3'
+import { reviewFood } from '@/action'
+import RatingWrite from './RatingWrite'
+import { Suspense } from 'react'
 
 const mockReviews = [
     { id: 1, author: 'Alice', rating: 5, content: 'Excellent service and delicious food!' },
@@ -15,31 +16,24 @@ const mockReviews = [
 ]
 
 function ReviewCard({ review }) {
+    console.log(review)
     return (
         <div className="mb-4 p-4 bg-muted rounded-lg">
             <div className="flex items-center justify-between mb-2">
-                <span className="font-semibold">{review.author}</span>
+                <span className="font-semibold">{review['FIRST_NAME']}</span>
                 <div className="flex">
                     {[...Array(5)].map((_, i) => (
-                        <StarIcon key={i} className={`w-4 h-4 ${i < review.rating ? 'text-primary fill-primary' : 'text-muted-foreground'}`} />
+                        <StarIcon key={i} className={`w-4 h-4 ${i < review['RATING'] ? 'text-primary fill-primary' : 'text-muted-foreground'}`} />
                     ))}
                 </div>
             </div>
-            <p className="text-sm">{review.content}</p>
+            <p className="text-sm">{review['REVIEW']}</p>
         </div>
     )
 }
 
-export default function Rating() {
-    const [rating, setRating] = useState(0)
-    const [review, setReview] = useState('')
-
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        
-        setRating(0)
-        setReview('')
-    }
+export default async function Rating(props) {
+    
 
     return (
         <Card className="w-full lg:max-w-7xl md:max-w-6xl sm:max-w-5xl mx-auto mb-5">
@@ -48,52 +42,20 @@ export default function Rating() {
                 <CardDescription>How was your experience related to this food?</CardDescription>
             </CardHeader>
             <div className="flex flex-col md:flex-row">
-                <form onSubmit={handleSubmit} className="w-full md:w-1/2 p-6 md:border-r">
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <label htmlFor="rating" className="block text-sm font-medium text-muted-foreground">
-                                Star Rating
-                            </label>
-                            <div className="flex space-x-1" id="rating" aria-label={`Star rating, ${rating} out of 5 stars selected`}>
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <button
-                                        key={star}
-                                        type="button"
-                                        className={`text-2xl focus:outline-none focus:ring-2 focus:ring-input rounded-full ${star <= rating ? 'text-primary' : 'text-muted'
-                                            }`}
-                                        onClick={() => setRating(star)}
-                                        aria-label={`Rate ${star} star${star !== 1 ? 's' : ''}`}
-                                        aria-pressed={star <= rating}
-                                    >
-                                        <StarIcon className="w-8 h-8 fill-current" />
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <label htmlFor="review" className="block text-sm font-medium text-muted-foreground">
-                                Your Review
-                            </label>
-                            <Textarea
-                                id="review"
-                                placeholder="Tell us about your experience..."
-                                value={review}
-                                onChange={(e) => setReview(e.target.value)}
-                                rows={4}
-                            />
-                        </div>
-                    </CardContent>
-                    <CardFooter>
-                        <Button3 type="submit" className="w-full">
-                            Submit Review
-                        </Button3>
-                    </CardFooter>
-                </form>
+                {props.status ?
+                    <Suspense fallback={<div>loading...</div>}>
+                        <RatingWrite data={props.data.result} fid={props.fid} />
+                    </Suspense>
+                    : <div className='p-5 my-auto'>
+                        <p>
+                            You need to be logged in or buy this food to leave a review.
+                        </p>
+                    </div>}
                 <div className="w-full md:w-1/2 p-6">
                     <h3 className="text-lg font-semibold mb-4">Recent Reviews</h3>
                     <ScrollArea className="h-[300px] pr-4">
-                        {mockReviews.map(review => (
-                            <ReviewCard key={review.id} review={review} />
+                        {props.data.result.map(review => (
+                            <ReviewCard key={review['ID']} review={review} />
                         ))}
                     </ScrollArea>
                 </div>

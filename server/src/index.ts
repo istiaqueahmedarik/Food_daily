@@ -101,7 +101,7 @@ app.get('/jwt/Profile', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
 
-  const result = await runQuery('SELECT FIRST_NAME, LAST_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL, TYPE, PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY, RATING FROM USERS,CHEF WHERE USERS.ID = :id AND USERS.EMAIL = :email AND CHEF.USER_ID(+) = USERS.ID', { id, email });
+  const result = await runQuery('SELECT FIRST_NAME, LAST_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL, TYPE, PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY FROM USERS,CHEF WHERE USERS.ID = :id AND USERS.EMAIL = :email AND CHEF.USER_ID(+) = USERS.ID', { id, email });
   if (result !== undefined && result.length)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -150,7 +150,7 @@ app.post('/jwt/applyChef', async (c) => {
 app.get('/jwt/getChef', async (c) => {
   const payload = c.get('jwtPayload')
   const { id } = payload
-  const result = await runQuery('SELECT FIRST_NAME, LAST_NAME, CHEF.CHEF_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL,  PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY, RATING FROM USERS ,CHEF WHERE USERS.ID = CHEF.USER_ID AND CHEF.USER_ID = :id', { id });
+  const result = await runQuery('SELECT FIRST_NAME, LAST_NAME, CHEF.CHEF_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL,  PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY FROM USERS ,CHEF WHERE USERS.ID = CHEF.USER_ID AND CHEF.USER_ID = :id', { id });
   if (result !== undefined)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -172,11 +172,9 @@ app.get('/jwt/chefDetails', async (c) => {
       CHEF_NAME,
       CHEF.ID AS CHEF_ID, 
       CHEF.SPECIALITY, 
-      CHEF.RATING, 
       CHEF.EXPERIENCE, 
       KITCHEN.ID AS KITCHEN_ID, 
       KITCHEN.ADDRESS AS KITCHEN_ADDRESS, 
-      KITCHEN.RATING AS KITCHEN_RATING, 
       APPROVED, 
       (SELECT IMAGE FROM KITCHEN_IMAGES WHERE KITCHEN_IMAGES.KITCHEN_ID = KITCHEN.ID AND ROWNUM = 1) AS KITCHEN_IMAGE, 
       KITCHEN.NAME AS KITCHEN_NAME, 
@@ -211,11 +209,9 @@ app.get('/getChef/:cid', async (c) => {
       CHEF_NAME,
       CHEF.ID AS CHEF_ID, 
       CHEF.SPECIALITY, 
-      CHEF.RATING, 
       CHEF.EXPERIENCE, 
       KITCHEN.ID AS KITCHEN_ID, 
       KITCHEN.ADDRESS AS KITCHEN_ADDRESS, 
-      KITCHEN.RATING AS KITCHEN_RATING, 
       APPROVED, 
       (SELECT IMAGE FROM KITCHEN_IMAGES WHERE KITCHEN_IMAGES.KITCHEN_ID = KITCHEN.ID AND ROWNUM = 1) AS KITCHEN_IMAGE, 
       KITCHEN.NAME AS KITCHEN_NAME, 
@@ -313,7 +309,7 @@ app.post('/getKitchen', async (c) => {
   kitchenId = kitchenId.toUpperCase();
 
 
-  const result = await runQuery('SELECT CHEF.ID AS CHEF_ID,   USERS.ID, USERS.FIRST_NAME, USERS.LAST_NAME, KITCHEN.ID AS KITCHEN_ID, KITCHEN.ADDRESS AS KITCHEN_ADDRESS,KITCHEN.CITY_NAME AS KITCHEN_CITY_NAME, KITCHEN.RATING AS KICHEN_RATING, KITCHEN.APPROVED AS KITCHEN_APPROVED, KITCHEN.NAME AS KICHEN_NAME FROM KITCHEN, USERS, CHEF WHERE KITCHEN.ID = :kitchenId AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID', { kitchenId });
+  const result = await runQuery('SELECT CHEF.ID AS CHEF_ID,   USERS.ID, USERS.FIRST_NAME, USERS.LAST_NAME, KITCHEN.ID AS KITCHEN_ID, KITCHEN.ADDRESS AS KITCHEN_ADDRESS,KITCHEN.CITY_NAME AS KITCHEN_CITY_NAME, KITCHEN.APPROVED AS KITCHEN_APPROVED, KITCHEN.NAME AS KICHEN_NAME FROM KITCHEN, USERS, CHEF WHERE KITCHEN.ID = :kitchenId AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID', { kitchenId });
   const image = await runQuery('SELECT IMAGE FROM KITCHEN_IMAGES WHERE KITCHEN_ID = :kitchenId', { kitchenId });
   if (result !== undefined)
     return c.json({ result, image });
@@ -535,7 +531,7 @@ app.get('/getFoods/:cid', async (c) => {
   const { cid } = c.req.param();
   const result = await runQuery('SELECT * FROM FOOD WHERE CATEGORY_ID = :cid', { cid });
 
-  const others = await runQuery('SELECT CATEGORY.ID AS CATEGORY_ID, CATEGORY.KITCHEN_ID AS KITCHEN_ID, CATEGORY.NAME, CATEGORY.DESCRIPTION, CATEGORY_IMAGE, KITCHEN.NAME AS KITCHEN_NAME, KITCHEN.ADDRESS AS KITCHEN_ADDRESS, KITCHEN.RATING AS KITCHEN_RATING, KITCHEN.CITY_NAME AS KITCHEN_CITY_NAME, KITCHEN.CHEF_ID FROM CATEGORY,KITCHEN WHERE CATEGORY.ID = :cid AND CATEGORY.KITCHEN_ID = KITCHEN.ID', { cid });
+  const others = await runQuery('SELECT CATEGORY.ID AS CATEGORY_ID, CATEGORY.KITCHEN_ID AS KITCHEN_ID, CATEGORY.NAME, CATEGORY.DESCRIPTION, CATEGORY_IMAGE, KITCHEN.NAME AS KITCHEN_NAME, KITCHEN.ADDRESS AS KITCHEN_ADDRESS, KITCHEN.CITY_NAME AS KITCHEN_CITY_NAME, KITCHEN.CHEF_ID FROM CATEGORY,KITCHEN WHERE CATEGORY.ID = :cid AND CATEGORY.KITCHEN_ID = KITCHEN.ID', { cid });
 
 
   if (result !== undefined)
@@ -830,7 +826,7 @@ app.post('/search', async (c) => {
   const cityVals = city ? city.split(',') : [];
   const chefVals = chef ? chef.split(',') : [];
   const kitchenVals = kitchen ? kitchen.split(',') : [];
-  let query = 'SELECT  FOOD.ID AS FOOD_ID, CHEF.ID AS CHEF_ID, CHEF_NAME, KITCHEN.ID AS KITCHEN_ID, FOOD.NAME,FOOD.PRICE,  FOOD.RATING, FOOD.FOOD_IMAGE, KITCHEN.CITY_NAME, KITCHEN.NAME AS KITCHEN_NAME, CATEGORY.NAME AS CATEGORY_NAME, USERS.PROFILE_IMAGE FROM FOOD, KITCHEN, CATEGORY, CHEF, USERS WHERE FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND KITCHEN.APPROVED = 1 AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID  :where';
+  let query = 'SELECT  FOOD.ID AS FOOD_ID, CHEF.ID AS CHEF_ID, CHEF_NAME, KITCHEN.ID AS KITCHEN_ID, FOOD.NAME,FOOD.PRICE,  COALESCE(FOOD_RATING.RATING,0) as RATING, FOOD.FOOD_IMAGE, KITCHEN.CITY_NAME, KITCHEN.NAME AS KITCHEN_NAME, CATEGORY.NAME AS CATEGORY_NAME, USERS.PROFILE_IMAGE FROM FOOD, KITCHEN, CATEGORY, CHEF, USERS, FOOD_RATING WHERE FOOD_RATING.FOOD_ID(+) = FOOD.ID AND  FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND KITCHEN.APPROVED = 1 AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID  :where';
 
 
   let where = '';
@@ -873,9 +869,8 @@ app.post('/search', async (c) => {
 
   where += ` AND FOOD.PRICE >= :price1 AND FOOD.PRICE <= :price2`;
 
-  let ratingWhere = rating === undefined ? 0 : rating;
 
-  where += ` AND KITCHEN.RATING >= :rating`;
+  if (rating !== undefined) { where += ` AND RATING >= :rating`; }
 
 
   const vals: { [key: string]: string | number } = {
@@ -903,7 +898,8 @@ app.post('/search', async (c) => {
   }
   vals['price1'] = priceWhere1;
   vals['price2'] = priceWhere2;
-  vals['rating'] = ratingWhere;
+  if (rating !== undefined)
+    vals['rating'] = rating;
 
   let sortWhere = '';
   if (sort === 'price-low-to-high') {
@@ -913,7 +909,7 @@ app.post('/search', async (c) => {
     sortWhere = ' ORDER BY FOOD.PRICE DESC';
   }
   else if (sort === 'rating-high-to-low') {
-    sortWhere = ' ORDER BY FOOD.RATING DESC';
+    sortWhere = ' ORDER BY RATING DESC';
   }
   else {
     // if (searchVals.length > 0) {
@@ -926,7 +922,7 @@ app.post('/search', async (c) => {
     //   sortWhere = ' ORDER BY FOOD.RATING DESC';
     // }
 
-    sortWhere = ' ORDER BY FOOD.RATING DESC';
+    sortWhere = ' ORDER BY RATING DESC';
 
 
   }
@@ -942,6 +938,8 @@ app.post('/search', async (c) => {
   const q = query.replace(':where', where);
   const result = await runQuery(q, vals);
   // const result = []
+  console.log(q);
+  console.log(result);
 
   return c.json({ result });
 
@@ -974,6 +972,122 @@ app.get('/getPriceRange', async (c) => {
   return c.json([min, max]);
 })
 
+
+app.post('/jwt/isOrder', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const { fid } = await c.req.json<{ fid: string }>();
+  const result = await runQuery('SELECT * FROM CART WHERE USER_ID = :id AND FOOD_ID = :fid', { id, fid });
+  if (result !== undefined && result.length)
+    return c.json({ status: true });
+  return c.json({ status: false });
+})
+
+// CREATE TABLE FOOD_RATING(
+//   ID VARCHAR2(36) PRIMARY KEY,
+//   FOOD_ID VARCHAR2(36) NOT NULL,
+//   USER_ID VARCHAR2(36) NOT NULL,
+//   RATING NUMBER DEFAULT 0,
+//   REVIEW VARCHAR2(255) DEFAULT '',
+//   FOREIGN KEY(FOOD_ID) REFERENCES FOOD(ID),
+//   FOREIGN KEY(USER_ID) REFERENCES USERS(ID)
+// );
+
+interface RatingRequest { food_id: string, rating: string, review: string }
+app.post('/jwt/addRating', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const { food_id, rating, review } = await c.req.json<RatingRequest>();
+  const already = await runQuery('SELECT * FROM FOOD_RATING WHERE FOOD_ID = :food_id AND USER_ID = :id', { food_id, id });
+  if (already !== undefined && already.length) {
+    const result = await runQuery('UPDATE FOOD_RATING SET RATING = :rating, REVIEW = :review WHERE FOOD_ID = :food_id AND USER_ID = :id', { food_id, id, rating, review });
+    return c.json({ result });
+  }
+  const result = await runQuery('INSERT INTO FOOD_RATING(FOOD_ID, USER_ID, RATING, REVIEW) VALUES(:food_id, :id, :rating, :review)', { food_id, id, rating, review });
+  return c.json({ result });
+})
+
+app.get('/getRating/:fid', async (c) => {
+  const { fid } = c.req.param();
+  const result = await runQuery('SELECT FOOD_ID, USER_ID, RATING, REVIEW, FIRST_NAME, LAST_NAME FROM FOOD_RATING, USERS WHERE FOOD_ID = :fid AND USERS.ID = FOOD_RATING.USER_ID ORDER BY DATE_ADDED', { fid });
+  return c.json({ result });
+})
+
+app.post('/jwt/deleteRating', async (c) => {
+  const { rid } = await c.req.json<{ rid: string }>()
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('DELETE FROM FOOD_RATING WHERE ID = :rid', { rid });
+  return c.json({ result });
+})
+
+app.get('/jwt/getRating', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('SELECT * FROM FOOD_RATING WHERE USER_ID = :id', { id });
+  return c.json({ result });
+})
+
+app.post('/jwt/getReview', async (c) => {
+  const { fid } = await c.req.json<{ fid: string }>()
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('SELECT * FROM FOOD_RATING WHERE FOOD_ID = :fid AND USER_ID = :id', { fid, id });
+  return c.json({ result });
+})
+
+app.post('/jwt/updateRating', async (c) => {
+  const { rid, rating, review } = await c.req.json<{ rid: string, rating: string, review: string }>()
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('UPDATE FOOD_RATING SET RATING = :rating, REVIEW = :review WHERE ID = :rid', { rid, rating, review });
+  return c.json({ result });
+})
+
+
+app.get('/getFoodRating/:fid', async (c) => {
+  const { fid } = await c.req.param();
+  const result = await runQuery('SELECT COALESCE(AVG(RATING), 0) AS RATING FROM FOOD_RATING WHERE FOOD_ID = :fid', { fid });
+  return c.json({ Rating: result[0]['RATING'] });
+})
+
+app.get('/getKitchenRating/:kid', async (c) => {
+  const { kid } = await c.req.param();
+  const result = await runQuery('SELECT COALESCE(AVG(RATING), 0) AS RATING FROM FOOD_RATING WHERE FOOD_ID IN (SELECT ID FROM FOOD WHERE CATEGORY_ID IN (SELECT ID FROM CATEGORY WHERE KITCHEN_ID = :kid))', { kid });
+
+  return c.json({ Rating: result[0]['RATING'] });
+})
+
+app.get('/getChefRating/:cid', async (c) => {
+  const { cid } = await c.req.param();
+  const result = await runQuery('SELECT COALESCE(AVG(RATING), 0) AS RATING FROM FOOD_RATING WHERE FOOD_ID IN (SELECT ID FROM FOOD WHERE CATEGORY_ID IN (SELECT ID FROM CATEGORY WHERE KITCHEN_ID IN (SELECT ID FROM KITCHEN WHERE CHEF_ID = :cid)))', { cid });
+
+  return c.json({ Rating: result[0]['RATING'] });
+})
+
+
+
+
+app.get('/bestSellingFood', async (c) => {
+  const result = await runQuery('SELECT * FROM FOOD, (SELECT FOOD_ID, COUNT(FOOD_ID) AS COUNT FROM CART GROUP BY FOOD_ID ORDER BY COUNT DESC FETCH FIRST 10 ROWS ONLY) B WHERE B.FOOD_ID = FOOD.ID', {});
+  return c.json({ result });
+})
+
+app.get('/bestSellingChef', async (c) => {
+  const result = await runQuery('SELECT CHEF.ID AS CHEF_ID, CHEF_NAME, SPECIALITY, EXPERIENCE, B.COUNT, PROFILE_IMAGE FROM CHEF, (SELECT CHEF_ID, COUNT(CHEF_ID) AS COUNT FROM KITCHEN GROUP BY CHEF_ID ORDER BY COUNT DESC FETCH FIRST 10 ROWS ONLY) B, USERS WHERE B.CHEF_ID = CHEF.ID AND USERS.ID = CHEF.USER_ID', {});
+  return c.json({ result });
+})
+
+app.get('/bestFoodCategory', async (c) => {
+  const result = await runQuery('SELECT CATEGORY.ID AS CATEGORY_ID, CATEGORY.NAME, CATEGORY.DESCRIPTION, B.COUNT, CATEGORY_IMAGE FROM CATEGORY, (SELECT CATEGORY_ID, COUNT(CATEGORY_ID) AS COUNT FROM FOOD GROUP BY CATEGORY_ID ORDER BY COUNT DESC FETCH FIRST 10 ROWS ONLY) B WHERE B.CATEGORY_ID = CATEGORY.ID', {});
+  return c.json({ result });
+})
+
+app.get('/popularFood/:hour', async (c) => {
+  const { hour } = c.req.param();
+  const result = await runQuery('SELECT * FROM FOOD, (SELECT FOOD_ID, COUNT(FOOD_ID) AS COUNT FROM CART WHERE DATE_ADDED >= SYSDATE - :hour/24 GROUP BY FOOD_ID ORDER BY COUNT DESC FETCH FIRST 10 ROWS ONLY) B WHERE B.FOOD_ID = FOOD.ID', { hour });
+  return c.json({ result });
+})
 
 export default {
   port: process.env.PORT,
