@@ -60,7 +60,7 @@ async function layout({ params, children }) {
 
                   </form>
                   </div>
-              <Image quality={60}  src={front} alt="restaurant" class="object-cover w-full h-96 rounded-lg shadow-lg " width={500} height={500} />
+              <Image sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}  src={front} alt="restaurant" class="object-cover w-full h-96 rounded-lg shadow-lg " width={500} height={500} />
           </div>
           {children}
     </div>

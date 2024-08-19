@@ -131,15 +131,18 @@ app.post('/jwt/updateProfileImage', async (c) => {
   return c.json({ result });
 })
 
-interface ChefRequest { speciality: string, experience: string, [key: string]: string }
+interface ChefRequest { name: string, speciality: string, experience: string, [key: string]: string }
 app.post('/jwt/applyChef', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const { speciality, experience } = await c.req.json<ChefRequest>()
+  const { name, speciality, experience } = await c.req.json<ChefRequest>()
   // 
   // return c.json({ speciality, experience });
-  const result = await runQuery('INSERT INTO CHEF(USER_ID,SPECIALITY,EXPERIENCE) VALUES(:id,:speciality, :experience)', { id, speciality, experience });
-  if (result !== undefined && result.length)
+  const check = await runQuery('SELECT * FROM CHEF WHERE CHEF_NAME = :name', { name });
+  if (check !== undefined && check.length)
+    return c.json({ error: 'Name Must be Unique' });
+  const result = await runQuery('INSERT INTO CHEF(USER_ID,CHEF_NAME, SPECIALITY,EXPERIENCE) VALUES(:id,:name,:speciality, :experience)', { id, name, speciality, experience });
+  if (result !== undefined)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
 })
@@ -147,8 +150,8 @@ app.post('/jwt/applyChef', async (c) => {
 app.get('/jwt/getChef', async (c) => {
   const payload = c.get('jwtPayload')
   const { id } = payload
-  const result = await runQuery('SELECT FIRST_NAME, LAST_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL,  PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY, RATING FROM USERS ,CHEF WHERE USERS.ID = CHEF.USER_ID AND CHEF.USER_ID = :id', { id });
-  if (result !== undefined && result.length)
+  const result = await runQuery('SELECT FIRST_NAME, LAST_NAME, CHEF.CHEF_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL,  PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY, RATING FROM USERS ,CHEF WHERE USERS.ID = CHEF.USER_ID AND CHEF.USER_ID = :id', { id });
+  if (result !== undefined)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
 })
@@ -166,6 +169,7 @@ app.get('/jwt/chefDetails', async (c) => {
       USERS.CITY_CODE, 
       USERS.EMAIL, 
       USERS.PROFILE_IMAGE, 
+      CHEF_NAME,
       CHEF.ID AS CHEF_ID, 
       CHEF.SPECIALITY, 
       CHEF.RATING, 
@@ -204,6 +208,7 @@ app.get('/getChef/:cid', async (c) => {
       USERS.CITY_CODE, 
       USERS.EMAIL, 
       USERS.PROFILE_IMAGE, 
+      CHEF_NAME,
       CHEF.ID AS CHEF_ID, 
       CHEF.SPECIALITY, 
       CHEF.RATING, 
@@ -733,30 +738,7 @@ app.post('/jwt/cancelOrder', async (c) => {
   return c.json({ result });
 })
 
-/**
- * CREATE TABLE ORDERS (
-    ID VARCHAR2(255) PRIMARY KEY,
-    USER_ID VARCHAR2(36) NOT NULL,
-    TOTAL NUMBER DEFAULT 0,
-    DATE_ADDED DATE DEFAULT SYSDATE,
-    DATE_SHIPPED DATE,
-    DATE_DELIVERED DATE,
-    SHIPPING_ADD VARCHAR2(3255) NOT NULL,
-    SHIPPING_PHONE VARCHAR2(255) NOT NULL,
-    SHIPPING_NAME VARCHAR2(255) NOT NULL,
-    STATUS VARCHAR2(255) DEFAULT 'PAID' NOT NULL,
-    FOREIGN KEY (USER_ID) REFERENCES USERS(ID)
-);
 
-CREATE TABLE ACTIVE_DELIVERY (
-    ID VARCHAR2(36) PRIMARY KEY,
-    ORDER_ID VARCHAR2(36) NOT NULL,
-    DELIVERY_PARTNER_ID VARCHAR2(36) NOT NULL,
-    STATUS VARCHAR2(255) DEFAULT 'PENDING' NOT NULL,
-    FOREIGN KEY (ORDER_ID) REFERENCES ORDERS(ID),
-    FOREIGN KEY (DELIVERY_PARTNER_ID) REFERENCES USERS(ID)
-);
- */
 app.get('/jwt/deliverySummary', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
@@ -848,7 +830,7 @@ app.post('/search', async (c) => {
   const cityVals = city ? city.split(',') : [];
   const chefVals = chef ? chef.split(',') : [];
   const kitchenVals = kitchen ? kitchen.split(',') : [];
-  let query = 'SELECT  FOOD.ID AS FOOD_ID, CHEF.ID AS CHEF_ID,  KITCHEN.ID AS KITCHEN_ID, FOOD.NAME,FOOD.PRICE,  FOOD.RATING, FOOD.FOOD_IMAGE, KITCHEN.CITY_NAME, KITCHEN.NAME AS KITCHEN_NAME, CATEGORY.NAME AS CATEGORY_NAME, USERS.FIRST_NAME || \' \' || USERS.LAST_NAME AS CHEF_NAME, USERS.PROFILE_IMAGE FROM FOOD, KITCHEN, CATEGORY, CHEF, USERS WHERE FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND KITCHEN.APPROVED = 1 AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID  :where';
+  let query = 'SELECT  FOOD.ID AS FOOD_ID, CHEF.ID AS CHEF_ID, CHEF_NAME, KITCHEN.ID AS KITCHEN_ID, FOOD.NAME,FOOD.PRICE,  FOOD.RATING, FOOD.FOOD_IMAGE, KITCHEN.CITY_NAME, KITCHEN.NAME AS KITCHEN_NAME, CATEGORY.NAME AS CATEGORY_NAME, USERS.PROFILE_IMAGE FROM FOOD, KITCHEN, CATEGORY, CHEF, USERS WHERE FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND KITCHEN.APPROVED = 1 AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID  :where';
 
 
   let where = '';
@@ -973,7 +955,7 @@ app.get('/getAllKitchens', async (c) => {
 });
 
 app.get('/getChefs', async (c) => {
-  const result = await runQuery('SELECT USERS.FIRST_NAME || \' \' || USERS.LAST_NAME AS NAME FROM CHEF,USERS WHERE CHEF.USER_ID = USERS.ID', {});
+  const result = await runQuery('SELECT CHEF_NAME AS NAME FROM CHEF', {});
   // create array of names from result
   const names = result.map((r: any) => r['NAME']) || []
   return c.json(names);

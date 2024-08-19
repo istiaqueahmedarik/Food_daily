@@ -3,15 +3,18 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { Suspense } from 'react'
 import DeleteKitchen from './DeleteKitchen'
+import { getImage } from '@/util'
+
 export const experimental_ppr = true
 
 
-function KitchenCard({ name = "Hungry", image = "/food.svg", address = "123, Food Street", edit = "", profile, approved=false }) {
+async function KitchenCard({ name = "Hungry", image = "/food.svg", address = "123, Food Street", edit = "", profile, approved = false }) {
+  const blurImg = await getImage();
   if(image===null || image===undefined){ image="/food.svg" }
   return (
       <div className="relative w-[300px] h-[400px] rounded-xl overflow-hidden group border border-[#ffffff2d] ">
               <div className="absolute inset-0 bg-gradient-to-b from-[rgba(13,17,23,0.95)] via-[rgba(13,17,23,0.75)] to-[rgba(13,17,23,0.1)] z-10"></div>
-      <Image quality={60}
+      <Image blurDataURL={blurImg} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
                 src={image}
                 alt="Stay ahead, always"
                 className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300 backdrop-filter"

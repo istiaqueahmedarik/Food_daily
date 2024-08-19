@@ -25,7 +25,8 @@ export default function SearchSide(props) {
     const [selectedChefs, setSelectedChefs] = useState(tmpChef ? tmpChef.split(',') : [])
     const tmpKitchen = searchQ.get('kitchen')
     const [selectedKitchens, setSelectedKitchens] = useState(tmpKitchen ? tmpKitchen.split(',') : [])
-    const [priceRange, setPriceRange] = useState(searchQ.get('price') ? searchQ.get('price').split(',').map(Number) : props.prices)
+    const tempPrice = searchQ.get('price') ? searchQ.get('price').split(',').map(Number) : props.prices;
+    const [priceRange, setPriceRange] = useState(tempPrice)
     const [rating, setRating] = useState(Number(searchQ.get('rating')) || 0)
     const [sortOption, setSortOption] = useState(searchQ.get('sort') || "default")
     console.log(props)
@@ -311,7 +312,7 @@ export default function SearchSide(props) {
                             <Slider
                                 value={priceRange}
                                 onValueChange={setPriceRange}
-                                max={10000}
+                                max={tempPrice[1]}
                                 step={1}
                                 className="mb-2"
                             />

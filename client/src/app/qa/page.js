@@ -59,7 +59,7 @@ async function page() {
                     </div>
                 </form>
                 <div className='m-auto'>
-                    <Image quality={60} src='/qa_.svg' width={500} height={500} />
+                    <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src='/qa_.svg' width={500} height={500} />
                 </div>
             </div>
         </div>

@@ -16,7 +16,7 @@ function SignUp() {
   return (
       <div>
           <div className='flex flex-wrap pt-10'>
-              <Image quality={60} src="/signup.svg" alt="logo" width={500} height={100} className="mx-auto" />
+              <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src="/signup.svg" alt="logo" width={500} height={100} className="mx-auto" />
               <div className="max-w-md mx-auto mt-8 p-6 bg-background rounded-lg shadow-md ">
                   <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
                   <p className="text-center mb-6">

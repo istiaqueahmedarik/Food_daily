@@ -1,13 +1,15 @@
+import { getImage } from '@/util'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 
-function NotFound() {
+async function NotFound() {
+  const image = await getImage();
   return (
 
     <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-md text-center">
-        <Image
+        <Image blurDataURL={image} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
           src="/404.svg"
           width="800"
           height="300"

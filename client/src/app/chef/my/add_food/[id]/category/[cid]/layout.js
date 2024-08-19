@@ -9,7 +9,7 @@ function layout({ params,children }) {
       <div>
       <div className="grid grid-cols-2">
           <div className="m-auto">
-                    <Image quality={60} src={"/burger.svg"} alt="burger" width={500} height={500} />
+                    <Image  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={"/burger.svg"} alt="burger" width={500} height={500} />
           </div>
           <div className="flex flex-col min-h-dvh m-auto">
 

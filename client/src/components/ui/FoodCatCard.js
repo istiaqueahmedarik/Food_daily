@@ -1,13 +1,14 @@
+import { getImage } from '@/util'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 
-function FoodCatCard(props) {
-  
+async function FoodCatCard(props) {
+    const blurImg = await getImage();
   return (
       <Link href={props.edit ? `/chef/my/add_food/${props.cat['KITCHEN_ID']}/category/${props.cat['ID']}`:`/chef/kitchen/${props.cat['KITCHEN_ID']}/category/${props.cat['ID']}`} className='m-5'>
           <div className="card-shadow rounded-2xl p-0 bg-cover bg-center h-96 relative overflow-hidden">
-              <Image quality={60}
+              <Image blurDataURL={blurImg}  placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
                   src={props.cat['CATEGORY_IMAGE']}
                   alt="Background"
                   className="absolute inset-0  h-full object-cover"

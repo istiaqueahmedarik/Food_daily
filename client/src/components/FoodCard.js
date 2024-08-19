@@ -4,12 +4,14 @@ import Link from "next/link";
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { getImage } from "@/util";
 
 async function FoodCard({ params,profile=false }) {
     const res = await get(`getFoods/${params.cid}`)
     const data = res.result
     const others = res.others;
-    
+    const blurImg = await getImage();
+
 
     return (
         <div className="flex flex-wrap gap-2 m-5">
@@ -19,7 +21,7 @@ async function FoodCard({ params,profile=false }) {
                     
                         <Card className="w-full max-w-sm overflow-hidden">
                             <div className="relative">
-                                <Image
+                                <Image blurDataURL={blurImg}  placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
                                     quality={60}
                                     width={400}
                                     height={300}

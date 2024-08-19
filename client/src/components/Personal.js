@@ -1,4 +1,5 @@
 import { get_with_token } from "@/action";
+import { getImage } from "@/util";
 import { PencilIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -6,7 +7,7 @@ import Link from "next/link"
 async function Personal({ mine = true, path, res }) {
     if(mine===false)
         res = await get_with_token(path);
-
+    const image = await getImage();
   return (
       <div>
           {
@@ -29,7 +30,7 @@ async function Personal({ mine = true, path, res }) {
                           
                       </div>
                       <div className="grid place-content-center">
-                          <Image quality={60} src={res.result[0]['PROFILE_IMAGE']} alt="Food plate" width={600} height={400} className="rounded-full bg-cover max-w-72 max-h-max" />
+                          <Image blurDataURL={image} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={res.result[0]['PROFILE_IMAGE']} alt="Food plate" width={600} height={400} className="rounded-full bg-cover max-w-72 max-h-max" />
 
 
                       </div>

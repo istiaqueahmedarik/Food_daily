@@ -11,7 +11,7 @@ function page() {
             <div className="h-20"></div>
             <div className="grid grid-cols-2 m-7">
                 <div>
-                    <Image src={"/add_cert.svg"} width={500} height={500} alt="Certificate" className="rounded-lg object-cover" />
+                    <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src={"/add_cert.svg"} width={500} height={500} alt="Certificate" className="rounded-lg object-cover" />
                 </div>
                 <div className='h-screen m-auto w-full '>
                     <div className="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-2xl border-[#ffffff1e]" >

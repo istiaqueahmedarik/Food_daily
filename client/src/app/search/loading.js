@@ -1,11 +1,11 @@
 import Loading from '@/components/Loading'
-import LoadingSection from '@/components/LoadingSection'
+import LoadingSearch from '@/components/LoadingSearch'
 import React from 'react'
 
 function loading() {
   return (
       <>
-        <LoadingSection />
+        <LoadingSearch />
       </>
   )
 }

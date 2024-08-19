@@ -6,7 +6,7 @@ function Reciepie() {
       <div className="w-full">
           <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
               <div className="container grid items-center gap-6 px-4 md:px-6 lg:grid-cols-2 lg:gap-10">
-                  <Image quality={60}
+                  <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
                       src="/food.svg"
                       width="550"
                       height="510"

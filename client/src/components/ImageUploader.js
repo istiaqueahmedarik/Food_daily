@@ -30,7 +30,7 @@ function ImageUploader({ kid }) {
                 <p className="text-sm text-gray-500 mb-4">Accepted formats: .png, .jpg, .gif, .svg</p>
                 <div className="mb-4">
                     {selectedFile ? (
-                            <Image quality={60} width={500} height={500} src={selectedFile} alt="Selected file" className="bg-background h-48 flex items-center justify-center border border-[#ffffff21]" />
+                            <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} width={500} height={500} src={selectedFile} alt="Selected file" className="bg-background h-48 flex items-center justify-center border border-[#ffffff21]" />
                     ) : (
                             <div className="bg-background h-48 flex items-center justify-center border border-[#ffffff21]">
                             <p className="text-gray-400">No file selected</p>

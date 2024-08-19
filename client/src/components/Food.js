@@ -1,15 +1,20 @@
 import Image from "next/image"
 import Ingredients from "./Ingredients"
 import Button from "./ui/Button";
-import { addCart } from "@/action";
+import { addCart, get } from "@/action";
+import { getImage } from "@/util";
 
-function Food({ res, params }) {
+async function Food({ params }) {
+    
+
+    const res = await get(`getFood/${params.fid}`)
     const binded = addCart.bind(null, {
         params: params,
         kid: res.result[0]['KITCHEN_ID']
     });
     const data = res.result[0];
-    
+    const blurImg = await getImage();
+
     const stars = []
     for (let i = 0; i < 5; i++) {
         if (i < data['RATING'])
@@ -23,7 +28,7 @@ function Food({ res, params }) {
       <div>
           <div className="bg-card text-card-foreground overflow-hidden rounded-lg shadow-lg  m-7 white-grad border border-[#ffffff18]">
               <div className="grid md:grid-cols-2 my-auto">
-                  <Image quality={60}
+                  <Image blurDataURL={blurImg}  placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
                       src={data['FOOD_IMAGE']}
                       alt="Food Image"
                       width="300"

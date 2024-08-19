@@ -1,5 +1,6 @@
 import { addCategory, post, post_with_token } from "@/action"
 import Button from "@/components/ui/Button"
+import { getImage } from "@/util"
 import { ArrowRight, Star } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -12,7 +13,7 @@ async function layout({ params, children }) {
           <div className='h-20'></div>
           <div className='grid grid-cols-2'>
               <div className='m-auto'>
-                  <Image quality={60}  src='/foodCat.svg' width={500} height={500} />
+                  <Image sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}  src='/foodCat.svg' width={500} height={500} />
               </div>
               <div class="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-md border-[#ffffff21] m-auto" >
                   <div class="flex flex-col space-y-1.5 p-6">

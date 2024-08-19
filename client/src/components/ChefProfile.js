@@ -1,14 +1,15 @@
 import { get, get_with_token } from '@/action';
 import Link from 'next/link';
 import Image from 'next/image'
-import React from 'react'
+import React, { Suspense } from 'react'
 import KitchenCard from './ui/KitchenCard';
+import { getImage } from '@/util';
 
 
 async function ChefProfile({ profile = false, mine = true, path, chef }) {
     if (mine === false)
         chef = await get(path);
-    
+    const image = await getImage();
     if (chef.error !== undefined || chef.result === undefined || chef.result.length === 0)
         return null
     const data = chef.result[0]
@@ -30,7 +31,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                     <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                         <div className="flex flex-col items-start justify-center">
                             <div className={`inline-block rounded-full bg-primary px-4 py-1 text-primary-foreground ${profile?'hidden':''}`}>Chef Profile</div>
-                            <h1 className="mt-4 text-4xl font-bold tracking-tight">{data['FIRST_NAME']} {data['LAST_NAME']}</h1>
+                            <h1 className="mt-4 text-4xl font-bold tracking-tight">{data['CHEF_NAME']}</h1>
                             <span>
                                 <p className="mt-4 text-lg text-muted-foreground flex flex-row">
                                     {stars}
@@ -69,10 +70,10 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                         </div>
                         {profile ? <div className='m-auto'>
 
-                            <Image quality={60} src={data['PROFILE_IMAGE']} width="400" height="400" alt={data['FIRST_NAME']} className="rounded-lg object-cover" />
+                            <Image blurDataURL={image} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={data['PROFILE_IMAGE']} width="400" height="400" alt={data['FIRST_NAME']} className="rounded-lg object-cover" />
                         </div>:
                         <div className={`grid grid-cols-2 gap-4`}>
-                                <Image quality={60}
+                                <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
                                 src="/vercel.svg"
                                 width="300"
                                 height="300"
@@ -80,7 +81,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                                 className="rounded-lg object-cover"
 
                             />
-                            <Image 
+                            <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  
                                 src="/vercel.svg"
                                 width="300"
                                 height="300"
@@ -88,7 +89,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                                 className="rounded-lg object-cover"
 
                             />
-                            <Image
+                            <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
                                 src="/vercel.svg"
                                 width="300"
                                 height="300"
@@ -96,7 +97,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                                 className="rounded-lg object-cover"
 
                             />
-                            <Image
+                            <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
                                 src="/vercel.svg"
                                 width="300"
                                 height="300"
@@ -117,7 +118,9 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                     {
                         chef.result.map((kitchen,index) => { 
                         return (
-                            <KitchenCard key={index} name={kitchen['KITCHEN_NAME']} image={kitchen['KITCHEN_IMAGE']} address={kitchen['KITCHEN_ADDRESS']} edit={kitchen['KITCHEN_ID']} profile={profile} approved={kitchen['APPROVED']} />
+                            <Suspense key={index} fallback={<div>loading..</div>}>
+                                <KitchenCard name={kitchen['KITCHEN_NAME']} image={kitchen['KITCHEN_IMAGE']} address={kitchen['KITCHEN_ADDRESS']} edit={kitchen['KITCHEN_ID']} profile={profile} approved={kitchen['APPROVED']} />
+                            </Suspense>
 
 
                         );
