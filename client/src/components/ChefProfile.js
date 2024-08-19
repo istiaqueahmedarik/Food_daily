@@ -12,9 +12,12 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
     const image = await getImage();
     if (chef.error !== undefined || chef.result === undefined || chef.result.length === 0)
         return null
-    const rating = await get(`getChefRating/${chef.result[0]['CHEF_ID']}`)
+    // const rating = await get(`getChefRating/${chef.result[0]['CHEF_ID']}`)
+    // const bestImages = await get(`bestFood/${chef.result[0]['CHEF_ID']}`)
+    // const category = await get(`bestFoodCategory/${chef.result[0]['CHEF_ID']}`)
+    const [rating, bestImages, category] = await Promise.all([get(`getChefRating/${chef.result[0]['CHEF_ID']}`), get(`bestFood/${chef.result[0]['CHEF_ID']}`), get(`bestFoodCategory/${chef.result[0]['CHEF_ID']}`)])
+    const blurImg = await getImage();
     const data = chef.result[0]
-    console.log(data)
     const stars = []
     for (let i = 0; i < 5; i++) {
         if (i < rating.Rating)
@@ -26,7 +29,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
     }
     stars.push(<span className="ml-2" key={rating.Rating}>{rating.Rating}</span>)
     return (
-        <div className=" m-auto grid place-content-center">
+        <div className="">
 
             <div className="bg-background text-foreground">
                 <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -44,16 +47,14 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                                 {data['SPECIALITY']}
                             </p>
                             <div className="mt-6 flex flex-wrap gap-4">
-                                <div className="rounded-full bg-muted px-4 py-1 text-sm font-medium text-muted-foreground border border-[#ffffff16]">
-                                    French Cuisine
-                                </div>
-                                <div className="rounded-full bg-muted px-4 py-1 text-sm font-medium text-muted-foreground border border-[#ffffff16]">
-                                    Gourmet Dishes
-                                </div>
-                                <div className="rounded-full bg-muted px-4 py-1 text-sm font-medium text-muted-foreground border border-[#ffffff16]">Desserts</div>
-                                <div className="rounded-full bg-muted px-4 py-1 text-sm font-medium text-muted-foreground border border-[#ffffff16]">
-                                    Vegetarian Options
-                                </div>
+                                {category.result.map((cat, index) => {
+                                    return (
+                                        <div key={index} className="rounded-full bg-muted px-4 py-1 text-sm font-medium text-muted-foreground border border-[#ffffff16]">
+                                            {cat['NAME']}
+                                        </div>
+                                    )
+                                })}
+                              
                             </div>
                             <div className={`${profile===true?'hidden':''}`}>
                                 <Link href={`${mine ? '/chef/my' :'#kitchen'}`} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6">
@@ -74,39 +75,23 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
 
                             <Image blurDataURL={image} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={data['PROFILE_IMAGE']} width="400" height="400" alt={data['FIRST_NAME']} className="rounded-lg object-cover" />
                         </div>:
-                        <div className={`grid grid-cols-2 gap-4`}>
-                                <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
-                                src="/vercel.svg"
-                                width="300"
-                                height="300"
-                                alt="Chef's Dish 1"
-                                className="rounded-lg object-cover"
+                            <div className={`grid grid-cols-2 gap-4`}>
+                                {bestImages.result.map((image, index) => {
+                                    return (
+                                        <Link href={`/chef/kitchen/food/${image['FOOD_ID']}`} key={index}>
+                                            <Image blurDataURL={blurImg} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" quality={60}
+                                                src={image['FOOD_IMAGE']}
+                                                width="300"
+                                                height="300"
+                                                alt="Chef's Dish 1"
+                                                className="rounded-lg object-cover"
 
-                            />
-                            <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  
-                                src="/vercel.svg"
-                                width="300"
-                                height="300"
-                                alt="Chef's Dish 2"
-                                className="rounded-lg object-cover"
-
-                            />
-                            <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
-                                src="/vercel.svg"
-                                width="300"
-                                height="300"
-                                alt="Chef's Dish 3"
-                                className="rounded-lg object-cover"
-
-                            />
-                            <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" 
-                                src="/vercel.svg"
-                                width="300"
-                                height="300"
-                                alt="Chef's Dish 4"
-                                className="rounded-lg object-cover"
-
-                            />
+                                            />
+                                        </Link>
+                                    )
+                                })
+                               
+                                }
                         </div>
                         }
                         

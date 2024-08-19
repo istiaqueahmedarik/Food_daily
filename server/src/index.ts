@@ -1083,13 +1083,55 @@ app.get('/bestFoodCategory', async (c) => {
   return c.json({ result });
 })
 
-app.get('/popularFood/:hour', async (c) => {
-  const { hour } = c.req.param();
-  const result = await runQuery('SELECT * FROM FOOD, (SELECT FOOD_ID, COUNT(FOOD_ID) AS COUNT FROM CART WHERE DATE_ADDED >= SYSDATE - :hour/24 GROUP BY FOOD_ID ORDER BY COUNT DESC FETCH FIRST 10 ROWS ONLY) B WHERE B.FOOD_ID = FOOD.ID', { hour });
+app.get('/bestFood/:cid', async (c) => {
+  const { cid } = c.req.param();
+  const result = await runQuery('SELECT * FROM FOOD, (SELECT FOOD_ID, COUNT(FOOD_ID) AS COUNT FROM CART WHERE FOOD_ID IN (SELECT ID FROM FOOD WHERE CATEGORY_ID IN (SELECT ID FROM CATEGORY WHERE KITCHEN_ID IN (SELECT ID FROM KITCHEN WHERE CHEF_ID = :cid))) GROUP BY FOOD_ID ORDER BY COUNT DESC FETCH FIRST 4 ROWS ONLY) B WHERE B.FOOD_ID = FOOD.ID', { cid });
   return c.json({ result });
 })
+
+app.get('/bestFoodCategory/:cid', async (c) => {
+  const { cid } = c.req.param();
+  const result = await runQuery('SELECT * FROM CATEGORY, (SELECT CATEGORY_ID, COUNT(CATEGORY_ID) AS COUNT FROM FOOD WHERE CATEGORY_ID IN (SELECT ID FROM CATEGORY WHERE KITCHEN_ID IN (SELECT ID FROM KITCHEN WHERE CHEF_ID = :cid)) GROUP BY CATEGORY_ID ORDER BY COUNT DESC FETCH FIRST 5 ROWS ONLY) B WHERE B.CATEGORY_ID = CATEGORY.ID', { cid });
+  return c.json({ result });
+})
+
+app.get('/popularFood/:hour', async (c) => {
+  const { hour } = c.req.param();
+  const result = await runQuery('SELECT FOOD.NAME, FOOD.PRICE, USERS.ID AS USERS_ID, FOOD.ID AS ID, FIRST_NAME, PROFILE_IMAGE, CHEF_NAME, FOOD.DESCRIPTION, FOOD.FOOD_IMAGE AS FOOD_IMAGE FROM USERS, CHEF, CATEGORY, KITCHEN, FOOD, (SELECT FOOD_ID, COUNT(FOOD_ID) AS COUNT FROM CART WHERE DATE_ADDED >= SYSDATE - :hour/24 GROUP BY FOOD_ID ORDER BY COUNT DESC FETCH FIRST 10 ROWS ONLY) B WHERE B.FOOD_ID = FOOD.ID AND FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND CHEF.ID = KITCHEN.CHEF_ID AND CHEF.USER_ID = USERS.ID', { hour });
+  return c.json({ result });
+})
+
+
+app.get('/jwt/isDelivery', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('SELECT * FROM DELIVERY_PARTNER WHERE USER_ID = :id', { id });
+  if (result !== undefined && result.length)
+    return c.json({ status: true });
+  return c.json({ status: false });
+})
+
+app.get('/jwt/isChef', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('SELECT * FROM CHEF,USERS WHERE CHEF.USER_ID = USERS.ID AND USERS.ID = :id', { id });
+  if (result !== undefined && result.length)
+    return c.json({ status: true });
+  return c.json({ status: false });
+})
+
+app.get('/jwt/isQa', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('SELECT * FROM QA_OFFICER WHERE USER_ID = :id', { id });
+  if (result !== undefined && result.length)
+    return c.json({ status: true });
+  return c.json({ status: false });
+})
+
+
 
 export default {
   port: process.env.PORT,
   fetch: app.fetch,
-} 
+}
