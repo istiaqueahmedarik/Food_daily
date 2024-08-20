@@ -1,11 +1,13 @@
-import { get_with_token } from "@/action"
+import { get_with_token, post_with_token } from "@/action"
 import CertList from "@/components/CertList"
 import ChefProfile from "@/components/ChefProfile"
+import ChefsOrder from "@/components/ChefsOrder";
 import { Star } from "lucide-react"
 
+export const experimental_ppr = true;
+  
 async function page() {
 
-  
   const [chef, res] = await Promise.all([get_with_token('jwt/chefDetails'), get_with_token('jwt/getCertifications')])
     
 
@@ -15,7 +17,6 @@ async function page() {
           <ChefProfile profile={true} chef={chef}/>
 
       <CertList chef={chef} res={res} />
-          
     </div>
   )
 }

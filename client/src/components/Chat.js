@@ -14,18 +14,18 @@ const Chat = ({ user1, user2 }) => {
         const socket = new WebSocket(`ws://localhost:8080/ws/${user1}/${user2}`);
 
         socket.onopen = () => {
-            console.log('WebSocket connected');
+            
         };
 
         socket.onmessage = (event) => {
-            console.log('Message from server ', event.data);
+            
             // json string to json object
             const data = JSON.parse(event.data);
-            console.log(data)
+            
         };
 
         socket.onclose = () => {
-            console.log('WebSocket closed');
+            
         };
 
         setWs(socket);
@@ -38,7 +38,7 @@ const Chat = ({ user1, user2 }) => {
     const sendMessage = () => {
         if (input && ws) {
             ws.send(JSON.stringify(input));
-            console.log('Sent message');
+            
             setInput('');
         }
     };

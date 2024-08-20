@@ -4,9 +4,10 @@ import Button from "./ui/Button";
 
 async function PendingDelivery(url,style) {
    
-    const orders = await get_with_token('jwt/getOrders')
+    // const orders = await get_with_token('jwt/getOrders')
+    // const pending = await get_with_token('jwt/activeOrders')
+    const [orders, pending] = await Promise.all([get_with_token('jwt/getOrders'), get_with_token('jwt/activeOrders')]);
     const data = orders.result;
-    const pending = await get_with_token('jwt/activeOrders')
     const length = pending.result.length;
   return (
       <div className="p-6 border border-input rounded-xl">
@@ -34,9 +35,7 @@ async function PendingDelivery(url,style) {
                                       <p>{order['FOOD_NAMES']}</p>
                               </div>
                               <form action={binded}>
-                                  <Button disabled={length!==0}>
-                                      Accept
-                                  </Button>
+                                  <Button txt="Accept" disabled={length!==0} />
                               </form>
                                   
                               </li>

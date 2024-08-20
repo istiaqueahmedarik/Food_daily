@@ -54,7 +54,7 @@ const saveMessage = async (message: any, user1: any, user2: any, ws: any) => {
     const query = `INSERT INTO MESSAGES (CONVERSATION_ID,SENDER_ID,MESSAGE) VALUES (:conversationId, :senderId,:messageText)`;
 
     const res = await runQuery(query, { conversationId, senderId, messageText });
-    console.log(res);
+
     let mn: string = "";
     let mx: string = "";
     if (user1 < user2) {
@@ -81,9 +81,9 @@ app.get(
     upgradeWebSocket((c) => {
         return {
             onOpen: async (_event, ws) => {
-                console.log('Connection opened');
+
                 const { user1, user2 } = c.req.param();
-                console.log(user1, user2);
+
 
                 let mn: string = "";
                 let mx: string = "";
@@ -113,13 +113,13 @@ app.get(
                     conversationId = res[0].CONVERSATION_ID;
                 }
                 const res = await runQuery(`SELECT * FROM CONVERSATIONS,MESSAGES WHERE USER_ID = :user1 AND DELIVERY_PARTNER_ID = :user2 AND MESSAGES.CONVERSATION_ID = :conversationId`, { user1, user2, conversationId });
-                console.log(res);
+
                 ws.send(JSON.stringify(res));
 
             },
             onMessage: async (event, ws) => {
                 const { user1, user2 } = c.req.param();
-                console.log(user1, user2);
+
                 await saveMessage(event.data, user1, user2, ws);
                 // const msg = checkConnection(user1, user2);
             },
@@ -138,7 +138,7 @@ app.get(
 
                 clients[mn + '_' + mx] = clients[mn + '_' + mx].filter((client: any) => client !== ws);
 
-                console.log('Connection closed')
+
             },
         }
     })
@@ -151,4 +151,4 @@ Bun.serve({
     port: 8080,
 });
 
-console.log('Server is running on http://localhost:8080');
+

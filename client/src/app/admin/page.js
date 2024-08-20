@@ -13,6 +13,7 @@ async function page() {
   return (
       <div>
           <div className='h-20'></div>
+          
           <div className="grid gap-8 p-4 md:p-8">
               <div>
                   <div className="rounded-lg border bg-background text-card-foreground shadow-sm border-[#ffffff21]" >
@@ -95,7 +96,8 @@ async function page() {
                       </div>
                   </div>
               </div>
-          </div></div>
+          </div>
+      </div>
   )
 }
 

@@ -18,7 +18,7 @@ async function DeliveryHistory() {
                     {data.map((order, index) => {
                         
                         return (
-                            <li key={index} className="bg-background border border-input rounded-lg p-4 flex justify-between items-center gap-3">
+                            <li key={index} className="relative bg-background border border-input rounded-lg p-4 flex justify-between items-center gap-3">
                                 <div className="grid grid-cols-2 gap-3">
                                     <p className="font-medium">Kitchen Name:</p>
                                     <p>{order['NAME']}</p>

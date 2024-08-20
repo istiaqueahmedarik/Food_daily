@@ -20,7 +20,7 @@ async function layout({ params, children }) {
         const query = `?city=${city}&chef=${chef_name}&kitchen=${data['KICHEN_NAME']}&search=${search}`
         redirect(`/search${query}`)
     }
-    console.log(rating)
+    
     
   return (
       <div>

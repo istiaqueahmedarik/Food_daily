@@ -8,13 +8,13 @@ import { Textarea } from './ui/textarea'
 import { Button3 } from './ui/button3'
 
 function RatingWrite(props) {
-    console.log(props)
+    
     const [rating, setRating] = useState(props.data && props.data.length?props.data[0]['RATING']:0)
     const [review, setReview] = useState(props.data && props.data.length ? props.data[0]['REVIEW'] : '')
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        console.log({ rating, review })
+        
         
         const res = await reviewFood({ food_id:props.fid, rating, review })
     }

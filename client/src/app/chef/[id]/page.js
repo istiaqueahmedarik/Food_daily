@@ -6,7 +6,7 @@ import { Suspense } from "react"
 export const experimental_ppr = true
 async function page({params}) {
 
-  console.log(params)
+  
   
   const [chef, res] = await Promise.all([get_with_token('jwt/chefDetails'), get_with_token('jwt/getCertifications')])
     

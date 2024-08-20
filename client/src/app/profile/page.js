@@ -11,7 +11,7 @@ import Link from "next/link";
 
 async function page() {
   const res = await get_with_token('jwt/chefDetails');
-  console.log(res)
+  
 
   return (
     <div className="dark bg-background flex flex-col gap-8">

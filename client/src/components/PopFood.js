@@ -8,7 +8,7 @@ import Link from 'next/link';
 async function PopFood() {
     const res = await get('popularFood/24'); 
     const popularFoods = res.result;
-    console.log(popularFoods)
+    
   return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {popularFoods.map((food, index) => (

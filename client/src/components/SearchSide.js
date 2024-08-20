@@ -29,7 +29,7 @@ export default function SearchSide(props) {
     const [priceRange, setPriceRange] = useState(tempPrice)
     const [rating, setRating] = useState(Number(searchQ.get('rating')) || 0)
     const [sortOption, setSortOption] = useState(searchQ.get('sort') || "default")
-    console.log(props)
+    
     const cities = props.cities
     const chefs = props.chefs
     const kitchens = props.kitchens

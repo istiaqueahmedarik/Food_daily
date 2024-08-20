@@ -225,7 +225,7 @@ app.get('/getChef/:cid', async (c) => {
       AND CHEF.ID = :cid 
       AND CHEF.ID = KITCHEN.CHEF_ID(+)
   `, { cid });
-  console.log(result)
+
   if (result !== undefined)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -364,7 +364,7 @@ app.get('/jwt/getCertifications', async (c) => {
 app.get('/getCertifications/:cid', async (c) => {
   const { cid } = c.req.param();
   const result = await runQuery('SELECT * FROM CHEF C, CERTIFICATION CE WHERE  C.ID = :cid AND CE.CHEF_ID = C.ID ORDER BY CE.ISSUE_DATE', { cid });
-  console.log(result)
+
   if (result !== undefined && result.length)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -413,6 +413,34 @@ app.post('/jwt/disapproveKitchen', async (c) => {
   return c.json({ result });
 })
 
+
+
+app.post('/jwt/approveDelivery', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const { delivery_id } = await c.req.json<{ st: number, delivery_id: string }>()
+  const user = await runQuery('SELECT * FROM QA_OFFICER WHERE USER_ID = :id', { id });
+  if (user[0]['APPROVED'] !== 1)
+    return c.json({ error: 'Invalid Token' });
+  const result = await runQuery('UPDATE DELIVERY_PARTNER SET VERIFIED = 1 WHERE ID = :delivery_id', { delivery_id });
+  return c.json({ result });
+
+})
+
+app.post('/jwt/disapproveDelivery', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const { delivery_id } = await c.req.json<{ st: number, delivery_id: string }>()
+  const user = await runQuery('SELECT * FROM QA_OFFICER WHERE USER_ID = :id', { id });
+  if (user[0]['APPROVED'] !== 1)
+    return c.json({ error: 'Invalid Token' });
+
+  const result = await runQuery('DELETE FROM DELIVERY_PARTNER WHERE ID = :delivery_id CASCADE CONSTRAINTS', { delivery_id });
+  return c.json({ result });
+})
+
+
+
 app.post('/jwt/getKitchenImages', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
@@ -432,6 +460,19 @@ app.get('/jwt/verifyKitchens', async (c) => {
   if (user[0]['APPROVED'] !== 1)
     return c.json({ error: 'Invalid Token' });
   const result = await runQuery('SELECT * FROM KITCHEN WHERE APPROVED = 0', {});
+  if (result !== undefined)
+    return c.json({ result });
+  return c.json({ error: 'Invalid Token' });
+})
+
+app.get('/jwt/verifyDelivery', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const user = await runQuery('SELECT * FROM QA_OFFICER WHERE USER_ID = :id', { id });
+  if (user[0]['APPROVED'] !== 1)
+    return c.json({ error: 'Invalid Token' });
+  const result = await runQuery('SELECT USERS.ID AS USER_ID, DELIVERY_PARTNER.ID AS DELIVERY_ID, LICENSE, VEHICLE, FIRST_NAME, LAST_NAME FROM DELIVERY_PARTNER,USERS WHERE USERS.ID = DELIVERY_PARTNER.USER_ID AND VERIFIED = 0', {});
+  console.log(result)
   if (result !== undefined)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -678,7 +719,7 @@ app.get('/jwt/getOrder', async (c) => {
 app.get('/jwt/getOrders', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, LISTAGG(F.NAME,  ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI WHERE KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'PAID' AND O.DATE_SHIPPED IS NULL     AND O.DATE_DELIVERED IS NULL AND O.DATE_ADDED <= SYSDATE ORDER BY O.DATE_ADDED", {});
+  const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, LISTAGG(F.NAME,  ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI WHERE KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'PREPEARED' AND O.DATE_SHIPPED IS NULL  AND O.DATE_PREPARED IS NOT NULL   AND O.DATE_DELIVERED IS NULL AND O.DATE_ADDED <= SYSDATE ORDER BY O.DATE_ADDED", {});
   return c.json({ result });
 })
 
@@ -938,8 +979,8 @@ app.post('/search', async (c) => {
   const q = query.replace(':where', where);
   const result = await runQuery(q, vals);
   // const result = []
-  console.log(q);
-  console.log(result);
+
+
 
   return c.json({ result });
 
@@ -1105,7 +1146,7 @@ app.get('/popularFood/:hour', async (c) => {
 app.get('/jwt/isDelivery', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery('SELECT * FROM DELIVERY_PARTNER WHERE USER_ID = :id', { id });
+  const result = await runQuery('SELECT * FROM DELIVERY_PARTNER WHERE USER_ID = :id AND  VERIFIED = 1', { id });
   if (result !== undefined && result.length)
     return c.json({ status: true });
   return c.json({ status: false });
@@ -1123,11 +1164,107 @@ app.get('/jwt/isChef', async (c) => {
 app.get('/jwt/isQa', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery('SELECT * FROM QA_OFFICER WHERE USER_ID = :id', { id });
+  const result = await runQuery('SELECT * FROM QA_OFFICER WHERE USER_ID = :id AND APPROVED = 1', { id });
   if (result !== undefined && result.length)
     return c.json({ status: true });
   return c.json({ status: false });
 })
+
+app.get('/jwt/isAdmin', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('SELECT * FROM USERS WHERE TYPE = \'ADMIN\' AND ID = :id', { id });
+  if (result !== undefined && result.length)
+    return c.json({ status: true });
+  return c.json({ status: false });
+})
+
+
+/**
+ * 
+ * CREATE TABLE DELIVERY_PARTNER (
+    ID VARCHAR2(36) PRIMARY KEY,
+    USER_ID VARCHAR2(36) NOT NULL,
+    LICENSE VARCHAR2(255) NOT NULL,
+    VEHICLE VARCHAR2(255) NOT NULL,
+    FOREIGN KEY (USER_ID) REFERENCES USERS(ID)
+);
+
+CREATE TABLE ORDERS (
+    ID VARCHAR2(255) PRIMARY KEY,
+    USER_ID VARCHAR2(36) NOT NULL,
+    TOTAL NUMBER DEFAULT 0,
+    DATE_ADDED DATE DEFAULT SYSDATE,
+    DATE_PREPARED DATE,
+    DATE_SHIPPED DATE,
+    DATE_DELIVERED DATE,
+    SHIPPING_ADD VARCHAR2(3255) NOT NULL,
+    SHIPPING_PHONE VARCHAR2(255) NOT NULL,
+    SHIPPING_NAME VARCHAR2(255) NOT NULL,
+    STATUS VARCHAR2(255) DEFAULT 'PAID' NOT NULL,
+    FOREIGN KEY (USER_ID) REFERENCES USERS(ID)
+);
+
+CREATE TABLE ACTIVE_DELIVERY (
+    ID VARCHAR2(36) PRIMARY KEY,
+    ORDER_ID VARCHAR2(36) NOT NULL,
+    DELIVERY_PARTNER_ID VARCHAR2(36) NOT NULL,
+    STATUS VARCHAR2(255) DEFAULT 'PENDING' NOT NULL,
+    FOREIGN KEY (ORDER_ID) REFERENCES ORDERS(ID),
+    FOREIGN KEY (DELIVERY_PARTNER_ID) REFERENCES USERS(ID)
+);
+ */
+
+app.post('/jwt/orderDetails', async (c) => {
+  const { oid } = await c.req.json<{ oid: string }>()
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  // get delivery partner details as well as users details as well as delivery status together
+  // delivert partner details's user id also point the delivery man's personal details
+  // get userID, username, Delivery Partner's name, both of their profile images, order details, order status
+
+  const result = await runQuery('SELECT O.ID, O.TOTAL, O.DATE_ADDED, O.DATE_PREPARED, O.DATE_SHIPPED, O.DATE_DELIVERED, O.SHIPPING_ADD, O.SHIPPING_PHONE, O.SHIPPING_NAME, O.STATUS, U.ID AS USER_ID, U.FIRST_NAME, U.LAST_NAME, U.PROFILE_IMAGE, DP.ID AS DELIVERY_ID, DP.LICENSE, DP.VEHICLE, DP.USER_ID AS DELIVERY_USER_ID, DP.PROFILE_IMAGE AS DELIVERY_IMAGE FROM ORDERS O, USERS U, DELIVERY_PARTNER DP, ACTIVE_DELIVERY AD WHERE O.ID = :oid AND O.USER_ID = U.ID AND O.ID = AD.ORDER_ID AND AD.DELIVERY_PARTNER_ID = DP.USER_ID', { oid });
+})
+
+
+app.post('/jwt/chefOrder', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const { kid } = await c.req.json<{ kid: string }>()
+  console.log(kid)
+  const result = await runQuery(`SELECT KI.ID AS KITCHEN_ID,  ORDER_ID, FOOD_NAMES, TOTAL, DATE_ADDED, DATE_SHIPPED, DATE_DELIVERED, SHIPPING_ADD, SHIPPING_PHONE, SHIPPING_NAME, 
+    CASE WHEN ORD.STATUS = 'DELIVERED' THEN 'DELIVERED' WHEN ORD.STATUS = 'PREPEARED' THEN 'PREPEARED' WHEN ORD.STATUS = 'SHIPPED' THEN 'SHIPPED' WHEN ORD.STATUS = 'CANCELLED' THEN 'CANCELLED'  ELSE 'PENDING' END AS ORDER_STATUS  FROM (SELECT
+    C.DELETED_ID AS ORDER_ID,
+    K.ID,
+    LISTAGG(F.NAME
+            || ' x'
+            || C.QUANTITY, ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES
+    
+FROM
+    CART     C
+    JOIN FOOD F
+    ON C.FOOD_ID = F.ID
+    JOIN CATEGORY CAT
+    ON F.CATEGORY_ID = CAT.ID
+    JOIN KITCHEN K
+    ON CAT.KITCHEN_ID = K.ID
+WHERE
+    C.DELETED_ID IS NOT NULL
+GROUP BY
+    C.DELETED_ID,
+    K.ID) Q, ORDERS ORD, KITCHEN KI,CHEF, USERS WHERE Q.ID = KI.ID AND CHEF.ID = KI.CHEF_ID AND USERS.ID = CHEF.USER_ID AND Q.ORDER_ID = ORD.ID AND CHEF.USER_ID = :id AND KI.ID = :kid ORDER BY CASE WHEN ORD.STATUS = 'DELIVERED' THEN 1 ELSE 0 END ASC, ORD.DATE_ADDED ASC`, { kid, id })
+
+  return c.json({ result });
+})
+
+app.post('/jwt/accptOrderChef', async (c) => {
+  const { oid } = await c.req.json<{ oid: string }>()
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery('UPDATE ORDERS SET DATE_PREPARED = SYSDATE, STATUS = \'PREPEARED\' WHERE ID = :oid', { oid });
+  return c.json({ result });
+})
+
 
 
 

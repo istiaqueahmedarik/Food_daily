@@ -16,7 +16,7 @@ const mockReviews = [
 ]
 
 function ReviewCard({ review }) {
-    console.log(review)
+    
     return (
         <div className="mb-4 p-4 bg-muted rounded-lg">
             <div className="flex items-center justify-between mb-2">

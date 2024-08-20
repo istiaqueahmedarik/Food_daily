@@ -295,7 +295,7 @@ export async function editKitchen(prevState, formData)
 export async function applyChef(prevState,formData) {
     const rawFormData = Object.fromEntries(formData)
     const response = await post_with_token('jwt/applyChef', rawFormData)
-    console.log(response)
+    
     if (response.error !== undefined)
         return {
             message: response.error
@@ -396,7 +396,27 @@ export async function approveKitchen(st,formData)
         return {
             message: response.error
         }
-    revalidatePath('/admin')
+    revalidatePath('/admin/qa')
+}
+
+export async function approveDelivery(st, formData) {
+    // const rawFormData = Object.fromEntries(formData)
+    const response = await post_with_token('jwt/approveDelivery', st)
+    if (response.error !== undefined)
+        return {
+            message: response.error
+        }
+    revalidatePath('/admin/qa')
+}
+
+export async function disapproveDelivery(st, formData) { 
+    // const rawFormData = Object.fromEntries(formData)
+    const response = await post_with_token('jwt/disapproveDelivery', st)
+    if (response.error !== undefined)
+        return {
+            message: response.error
+        }
+    revalidatePath('/admin/qa')
 }
 
 export async function disapproveKitchen(st, formData) {
@@ -626,10 +646,17 @@ export async function searchFood(prevState, formData) {
 
 export async function reviewFood(formData)
 {
-    console.log(formData);
+    
     const res = await post_with_token('jwt/addRating', formData);
-    console.log(res);
+    
     revalidatePath(`/chef/my/food/${formData.food_id}`)
-    // const response = await post_with_token('jwt/reviewFood', { 'food_id': st, 'rating': raw.rating, 'review': raw.review })
-    // revalidatePath(`/chef/my/food/${st}`)
+    
 }
+
+export async function acceptFoodChef(st, formData)
+{
+    const response = await post_with_token('jwt/accptOrderChef', { 'oid': st.oid })
+    revalidatePath(`/chef/my/${st.kid}`)
+}
+
+
