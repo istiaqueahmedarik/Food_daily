@@ -11,7 +11,7 @@ function FoodDetails() {
                   alt="Food Image"
                   width="600"
                   height="600"
-                  className="aspect-square object-cover border border-[#ffffff38] w-full rounded-lg overflow-hidden"
+                  className="aspect-square object-cover border border-input w-full rounded-lg overflow-hidden"
               />
           </div>
           <div className="grid gap-4 md:gap-10 items-start">

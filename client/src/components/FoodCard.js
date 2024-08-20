@@ -28,9 +28,9 @@ async function FoodCard({ params,profile=false }) {
                                     src={food['FOOD_IMAGE']}
                                     alt={food['NAME']}
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black to-white opacity-50"></div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-background to-foreground opacity-50"></div>
                                 <div className="absolute bottom-4 left-4 right-4">
-                                    <h2 className="text-2xl font-bold text-white mb-2">{food['NAME']}</h2>
+                                    <h2 className="text-2xl font-bold text-foreground mb-2">{food['NAME']}</h2>
                                     
                                 </div>
                             </div>

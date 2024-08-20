@@ -196,8 +196,8 @@ export default function SearchSide(props) {
                         }}
                         className="pl-10"
                     />
-                    <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <Link href={`/search?search=${searchQuery}`} className={` absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400`}>
+                    <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                    <Link href={`/search?search=${searchQuery}`} className={` absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground`}>
                         Search
                     </Link>
                 </div>
@@ -348,10 +348,10 @@ export default function SearchSide(props) {
                     {props.children}
                     <div className='grid place-content-center'>
                         <div className='grid place-content-center grid-cols-2 w-fit gap-6'>
-                            <Link href={`/search${prevPageUrl()}`} className={`${buttonVariants("outline")} ${PreviousPageVisible()} bg-transparent border-input border hover:bg-input text-white m-2 hover:text-background w-5`}>
+                            <Link href={`/search${prevPageUrl()}`} className={`${buttonVariants("outline")} ${PreviousPageVisible()} bg-transparent border-input border hover:bg-input text-foreground m-2 hover:text-background w-5`}>
                                 <ChevronLeftIcon className="h-4 w-4" />
                             </Link>
-                            <Link href={`/search${nextPageUrl()}`} className={`${buttonVariants("outline")} bg-transparent border-input border hover:bg-input text-white m-2 hover:text-background w-5`}>
+                            <Link href={`/search${nextPageUrl()}`} className={`${buttonVariants("outline")} bg-transparent border-input border hover:bg-input text-foreground m-2 hover:text-background w-5`}>
                                 <ChevronRightIcon className="h-4 w-4" />
                             </Link>
                         </div>

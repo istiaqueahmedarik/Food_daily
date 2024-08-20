@@ -14,7 +14,7 @@ function layout({ params,children }) {
           <div className="flex flex-col min-h-dvh m-auto">
 
               <form action={binded} className="flex-1 px-4 md:px-6 py-8">
-                  <div className="rounded-lg border bg-card text-card-foreground shadow-sm max-w-2xl mx-auto border-[#ffffff18]"  >
+                  <div className="rounded-lg border bg-card text-card-foreground shadow-sm max-w-2xl mx-auto border-input"  >
                       <div className="flex flex-col space-y-1.5 p-6">
                           <h3 className="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Add New Food Item</h3>
                           <p className="text-sm text-muted-foreground">Fill out the form to add a new food to the menu.</p>
@@ -28,7 +28,7 @@ function layout({ params,children }) {
                                   Food Name
                               </label>
                               <input
-                                  className="flex h-10 w-full rounded-md border border-[#ffffff18] bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                   id="name"
                                   placeholder="Enter food name"
                                   name="foodName"
@@ -42,7 +42,7 @@ function layout({ params,children }) {
                                   Description
                               </label>
                               <textarea
-                                  className="flex min-h-[80px] w-full rounded-md border border-[#ffffff18] bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                   id="description"
                                   placeholder="Enter food description"
                                   name="foodDescription"
@@ -57,7 +57,7 @@ function layout({ params,children }) {
                                       Price
                                   </label>
                                   <input
-                                      className="flex h-10 w-full rounded-md border border-[#ffffff18] bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                       id="price"
                                       placeholder="Enter price"
                                       type="number"
@@ -72,7 +72,7 @@ function layout({ params,children }) {
                                       Image
                                   </label>
                                   <div className="flex items-center gap-2">
-                                      <input type="file" name="foodImage" id="image" accept=".jpg,.png,.svg" className="flex h-10 w-full rounded-md border border-[#ffffff18]  bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                                      <input type="file" name="foodImage" id="image" accept=".jpg,.png,.svg" className="flex h-10 w-full rounded-md border border-input  bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
                                   </div>
                               </div>
                           </div>

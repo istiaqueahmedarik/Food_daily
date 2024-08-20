@@ -12,8 +12,8 @@ async function KitchenCard({ name = "Hungry", image = "/food.svg", address = "12
   const blurImg = await getImage();
   if(image===null || image===undefined){ image="/food.svg" }
   return (
-      <div className="relative w-[300px] h-[400px] rounded-xl overflow-hidden group border border-[#ffffff2d] ">
-              <div className="absolute inset-0 bg-gradient-to-b from-[rgba(13,17,23,0.95)] via-[rgba(13,17,23,0.75)] to-[rgba(13,17,23,0.1)] z-10"></div>
+      <div className="relative w-[300px] h-[400px] rounded-xl overflow-hidden group border border-input ">
+      <div className="absolute inset-0 bg-gradient-to-b from-[rgba(228,235,247,0.95)] via-[rgba(233,238,246,0.75)] to-[rgba(239,240,243,0.1)] dark:from-[rgba(13,17,23,0.95)] via-[rgba(13,17,23,0.75)] to-[rgba(13,17,23,0.1)] z-10"></div>
       <Image blurDataURL={blurImg} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
                 src={image}
                 alt="Stay ahead, always"
@@ -28,15 +28,15 @@ async function KitchenCard({ name = "Hungry", image = "/food.svg", address = "12
           <DeleteKitchen edit={edit} profile={profile} />
         </Suspense>
         <Link href={`/chef/kitchen/edit/${edit}`} className={`${profile ? '' : 'hidden'}`}>
-          <PencilIcon size={20} className="text-white" />
+          <PencilIcon size={20} className="text-foreground" />
         </Link>
       </div>
       <div className="absolute bottom-4 left-4 z-20">
-        <h3 className="text-white text-xl font-bold flex flex-wrap gap-2">{name}<span>
+        <h3 className="text-foreground text-xl font-bold flex flex-wrap gap-2">{name}<span>
         {approved && <CheckCircle2 size={20}/>}
         </span></h3>
-        <h3 className="mr-5 text-white text-sm font-light">{address}</h3>
-        <Link href={profile ? `/chef/my/${edit}`:`/chef/kitchen/${edit}`} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#ffffff2d] pl-5 pr-5 pt-2 pb-2 bg-transparent backdrop-blur-lg">
+        <h3 className="mr-5 text-foreground text-sm font-light">{address}</h3>
+        <Link href={profile ? `/chef/my/${edit}`:`/chef/kitchen/${edit}`} className="inline-flex items-center justify-center foregtext-foregroundspace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input pl-5 pr-5 pt-2 pb-2 bg-transparent backdrop-blur-lg">
           Explore
           <Plus size={20} className="ml-2" />
         </Link>
@@ -74,8 +74,8 @@ const AddBurgerIcon = ({ size = 24, color = 'currentColor' }) => {
 
       {/* Larger plus sign */}
       <circle cx="18" cy="6" r="5" fill={color} stroke="none" />
-      <line x1="18" y1="3" x2="18" y2="9" stroke="white" strokeWidth="2" />
-      <line x1="15" y1="6" x2="21" y2="6" stroke="white" strokeWidth="2" />
+      <line x1="18" y1="3" x2="18" y2="9" stroke="foregtext-foreground" strokeWidth="2" />
+      <line x1="15" y1="6" x2="21" y2="6" stroke="foregtext-foreground" strokeWidth="2" />
     </svg>
   );
 };

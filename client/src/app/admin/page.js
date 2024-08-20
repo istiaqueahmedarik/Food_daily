@@ -16,7 +16,7 @@ async function page() {
           
           <div className="grid gap-8 p-4 md:p-8">
               <div>
-                  <div className="rounded-lg border bg-background text-card-foreground shadow-sm border-[#ffffff21]" >
+                  <div className="rounded-lg border bg-background text-card-foreground shadow-sm border-input" >
                       <div className="flex flex-col space-y-1.5 p-6">
                           <h3 className="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">
                               People Applied for QA Officer
@@ -25,8 +25,8 @@ async function page() {
                       <div className="p-6">
                           <div className="relative w-full overflow-auto">
                               <table className="w-full caption-bottom text-sm">
-                                  <thead className="[&amp;_tr]:border-b border-[#ffffff21]">
-                                      <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted border-[#ffffff21]">
+                                  <thead className="[&amp;_tr]:border-b border-input">
+                                      <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted border-input">
                                           <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
                                               Name
                                           </th>
@@ -58,15 +58,15 @@ async function page() {
                   </div>
               </div>
               <div>
-                  <div className="rounded-lg border bg-card text-card-foreground shadow-sm border-[#ffffff21]" >
-                      <div className="flex flex-col space-y-1.5 p-6 border-[#ffffff21]">
+                  <div className="rounded-lg border bg-card text-card-foreground shadow-sm border-input" >
+                      <div className="flex flex-col space-y-1.5 p-6 border-input">
                           <h3 className="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Current QA Officers</h3>
                       </div>
                       <div className="p-6">
                           <div className="relative w-full overflow-auto">
                               <table className="w-full caption-bottom text-sm">
-                                  <thead className="[&amp;_tr]:border-b border-[#ffffff21]">
-                                      <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted border-[#ffffff21]">
+                                  <thead className="[&amp;_tr]:border-b border-input">
+                                      <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted border-input">
                                           <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
                                               Name
                                           </th>

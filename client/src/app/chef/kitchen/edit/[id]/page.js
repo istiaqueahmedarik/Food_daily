@@ -20,7 +20,7 @@ async function page({params}) {
               </h1>
               <div className='grid grid-cols-2'>
                   <div className='my-auto'>
-                      <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" Uploader kid={params.id} />
+                      <ImageUploader kid={params.id} />
                   </div>
                   <div className='m-5 p-5 flex flex-wrap'>
                       

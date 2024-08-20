@@ -13,7 +13,7 @@ function ApplyChef() {
           <div className="m-auto">
               <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/apply_chef.svg" alt="Chef" width={500} height={500} />
           </div>
-          <form action={formAction} className="m-auto rounded-lg border border-[#ffffff26] bg-card text-card-foreground shadow-sm w-full max-w-md" >
+          <form action={formAction} className="m-auto rounded-lg border border-input bg-card text-card-foreground shadow-sm w-full max-w-md" >
               <div className="flex flex-col space-y-1.5 p-6">
                   <h3 className="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Chef Profile</h3>
                   <p className="text-sm text-muted-foreground">Fill out your chef profile details.</p>

@@ -13,7 +13,7 @@ async function Ingredients({ res, params, profile = false }) {
               </>
           ) : (
               <>
-                  <div className='grid grid-cols-[3fr_1fr_1fr_1fr] border m-2 px-4 py-5 rounded-2xl border-[#fff2]'>
+                  <div className='grid grid-cols-[3fr_1fr_1fr_1fr] border m-2 px-4 py-5 rounded-2xl border-input'>
                       <h1>Name</h1>
                       <p>Quantity</p>
                       <p>Calories</p>
@@ -21,7 +21,7 @@ async function Ingredients({ res, params, profile = false }) {
                       <ScrollArea className='h-52'>
                           {res.ingr.map((ing, idx) => {
                               return (
-                                  <div key={idx} className='grid grid-cols-[3fr_1fr_1fr_1fr] border m-2 px-4 py-5 rounded-2xl border-[#fff2] hover:bg-[#ffffff1b] max-h-20'>
+                                  <div key={idx} className='grid grid-cols-[3fr_1fr_1fr_1fr] border m-2 px-4 py-5 rounded-2xl border-input hover:bg-input max-h-20'>
                                       <h1>{ing['NAME']}</h1>
                                       <p>{ing['QUANTITY']}</p>
                                       <p>{ing['CALORIES']}</p>

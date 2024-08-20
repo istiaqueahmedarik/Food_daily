@@ -26,8 +26,8 @@ async function layout({ params, children }) {
       <div>
           <div className='h-20'></div>
         
-              <div class="grid grid-cols-2 items-center w-full max-w-6xl p-4 mx-auto space-x-4 bg-background rounded-lg shadow-lg border border-[#ffffff11]">
-              <div class="flex flex-col p-8 space-y-4 bg-background border border-[#ffffff28] rounded-lg shadow-lg">
+              <div class="grid grid-cols-2 items-center w-full max-w-6xl p-4 mx-auto space-x-4 bg-background rounded-lg shadow-lg border border-input">
+              <div class="flex flex-col p-8 space-y-4 bg-background border border-input rounded-lg shadow-lg">
                       <div class="space-y-2">
                       <h1 class="text-3xl font-bold">{data['KICHEN_NAME']}</h1>
                       <Link href={`/chef/${data['CHEF_ID']}`}>
@@ -50,10 +50,10 @@ async function layout({ params, children }) {
                           <input
                               type="text"
                               placeholder="Search..."
-                              className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                              className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
                               name="search"
                           />
-                          <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white text-black p-2 rounded-full">
+                          <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-foreground text-background p-2 rounded-full">
                               <ArrowRight size={20} />
                           </button>
                       </div>

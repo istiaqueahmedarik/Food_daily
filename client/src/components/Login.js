@@ -14,7 +14,7 @@ function Login() {
       <div className="">
           {/* <NavBar vis={true} /> */}
           <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
-              <div className="flex items-center justify-center py-12  border-r-2 border-r-[#ffffff2d]">
+              <div className="flex items-center justify-center py-12  border-r-2 border-r-foreground">
                   <div className="mx-auto grid w-[350px] gap-6">
                       <div className="grid gap-2 text-center">
                           <h1 className="text-3xl font-bold">Login</h1>
@@ -32,7 +32,7 @@ function Login() {
                                   placeholder="m@example.com"
                                   autoComplete="off"
                                   required
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-muted-foreground outline-none"
                               />
                           </div>
                           <div className="grid gap-2">
@@ -46,7 +46,7 @@ function Login() {
                                   </Link>
                               </div>
                               <input id="password" type="password" required
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-muted-foreground outline-none"
                                     name="password"
                               />
                           </div>

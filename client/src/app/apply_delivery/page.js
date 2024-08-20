@@ -13,7 +13,7 @@ async function page() {
         <div>
             <div className='h-20'></div>
             <div className="mx-auto max-w-3xl space-y-8 py-8 px-4 sm:px-6 lg:px-8 relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#565656] to-light-blue-500 shadow-lg transform -skew-y-12 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-input to-light-blue-500 shadow-lg transform -skew-y-12 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
                 <div className="relative bg-background shadow-lg sm:rounded-3xl sm:p-20 border border-input">
                 <div className="space-y-4 text-center">
                     <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Become a Delivery Partner</h1>

@@ -21,60 +21,60 @@ function SignUp() {
                   <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
                   <p className="text-center mb-6">
                       Already have an account?{' '}
-                      <Link href="/login" className="text-[#ffffff82] font-semibold">
+                      <Link href="/login" className="text-muted-foreground font-semibold">
                           Sign In
                       </Link>
                   </p>
                   <form action={formAction}>
                       <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
-                              <label htmlFor="firstName" className="block text-sm font-medium text-gray-500 mb-1">
+                              <label htmlFor="firstName" className="block text-sm font-medium text-muted-foreground mb-1">
                                   First Name
                               </label>
                               <input
                                   type="text"
                                   id="firstName"
                                   name='firstName'
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
                                   required
 
                               />
                           </div>
                           <div>
-                              <label htmlFor="lastName" className="block text-sm font-medium text-gray-500 mb-1">
+                              <label htmlFor="lastName" className="block text-sm font-medium text-muted-foreground mb-1">
                                   Last Name
                               </label>
                               <input
                                   type="text"
                                   id="lastName"
                                     name='lastName'
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
                                   required
                               />
                           </div>
                       </div>
                       <div className="mb-4">
-                          <label htmlFor="email" className="block text-sm font-medium text-gray-500 mb-1">
+                          <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-1">
                               Email
                           </label>
                           <input
                               type="email"
                               id="email"
                                 name='email'
-                              className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                              className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
                               required
                           />
                       </div>
                       <div className="grid grid-cols-3 gap-4 mb-4">
                           <div className="col-span-1">
-                              <label htmlFor="country" className="block text-sm font-medium text-gray-500 mb-1">
+                              <label htmlFor="country" className="block text-sm font-medium text-muted-foreground mb-1">
                                   Country
                               </label>
                               <div className="relative">
                                   <select
                                       id="country"
                                         name="cityCode"
-                                      className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none appearance-none"
+                                      className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none appearance-none"
                                   >
                                       <option  value="44" Selected>UK (+44)</option>
                                       <option  value="1">USA (+1)</option>
@@ -295,50 +295,50 @@ function SignUp() {
                                           <option  value="263">Zimbabwe (+263)</option>
                                       </optgroup>
                                   </select>
-                                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-card-foreground" size={20} />
                               </div>
                           </div>
                           <div className="col-span-2">
-                              <label htmlFor="mobileNumber" className="block text-sm font-medium text-gray-500 mb-1">
+                              <label htmlFor="mobileNumber" className="block text-sm font-medium text-muted-foreground mb-1">
                                   Mobile Number
                               </label>
                               <input
                                   type="tel"
                                   id="mobileNumber"
                                     name='mobileNumber'
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
                                   required
                               />
                           </div>
                           <div className='col-span-3'>
-                                <label htmlFor="dob" className="block text-sm font-medium text-gray-500 mb-1">
+                                <label htmlFor="dob" className="block text-sm font-medium text-muted-foreground mb-1">
                                   Date of Birth
                               </label>
                                 <input
                                     type="date"
                                     id="dob"
                                         name='dob'
-                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
                                   required
                               />
                               
                           </div>
                           <div className='col-span-3'>
-                                <label htmlFor="address" className="block text-sm font-medium text-gray-500 mb-1">
+                                <label htmlFor="address" className="block text-sm font-medium text-muted-foreground mb-1">
                                   Address
                               </label>
                                 <input
                                     type="text"
                                     id="address"
                                         name='address'
-                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
                                   required
                               />
                               </div>
                               
                       </div>
                       <div className="mb-6">
-                          <label htmlFor="password" className="block text-sm font-medium text-gray-500 mb-1">
+                          <label htmlFor="password" className="block text-sm font-medium text-muted-foreground mb-1">
                               Password
                           </label>
                           <div className="relative">
@@ -346,7 +346,7 @@ function SignUp() {
                                   type={showPassword ? 'text' : 'password'}
                                   id="password"
                                     name='password'
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
                                   required
                               />
                               <button
@@ -355,16 +355,16 @@ function SignUp() {
                                   onClick={() => setShowPassword(!showPassword)}
                               >
                                   {showPassword ? (
-                                      <EyeOff className="text-gray-400" size={20} />
+                                      <EyeOff className="text-card-foreground" size={20} />
                                   ) : (
-                                      <Eye className="text-gray-400" size={20} />
+                                      <Eye className="text-card-foreground" size={20} />
                                   )}
                               </button>
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">At least 10 characters</p>
+                          <p className="text-xs text-muted-foreground mt-1">At least 10 characters</p>
                       </div>
                       <div className='mb-4'>
-                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-500 mb-1">
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-muted-foreground mb-1">
                                 Confirm Password
                             </label>
                             <div className="relative">
@@ -372,7 +372,7 @@ function SignUp() {
                                     type={showPassword ? 'text' : 'password'}
                                     id="confirmPassword"
                                         name='confirmPassword'
-                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-[#ffffff21] bg-background text-white focus:outline-[#ffffff25] outline-none"
+                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
                                     required
                                 />
                                 <button
@@ -381,9 +381,9 @@ function SignUp() {
                                     onClick={() => setShowPassword(!showPassword)}
                                 >
                                     {showPassword ? (
-                                        <EyeOff className="text-gray-400" size={20} />
+                                        <EyeOff className="text-card-foreground" size={20} />
                                     ) : (
-                                        <Eye className="text-gray-400" size={20} />
+                                        <Eye className="text-card-foreground" size={20} />
                                     )}
                                 </button>
                             </div>

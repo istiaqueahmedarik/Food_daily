@@ -17,9 +17,9 @@ async function SearchGridCard({ item }) {
                   <h2 className="font-semibold text-xl">{item['NAME']}</h2>
               </Link>
 
-              <Link href={`chef/kitchen/${item['KITCHEN_ID']}`} className="text-md text-gray-300">{item['KITCHEN_NAME']}</Link>
+              <Link href={`chef/kitchen/${item['KITCHEN_ID']}`} className="text-md text-foreground">{item['KITCHEN_NAME']}</Link>
               <div className="flex justify-between items-center mt-2">
-                  <Link href={`/chef/${item['CHEF_ID']}`} className="text-sm text-gray-500 flex flex-wrap">
+                  <Link href={`/chef/${item['CHEF_ID']}`} className="text-sm text-muted-foreground flex flex-wrap">
                       <Avatar>
                           <AvatarImage src={item['PROFILE_IMAGE']} alt="alt={item['CHEF_NAME']}" />
                           <AvatarFallback>{item['CHEF_NAME'][0]}{item['CHEF_NAME'][1]}</AvatarFallback>
@@ -31,7 +31,7 @@ async function SearchGridCard({ item }) {
                   </Link>
                   <div className="flex items-center">
 
-                      <Link href={`/search?city=${item['CITY_NAME']}`} className="text-sm text-gray-500">City: {item['CITY_NAME']}</Link>
+                      <Link href={`/search?city=${item['CITY_NAME']}`} className="text-sm text-muted-foreground">City: {item['CITY_NAME']}</Link>
                   </div>
               </div>
               <div className="flex justify-between items-center mt-2">

@@ -38,11 +38,11 @@ async function Feauture__card(props) {
   }
   const blurImg = await getImage();
   return (
-    <div className='max-w-xs bg-[#161b22]  p-5 text-center m-auto border border-[#ffffff1a] rounded-xl'>
+    <div className='max-w-xs bg-background  p-5 text-center m-auto border border-input rounded-xl'>
       <Image blurDataURL={blurImg} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={props.img} alt='Food plate' width={250} height={250} className='' />
           <h1 className='font-bold'>{props.title}</h1>
-      <p className='p-5 text-[#474E56]'>{props.description}</p>
-      <Link className='text-[#d5d5d56b] border pl-4 pr-4 pt-2 pb-2 rounded-md border-[#ffffff25] hover:text-white  ' href={props.type === 'food' || status === false ? props.link : statusLink}>
+      <p className='p-5 text-muted-foreground'>{props.description}</p>
+      <Link className='text-muted-foreground border pl-4 pr-4 pt-2 pb-2 rounded-md border-input  hover:text-foreground  ' href={props.type === 'food' || status === false ? props.link : statusLink}>
         {props.type ==='food' || status===false?props.linkText:statusText}
               </Link>
      

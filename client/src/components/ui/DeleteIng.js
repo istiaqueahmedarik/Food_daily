@@ -10,7 +10,7 @@ function DeleteIng({ fid, iid }) {
     const binded = deleteIngredient.bind(null, st);
   return (
       <form action={binded}>
-          <button type='submit' className='border border-[#ffffff1b] text-white rounded-lg p-2'>
+          <button type='submit' className='border border-input text-foreground rounded-lg p-2'>
               <DeleteIcon size={24} />
           </button>
     </form>

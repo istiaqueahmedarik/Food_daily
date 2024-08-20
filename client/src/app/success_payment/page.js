@@ -26,7 +26,7 @@ async function page() {
                       <p className="text-muted-foreground">Thank you for your purchase.</p>
                   </div>
 
-                  <div className="border-t border-b border-gray-200 py-4 mb-6">
+                  <div className="border-t border-b border-foreground py-4 mb-6">
                       <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
                       <div className="flex justify-between mb-2">
                           <span className="text-muted-foreground">Order #:</span>

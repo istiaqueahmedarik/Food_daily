@@ -20,11 +20,11 @@ async function FoodCatCard(props) {
               >
                   <div className="h-full flex">
                       <div
-                          className="leading-none p-6 rounded-2xl mt-auto mb-2 text-4xl font-semibold drop-shadow-sm tracking-tight text-[rgb(246, 246, 246)]"
+                          className="leading-none p-6 rounded-2xl mt-auto mb-2 text-4xl font-semibold drop-shadow-sm tracking-tight text-card"
                       >
                           {props.title}
                           <br />
-                          <span className='text-[rgb(188,187,187)]'>
+                          <span className='text-muted-foreground'>
                             {props.subtitle} 
                               {props.cat['NAME']}</span>
                       </div>

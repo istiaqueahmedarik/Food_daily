@@ -14,7 +14,7 @@ async function page() {
   
 
   return (
-    <div className="dark bg-background flex flex-col gap-8">
+    <div className=" bg-background flex flex-col gap-8">
       <div className="h-[100vh] m-auto grid place-content-center">
           <Personal res={res}/>
       </div>

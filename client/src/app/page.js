@@ -19,7 +19,7 @@ export const experimental_ppr = true;
 export default function Home() {
  
   return (
-    <div className="dark bg-background">
+    <div className="  bg-background">
       <Suspense fallback={<LoadingSection />}>
         <Hero />
       </Suspense>

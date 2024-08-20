@@ -12,7 +12,7 @@ async function page({params}) {
     
 
   return (
-    <div className="dark bg-background">
+    <div className=" bg-background">
       <div className="flex flex-row justify-center">
         {/* {user.result[0]['FIRST_NAME']} {user.result[0]['LAST_NAME']} {user.result[0]['RATING']} <Star size={30} /> */}
         <Suspense fallback={<div>Loading...</div>}>

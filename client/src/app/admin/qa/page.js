@@ -18,7 +18,7 @@ async function page() {
               
               {kitchens.result.map((kitchen, idx) => { 
                   return (
-                      <div key={idx} className="rounded-lg border border-[#ffffff2b] bg-card text-card-foreground shadow-sm grid gap-4">
+                      <div key={idx} className="rounded-lg border border-input bg-card text-card-foreground shadow-sm grid gap-4">
                           <div className="flex flex-col space-y-1.5 p-6">
                               <div className="flex items-center justify-between">
                                   <div className="font-semibold text-4xl">{kitchen['NAME']}</div>
@@ -65,7 +65,7 @@ async function page() {
 
               {delivery.result.map((del, idx) => {
                   return (
-                      <div key={idx} className="rounded-lg border border-[#ffffff2b] bg-card text-card-foreground shadow-sm grid gap-4">
+                      <div key={idx} className="rounded-lg border border-input bg-card text-card-foreground shadow-sm grid gap-4">
                           <div className="flex flex-col space-y-1.5 p-6">
                               <div className="flex items-center justify-between">
                                   <div className="font-semibold text-4xl">{del['FIRST_NAME']} {del['LAST_NAME']}</div>

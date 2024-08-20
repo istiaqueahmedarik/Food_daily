@@ -20,7 +20,7 @@ async function page({ params }) {
                   <Ingredients res={res} params={params} profile={true} />
                 </Suspense>
           </div>
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-md mx-auto border-[#ffffff2e]" >
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-md mx-auto border-input" >
               <div className="flex flex-col space-y-1.5 p-6">
                   <h3 className="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Add New Ingredient</h3>
                   <p className="text-sm text-muted-foreground">Fill out the form to create a new ingredient record.</p>

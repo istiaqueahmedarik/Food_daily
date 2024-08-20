@@ -1,6 +1,5 @@
 
 // import { getPlaiceholder } from "plaiceholder";
-import fs from "node:fs/promises";
 import { cache } from "react";
 
 export function encrypt(str) {

@@ -3,6 +3,8 @@ import "./globals.css";
 import NavBar from "@/components/NavBar";
 import { GeistSans } from "geist/font/sans";
 import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from "@/components/theme-provider";
+
 const geistSans = localFont({
   src: "./fonts/Geist-Light.woff",
   variable: "--font-geist-sans",
@@ -20,10 +22,16 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${GeistSans.className} dark bg-background`}>
+      <body className={`${GeistSans.className}  bg-background`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+        >
         <NavBar/>
         {children}
-        <Toaster/>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
