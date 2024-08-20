@@ -34,6 +34,7 @@
     "react-cookie": "^7.2.0",
     "react-dom": "19.0.0-rc-f994737d14-20240522",
     "react-loading-skeleton": "^3.4.0",
+    "react-use-websocket": "^3.0.0",
     "recharts": "^2.13.0-alpha.4",
     "sharp": "^0.33.5",
     "tailwind-merge": "^2.5.2",

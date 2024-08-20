@@ -1,42 +1,52 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { ScrollArea } from './ui/scroll-area'
-import { Button3 } from './ui/button3'
+import { Button3, buttonVariants } from './ui/button3'
 import { Badge } from './ui/badge'
+import { PersonalCancelOrder, post_with_token } from '@/action'
+import Link from 'next/link'
 
 async function OrderList() {
+    const data = await post_with_token('jwt/orderHistory', {});
+    const orders = data.result;
+    console.log(orders)
   return (
       <div>
           <Card className="w-full max-w-4xl mx-auto">
               <CardHeader>
-                  <CardTitle>Chef's Order Dashboard</CardTitle>
-                  <CardDescription>Accept or reject incoming orders</CardDescription>
+                  <CardTitle>Your Orders</CardTitle>
+                  <CardDescription>Your Current and Previous Order History</CardDescription>
               </CardHeader>
               <CardContent>
-                  <ScrollArea className="h-[400px] w-full rounded-md border p-4">
-                          <Card className="mb-4">
-                              <CardHeader>
-                                  <CardTitle className="text-lg flex items-center justify-between">
-                                      Order #1
-                                      <Badge  className="ml-2">
-                                          <span className="ml-1 capitalize">a</span>
-                                      </Badge>
-                                  </CardTitle>
-                                  <CardDescription>Customer: b</CardDescription>
-                              </CardHeader>
-                              <CardContent>
-                                  <h4 className="font-semibold mb-2">Items:</h4>
-                              <ul className="list-disc pl-5">
-                                  <li>2</li>
-                                   
-                                  </ul>
-                                  <p className="mt-2 font-semibold">Total: $2</p>
-                              </CardContent>
-                              <CardFooter className="flex justify-end space-x-2">
-                              <Button3 variant="destructive">Reject</Button3>
-                              <Button3>Accept</Button3>
-                              </CardFooter>
-                          </Card>
+                  <ScrollArea className="h-[400px] w-full rounded-md  p-4">
+                      {orders.map((order, index) => { 
+                          const binded = PersonalCancelOrder.bind(null, order['ORDER_ID'])
+                          return (
+                              <Card key={index} className="mb-4">
+                                  <CardHeader>
+                                      <CardTitle className="text-lg flex items-center justify-between">
+                                          Order ID: {order['ORDER_ID']}
+                                          
+                                      </CardTitle>
+                                      
+                                  </CardHeader>
+                                  <CardContent>
+                                      <h4 className="font-semibold mb-2">{order['FOOD_NAMES']}</h4>
+                                      
+                                      <p className="mt-2 font-semibold">Total: ৳{order['TOTAL']} </p>
+                                  </CardContent>
+                                  {(order['ORDER_STATUS'] === 'DELIVERED' || order['ORDER_STATUS'] === 'CANCELLED') ? <CardFooter>
+                                      <Badge variant={order['ORDER_STATUS'] === 'DELIVERED' ? 'success' : 'danger'}>{order['ORDER_STATUS']}</Badge>
+                                  </CardFooter> : 
+                                      <form action={binded} className={` flex flex-wrap gap-6 m-5`}>
+                                          <Button3 variant="" className="w-fit">Cancel</Button3>
+                                          <Link className={`${buttonVariants({ variant: "outline" })} !w-fit`} href={`/delivery_chat/${order['ORDER_ID']}`}>View Details</Link>
+                                      </form>
+                                    }
+                                      
+                              </Card>
+                          )
+                      })}
                   </ScrollArea>
               </CardContent>
           </Card>

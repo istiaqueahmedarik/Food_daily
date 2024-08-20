@@ -9,32 +9,8 @@ const app = new Hono();
 
 const { upgradeWebSocket, websocket } = createBunWebSocket();
 
-// Oracle DB Config
-const dbConfig = {
-    user: "system",
-    password: "oracle",
-    connectString: "localhost:1521/oracle",
-}
 
-/**
- * CREATE TABLE CONVERSATIONS (
-    CONVERSATION_ID VARCHAR2(36) PRIMARY KEY,
-    USER_ID VARCHAR2(36) NOT NULL,
-    DELIVERY_PARTNER_ID VARCHAR2(36) NOT NULL,
-    FOREIGN KEY (USER_ID) REFERENCES USERS(ID),
-    FOREIGN KEY (DELIVERY_PARTNER_ID) REFERENCES DELIVERY_PARTNER(ID)
-);
 
-CREATE TABLE MESSAGES (
-    MESSAGE_ID VARCHAR2(36) PRIMARY KEY,
-    CONVERSATION_ID VARCHAR2(36) NOT NULL,
-    SENDER_ID VARCHAR2(36) NOT NULL,
-    MESSAGE VARCHAR2(255) NOT NULL,
-    DATE_ADDED DATE DEFAULT SYSDATE,
-    FOREIGN KEY (CONVERSATION_ID) REFERENCES CONVERSATIONS(CONVERSATION_ID),
-    FOREIGN KEY (SENDER_ID) REFERENCES USERS(ID)
-);
- */
 
 let conversationId = '';
 let clients: any = {};
@@ -49,8 +25,8 @@ const saveMessage = async (message: any, user1: any, user2: any, ws: any) => {
     // const dateAdded = new Date();
     // const query = `INSERT INTO MESSAGES (MESSAGE_ID,CONVERSATION_ID,SENDER_ID,MESSAGE,DATE_ADDED) VALUES (:messageId,:conversationId,:senderId,:message,:dateAdded)`;
     const data = JSON.parse(message);
-    const messageText = data.message;
-    const senderId = data.sender;
+    const messageText = data.CONTENT;
+    const senderId = data.SENDER;
     const query = `INSERT INTO MESSAGES (CONVERSATION_ID,SENDER_ID,MESSAGE) VALUES (:conversationId, :senderId,:messageText)`;
 
     const res = await runQuery(query, { conversationId, senderId, messageText });
@@ -65,6 +41,7 @@ const saveMessage = async (message: any, user1: any, user2: any, ws: any) => {
         mn = user2;
         mx = user1;
     }
+    console.log(data)
     for (let i = 0; i < clients[mn + '_' + mx].length; i++) {
         clients[mn + '_' + mx][i].send(JSON.stringify(data));
     }
@@ -83,7 +60,7 @@ app.get(
             onOpen: async (_event, ws) => {
 
                 const { user1, user2 } = c.req.param();
-
+                console.log(user1, user2);
 
                 let mn: string = "";
                 let mx: string = "";
@@ -112,10 +89,8 @@ app.get(
                     const res = await runQuery(`SELECT * FROM CONVERSATIONS WHERE USER_ID = :user1 AND DELIVERY_PARTNER_ID = :user2`, { user1, user2 });
                     conversationId = res[0].CONVERSATION_ID;
                 }
-                const res = await runQuery(`SELECT * FROM CONVERSATIONS,MESSAGES WHERE USER_ID = :user1 AND DELIVERY_PARTNER_ID = :user2 AND MESSAGES.CONVERSATION_ID = :conversationId`, { user1, user2, conversationId });
-
+                const res = await runQuery(`SELECT DATE_ADDED AS timestamp, SENDER_ID AS sender, MESSAGE AS content FROM CONVERSATIONS,MESSAGES WHERE USER_ID = :user1 AND DELIVERY_PARTNER_ID = :user2 AND MESSAGES.CONVERSATION_ID = :conversationId`, { user1, user2, conversationId });
                 ws.send(JSON.stringify(res));
-
             },
             onMessage: async (event, ws) => {
                 const { user1, user2 } = c.req.param();

@@ -660,3 +660,10 @@ export async function acceptFoodChef(st, formData)
 }
 
 
+
+
+export async function PersonalCancelOrder(st, formData)
+{
+    const response = await post_with_token('jwt/PersonalCancelOrder', { 'oid': st })
+    revalidatePath('/profile')
+}

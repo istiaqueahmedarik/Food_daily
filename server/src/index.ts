@@ -6,9 +6,11 @@ import { runQuery } from '../db/connect/oracle'
 import { uuidv7 } from 'uuidv7'
 import { prettyJSON } from 'hono/pretty-json'
 import { cors } from 'hono/cors'
+import { createBunWebSocket } from 'hono/bun'
 var jwt_ = require('jsonwebtoken');
 dotenv.config()
 const SSLCommerzPayment = require('sslcommerz-lts')
+const { upgradeWebSocket, websocket } = createBunWebSocket();
 
 
 
@@ -17,6 +19,115 @@ type Variables = JwtVariables
 const app = new Hono<{ Variables: Variables }>()
 app.use(prettyJSON())
 app.use('/*', cors())
+
+
+let conversationId = '';
+let clients: any = {};
+const checkConnection = (a: any, b: any) => {
+  return `Connection is ${a} and ${b}`;
+}
+
+const saveMessage = async (message: any, user1: any, user2: any, ws: any) => {
+  // const conversationId = '123';
+  // const messageId = '123';
+  // const senderId = user1;
+  // const dateAdded = new Date();
+  // const query = `INSERT INTO MESSAGES (MESSAGE_ID,CONVERSATION_ID,SENDER_ID,MESSAGE,DATE_ADDED) VALUES (:messageId,:conversationId,:senderId,:message,:dateAdded)`;
+  const data = JSON.parse(message);
+  const messageText = data.CONTENT;
+  const senderId = data.SENDER;
+  const query = `INSERT INTO MESSAGES (CONVERSATION_ID,SENDER_ID,MESSAGE) VALUES (:conversationId, :senderId,:messageText)`;
+
+  const res = await runQuery(query, { conversationId, senderId, messageText });
+
+  let mn: string = "";
+  let mx: string = "";
+  if (user1 < user2) {
+    mn = user1;
+    mx = user2;
+  }
+  else {
+    mn = user2;
+    mx = user1;
+  }
+  console.log(data)
+  for (let i = 0; i < clients[mn + '_' + mx].length; i++) {
+    clients[mn + '_' + mx][i].send(JSON.stringify(data));
+  }
+}
+
+app.get('/', (c) => {
+  return c.text('WebSocket chat server is running.');
+});
+
+
+
+app.get(
+  '/ws/:user1/:user2',
+  upgradeWebSocket((c) => {
+    return {
+      onOpen: async (_event, ws) => {
+
+        const { user1, user2 } = c.req.param();
+        console.log(user1, user2);
+
+        let mn: string = "";
+        let mx: string = "";
+        if (user1 < user2) {
+          mn = user1;
+          mx = user2;
+        }
+        else {
+          mn = user2;
+          mx = user1;
+        }
+
+        // push all the ws to {mn,mx}
+        if (!clients[mn + '_' + mx]) {
+          clients[mn + '_' + mx] = [];
+        }
+        clients[mn + '_' + mx].push(ws);
+
+
+        const c_ = await runQuery(`SELECT * FROM CONVERSATIONS WHERE USER_ID = :user1 AND DELIVERY_PARTNER_ID = :user2`, { user1, user2 });
+        if (c_.length > 0) {
+          conversationId = c_[0].CONVERSATION_ID;
+        }
+        else {
+          await runQuery(`INSERT INTO CONVERSATIONS (USER_ID,DELIVERY_PARTNER_ID) VALUES (:user1,:user2)`, { user1, user2 });
+          const res = await runQuery(`SELECT * FROM CONVERSATIONS WHERE USER_ID = :user1 AND DELIVERY_PARTNER_ID = :user2`, { user1, user2 });
+          conversationId = res[0].CONVERSATION_ID;
+        }
+        const res = await runQuery(`SELECT DATE_ADDED AS timestamp, SENDER_ID AS sender, MESSAGE AS content FROM CONVERSATIONS,MESSAGES WHERE USER_ID = :user1 AND DELIVERY_PARTNER_ID = :user2 AND MESSAGES.CONVERSATION_ID = :conversationId`, { user1, user2, conversationId });
+        ws.send(JSON.stringify(res));
+      },
+      onMessage: async (event, ws) => {
+        const { user1, user2 } = c.req.param();
+
+        await saveMessage(event.data, user1, user2, ws);
+        // const msg = checkConnection(user1, user2);
+      },
+      onClose(event, ws) {
+        const { user1, user2 } = c.req.param();
+        let mn: string = "";
+        let mx: string = "";
+        if (user1 < user2) {
+          mn = user1;
+          mx = user2;
+        }
+        else {
+          mn = user2;
+          mx = user1;
+        }
+
+        clients[mn + '_' + mx] = clients[mn + '_' + mx].filter((client: any) => client !== ws);
+
+
+      },
+    }
+  })
+)
+
 app.use(
   '/jwt/*',
   jwt({
@@ -1219,12 +1330,50 @@ app.post('/jwt/orderDetails', async (c) => {
   const { oid } = await c.req.json<{ oid: string }>()
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  // get delivery partner details as well as users details as well as delivery status together
-  // delivert partner details's user id also point the delivery man's personal details
-  // get userID, username, Delivery Partner's name, both of their profile images, order details, order status
+  console.log(oid)
+  const result = await runQuery(`SELECT * FROM (SELECT FIRST_NAME, PROFILE_IMAGE, ORDERS.ID AS ORDER_ID, ORDERS.TOTAL, SHIPPING_NAME, SHIPPING_PHONE, SHIPPING_ADD  FROM ACTIVE_DELIVERY, USERS, ORDERS WHERE ACTIVE_DELIVERY.DELIVERY_PARTNER_ID = USERS.ID AND ACTIVE_DELIVERY.ORDER_ID = :oid AND ORDERS.ID = :oid) R, (SELECT KI.ID AS KITCHEN_ID,  ORDER_ID, FOOD_NAMES, TOTAL, DATE_ADDED, DATE_SHIPPED, DATE_DELIVERED, SHIPPING_ADD, SHIPPING_PHONE, SHIPPING_NAME, CASE WHEN ORD.STATUS = 'DELIVERED' THEN 'DELIVERED' WHEN ORD.STATUS = 'PREPEARED' THEN 'PREPEARED' WHEN ORD.STATUS = 'SHIPPED' THEN 'SHIPPED' WHEN ORD.STATUS = 'CANCELLED' THEN 'CANCELLED'  ELSE 'PENDING' END AS ORDER_STATUS  FROM(SELECT
+    C.DELETED_ID AS ORDER_ID,
+    K.ID,
+    LISTAGG(F.NAME
+      || ' x'
+      || C.QUANTITY, ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES
+    
+FROM
+    CART     C
+    JOIN FOOD F
+    ON C.FOOD_ID = F.ID
+    JOIN CATEGORY CAT
+    ON F.CATEGORY_ID = CAT.ID
+    JOIN KITCHEN K
+    ON CAT.KITCHEN_ID = K.ID
+WHERE
+    C.DELETED_ID IS NOT NULL
+GROUP BY
+    C.DELETED_ID,
+    K.ID) Q, ORDERS ORD, KITCHEN KI, CHEF, USERS WHERE Q.ID = KI.ID AND CHEF.ID = KI.CHEF_ID AND USERS.ID = CHEF.USER_ID AND Q.ORDER_ID = ORD.ID  AND ORD.ID = : oid ORDER BY CASE WHEN ORD.STATUS = 'DELIVERED' THEN 1 ELSE 0 END ASC, ORD.DATE_ADDED ASC) S WHERE R.ORDER_ID = S.ORDER_ID`, { oid });
 
-  const result = await runQuery('SELECT O.ID, O.TOTAL, O.DATE_ADDED, O.DATE_PREPARED, O.DATE_SHIPPED, O.DATE_DELIVERED, O.SHIPPING_ADD, O.SHIPPING_PHONE, O.SHIPPING_NAME, O.STATUS, U.ID AS USER_ID, U.FIRST_NAME, U.LAST_NAME, U.PROFILE_IMAGE, DP.ID AS DELIVERY_ID, DP.LICENSE, DP.VEHICLE, DP.USER_ID AS DELIVERY_USER_ID, DP.PROFILE_IMAGE AS DELIVERY_IMAGE FROM ORDERS O, USERS U, DELIVERY_PARTNER DP, ACTIVE_DELIVERY AD WHERE O.ID = :oid AND O.USER_ID = U.ID AND O.ID = AD.ORDER_ID AND AD.DELIVERY_PARTNER_ID = DP.USER_ID', { oid });
+  return c.json({ result });
 })
+
+
+app.post('/jwt/orderDetailsConnection', async (c) => {
+  const { oid } = await c.req.json<{ oid: string }>()
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+
+  const delivery = await runQuery('SELECT USERS.ID, USERS.CITY_CODE, USERS.MOBILE, USERS.FIRST_NAME, USERS.PROFILE_IMAGE FROM ACTIVE_DELIVERY,USERS WHERE ORDER_ID = :oid AND USERS.ID = ACTIVE_DELIVERY.DELIVERY_PARTNER_ID', { oid });
+  const user = await runQuery('SELECT USERS.ID, USERS.CITY_CODE, USERS.MOBILE, USERS.FIRST_NAME, USERS.PROFILE_IMAGE FROM USERS,ORDERS WHERE USERS.ID = ORDERS.USER_ID AND ORDERS.ID = :oid', { oid });
+
+  if (delivery.length === 0 || user.length === 0)
+    return c.json({ status: false });
+  let type = 'user';
+  if (delivery[0]['ID'] === id)
+    type = 'delivery';
+
+  return c.json({ delivery, user, type });
+})
+
+
 
 
 app.post('/jwt/chefOrder', async (c) => {
@@ -1265,10 +1414,46 @@ app.post('/jwt/accptOrderChef', async (c) => {
   return c.json({ result });
 })
 
+app.post('/jwt/orderHistory', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const result = await runQuery(`SELECT KI.ID AS KITCHEN_ID,  ORDER_ID, FOOD_NAMES, TOTAL, DATE_ADDED, DATE_SHIPPED, DATE_DELIVERED, SHIPPING_ADD, SHIPPING_PHONE, SHIPPING_NAME, 
+    CASE WHEN ORD.STATUS = 'DELIVERED' THEN 'DELIVERED' WHEN ORD.STATUS = 'PREPEARED' THEN 'PREPEARED' WHEN ORD.STATUS = 'SHIPPED' THEN 'SHIPPED' WHEN ORD.STATUS = 'CANCELLED' THEN 'CANCELLED'  ELSE 'PENDING' END AS ORDER_STATUS  FROM (SELECT
+    C.DELETED_ID AS ORDER_ID,
+    K.ID,
+    LISTAGG(F.NAME
+            || ' x'
+            || C.QUANTITY, ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES
+    
+FROM
+    CART     C
+    JOIN FOOD F
+    ON C.FOOD_ID = F.ID
+    JOIN CATEGORY CAT
+    ON F.CATEGORY_ID = CAT.ID
+    JOIN KITCHEN K
+    ON CAT.KITCHEN_ID = K.ID
+WHERE
+    C.DELETED_ID IS NOT NULL
+GROUP BY
+    C.DELETED_ID,
+    K.ID) Q, ORDERS ORD, KITCHEN KI,CHEF, USERS WHERE Q.ID = KI.ID AND CHEF.ID = KI.CHEF_ID AND USERS.ID = CHEF.USER_ID AND Q.ORDER_ID = ORD.ID AND ORD.USER_ID = :id  ORDER BY  ORD.DATE_ADDED DESC`, { id })
+  return c.json({ result });
+})
+
+app.post('/jwt/PersonalCancelOrder', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const { oid } = await c.req.json<{ oid: string }>()
+  const result = await runQuery('UPDATE ORDERS SET STATUS = \'CANCELLED\' WHERE ID = :oid AND USER_ID = :id', { oid, id });
+  return c.json({ result });
+})
 
 
 
 export default {
   port: process.env.PORT,
+  websocket,
+
   fetch: app.fetch,
 }

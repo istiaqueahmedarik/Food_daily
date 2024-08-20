@@ -1,6 +1,8 @@
 import { acceptOrder, cancelOrder, completeOrder, get_with_token } from "@/action";
 import { ScrollArea } from "./ui/scroll-area";
 import Button from "./ui/Button";
+import Link from "next/link";
+import { buttonVariants } from "./ui/button3";
 
 async function ActiveDelivery() {
    
@@ -42,6 +44,9 @@ async function ActiveDelivery() {
                                   <form action={binded2}>
                                       <Button variant={"outline"} txt="Reject" />
                                   </form>
+                                  <Link href={`/delivery_chat/${oid}`} className={buttonVariants('default')}>
+                                      DeliveryChat
+                                    </Link>
                              </div>
                                   
                               </li>
