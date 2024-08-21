@@ -3,6 +3,7 @@ import Ingredients from "./Ingredients"
 import Button from "./ui/Button";
 import { addCart, get } from "@/action";
 import { getImage } from "@/util";
+import { OrderType } from "./OrderType";
 
 async function Food({ params }) {
     
@@ -10,10 +11,7 @@ async function Food({ params }) {
     // const res = await get(`getFood/${params.fid}`)
     // const rating = await get(`getFoodRating/${params.fid}`).Rating;
     const [res, rating] = await Promise.all([get(`getFood/${params.fid}`), get(`getFoodRating/${params.fid}`)])
-    const binded = addCart.bind(null, {
-        params: params,
-        kid: res.result[0]['KITCHEN_ID']
-    });
+   
     const data = res.result[0];
     const blurImg = await getImage();
 
@@ -55,13 +53,9 @@ async function Food({ params }) {
                       <div className="flex items-center justify-between">
                           <div className="text-3xl font-bold">৳ { data['PRICE']}</div>
                       </div>
-                      <div>
-                          <form action={binded} className="flex flex-col gap-5">
-                              <input type="number" name="quantity" placeholder="Quantity" className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" defaultValue={1}/>
-                              <Button txt={"Add to Cart"}/>
-                          </form>
+                      <OrderType kid={res.result[0]['KITCHEN_ID']} params={params} />
+                          
 
-                      </div>
                   </div>
               </div>
           </div>

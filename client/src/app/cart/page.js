@@ -1,7 +1,7 @@
 import React from 'react'
 import { deleteCart, get_with_token } from '@/action'
 import Image from 'next/image'
-import { Delete } from 'lucide-react'
+import { Badge, Delete } from 'lucide-react'
 import { buttonVariants } from "@/components/ui/button3"
 
 import Link from 'next/link'
@@ -10,6 +10,7 @@ import Link from 'next/link'
 async function page() {
     const res = await get_with_token('jwt/getCart');
     const data = res.result;
+    console.log(data)
   return (
       <div className='grid grid-cols-2'>
           <div className='m-auto'>
@@ -26,9 +27,13 @@ async function page() {
                           const binded = deleteCart.bind(null, food['ID']);
                             return (
                                 <div key={idx} className="grid grid-cols-[3fr_1fr_0fr] items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="text-sm font-medium">{food['NAME']}</div>
-                                        <div className="text-sm text-muted-foreground">x{food['QUANTITY']}</div>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="text-sm font-medium">{food['NAME']}</div>
+                                            <div className="text-sm text-muted-foreground">x{food['QUANTITY']}</div>
+
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">{new Date(food['DATE_ADDED']).toLocaleDateString()}</div>
                                     </div>
                                     <div className="text-sm font-medium">৳{food['PRICE']*food['QUANTITY']}</div>
                                     <form action={binded}>

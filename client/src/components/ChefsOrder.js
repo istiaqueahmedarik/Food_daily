@@ -56,9 +56,12 @@ export default async function ChefsOrder({ kid }) {
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
                                         <h2 className="text-xl font-semibold">{order['SHIPPING_NAME']}</h2>
-                                        <p className="text-sm text-muted-foreground">
-                                            Order #{order['ORDER_ID']} - {new Date(order['DATE_ADDED']).toLocaleTimeString()}
-                                        </p>
+                                        <div className="flex flex-wrap">
+                                            <p className="text-sm text-muted-foreground">
+                                                Order #{order['ORDER_ID']} -
+                                            </p>
+                                            <Badge variant="secondary">{new Date(order['DATE_ADDED']).toLocaleString()}</Badge>
+                                        </div>
                                     </div>
                                     <Badge variant="secondary">{order['ORDER_STATUS'] === 'PENDING' ? 'NEW_ORDER' : order['ORDER_STATUS']}</Badge>
                                 </div>

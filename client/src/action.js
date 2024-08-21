@@ -507,6 +507,12 @@ export async function addCart(st, formData)
     redirect(`/chef/kitchen/${st.kid}`)
 }
 
+export async function addCartScheduled(data) {
+    console.log(data)
+    await post_with_token('jwt/addToCartScheduled', data)
+    redirect(`/chef/kitchen/${data.kid}`)
+}
+
 export async function deleteCart(st, formData)
 {
     

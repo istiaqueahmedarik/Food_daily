@@ -754,6 +754,31 @@ app.post('/jwt/addToCart', async (c) => {
   const result = await runQuery('BEGIN ADD_TO_CART(:id, :food_id, :quantity); END;', { id, food_id, quantity });
   return c.json({ result });
 })
+function formatDate(date: Date): string {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+}
+app.post('/jwt/addToCartScheduled', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload
+  const { kid, fid, orders } = await c.req.json<{ kid: string, fid: string, orders: any[] }>()
+  console.log(kid, fid, orders)
+  for (let i = 0; i < orders.length; i++) {
+    const dt = orders[i].date;
+    const quantity = orders[i].quantity;
+    const time = orders[i].time;
+    const combineDate = dt + ' ' + time;
+    const converted = formatDate(new Date(combineDate));
+    console.log(converted)
+    await runQuery('BEGIN ADD_TO_CART_SCHEDULED(:id, :fid, :quantity, TO_DATE(:converted, \'DD-MM-YYYY HH24:MI:SS\')); END;', { id, fid, quantity, converted });
+  }
+  return c.json({ result: 'ok' });
+})
 
 app.post('/jwt/deleteFromCart', async (c) => {
   const { food_id } = await c.req.json<{ food_id: string }>()

@@ -12,6 +12,7 @@ import TopChef from "@/components/TopChef";
 import PopFood from "@/components/PopFood";
 import { Suspense } from "react";
 import LoadingSection from "@/components/LoadingSection";
+import { OrderType } from "@/components/OrderType";
 
 // export const dynamic = 'force-static';
 export const experimental_ppr = true;
@@ -51,7 +52,6 @@ export default function Home() {
           <ProductList />
         </Suspense>
       </div>
-
     </div>
     
         
