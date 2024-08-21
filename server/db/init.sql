@@ -367,7 +367,6 @@ BEGIN
                || SEQUENCE8.NEXTVAL;
 END;
 /
-
 -- create an admin users
 INSERT INTO USERS (
     ID,
@@ -393,6 +392,7 @@ INSERT INTO USERS (
     'ADMIN'
 );
 
+SELECT * FROM USERS;
 -- -- DROP SEQUENCES
 -- DROP SEQUENCE SEQUENCE1;
 
