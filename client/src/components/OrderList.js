@@ -26,11 +26,12 @@ async function OrderList() {
                                   <CardHeader>
                                       <CardTitle className="text-lg flex items-center justify-between">
                                           Order ID: {order['ORDER_ID']}
-                                          
+                                          <Badge variant="info" className="mb-2">{new Date(order['DATE_ADDED']).toLocaleString()}</Badge>
                                       </CardTitle>
                                       
                                   </CardHeader>
                                   <CardContent>
+                                      
                                       <h4 className="font-semibold mb-2">{order['FOOD_NAMES']}</h4>
                                       
                                       <p className="mt-2 font-semibold">Total: ৳{order['TOTAL']} </p>
@@ -40,7 +41,7 @@ async function OrderList() {
                                   </CardFooter> : 
                                       <form action={binded} className={` flex flex-wrap gap-6 m-5`}>
                                           <Button3 variant="" className="w-fit">Cancel</Button3>
-                                          <Link className={`${buttonVariants({ variant: "outline" })} !w-fit`} href={`/delivery_chat/${order['ORDER_ID']}`}>View Details</Link>
+                                          <Link className={`${buttonVariants({ variant: "outline" })} !w-fit ${order['ORDER_STATUS'] === 'SHIPPED' ? 'block':'hidden'}`} href={`/delivery_chat/${order['ORDER_ID']}`}>View Details</Link>
                                       </form>
                                     }
                                       

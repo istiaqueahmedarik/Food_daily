@@ -24,7 +24,7 @@ async function page() {
               <div className="p-6">
                   <div className="grid gap-4">
                       {data.map((food, idx) => { 
-                          const binded = deleteCart.bind(null, food['ID']);
+                          const binded = deleteCart.bind(null, food['CART_ID']);
                             return (
                                 <div key={idx} className="grid grid-cols-[3fr_1fr_0fr] items-center justify-between">
                                     <div>

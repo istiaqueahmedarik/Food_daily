@@ -781,18 +781,18 @@ app.post('/jwt/addToCartScheduled', async (c) => {
 })
 
 app.post('/jwt/deleteFromCart', async (c) => {
-  const { food_id } = await c.req.json<{ food_id: string }>()
+  const { cart_id } = await c.req.json<{ cart_id: string }>()
 
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery('BEGIN DELETE_FROM_CART(:id ,:food_id); END;', { id, food_id });
+  const result = await runQuery('BEGIN DELETE_FROM_CART(:id ,:cart_id); END;', { id, cart_id });
   return c.json({ result });
 })
 
 app.get('/jwt/getCart', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery('SELECT FOOD.ID, FOOD.NAME, CART.QUANTITY, DATE_ADDED, FOOD.DESCRIPTION, FOOD.PRICE, FOOD_IMAGE FROM CART,FOOD WHERE USER_ID = :id AND CART.FOOD_ID = FOOD.ID AND CART.DELETED = 0', { id });
+  const result = await runQuery('SELECT CART.ID AS CART_ID,  FOOD.ID, FOOD.NAME, CART.QUANTITY, DATE_ADDED, FOOD.DESCRIPTION, FOOD.PRICE, FOOD_IMAGE FROM CART,FOOD WHERE USER_ID = :id AND CART.FOOD_ID = FOOD.ID AND CART.DELETED = 0', { id });
   const sm = await runQuery('SELECT SUM(FOOD.PRICE * CART.QUANTITY) AS TOTAL FROM CART,FOOD WHERE USER_ID = :id AND CART.FOOD_ID = FOOD.ID AND CART.DELETED = 0', { id });
 
   return c.json({ result, sm });

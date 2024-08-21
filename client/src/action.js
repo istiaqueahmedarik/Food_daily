@@ -516,7 +516,7 @@ export async function addCartScheduled(data) {
 export async function deleteCart(st, formData)
 {
     
-    const response = await post_with_token('jwt/deleteFromCart', { 'food_id': st })
+    const response = await post_with_token('jwt/deleteFromCart', { 'cart_id': st })
     revalidatePath('/cart')
 }
 
