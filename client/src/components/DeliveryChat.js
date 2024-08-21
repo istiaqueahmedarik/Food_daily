@@ -35,9 +35,6 @@ export default function DeliveryChat(props) {
 
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            // data is can be an array or object
-            // if array, set with all the element pushed
-            // if object, push the object
             if (Array.isArray(data)) {
                 setMessages(data);
             } else {

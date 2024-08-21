@@ -7,9 +7,8 @@ async function DeliverySummary() {
     const delivery = data.result[0];
     const totalOrder = summary.totalOrder[0]['TOTAL_ORDER'];
    
-    const cap = 1.5;
-
-    const totalEarning = summary.totalEarning[0]['TOTAL_EARNING']*cap;
+    const totalSold = summary.totalSold[0]['TOTAL_SOLD'];
+    const totalEarning = summary.totalEarning[0]['TOTAL_EARNING'];
 
     const avgDeliveryTime = (summary.avgDeliveryTime[0]['AVG_DELIVERY_TIME']*24*60).toFixed(2);
   return (
@@ -25,10 +24,14 @@ async function DeliverySummary() {
                   Your License
               </a>
           </div>
-          <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-6 flex flex-wrap justify-around gap-4">
               <div className="flex flex-col items-center justify-center gap-2">
                   <div className="text-4xl font-bold">{totalOrder}</div>
                   <div className="text-muted-foreground">Total Orders</div>
+              </div>
+              <div className="flex flex-col items-center justify-center gap-2">
+                  <div className="text-4xl font-bold">৳{totalSold}</div>
+                  <div className="text-muted-foreground">Total Sold</div>
               </div>
               <div className="flex flex-col items-center justify-center gap-2">
                   <div className="text-4xl font-bold">৳{totalEarning}</div>

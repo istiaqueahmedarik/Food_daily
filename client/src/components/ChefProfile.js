@@ -29,9 +29,9 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
     }
     stars.push(<span className="ml-2" key={rating.Rating}>{rating.Rating}</span>)
     return (
-        <div className="">
+        <div className=" m-5 ">
 
-            <div className="bg-background text-foreground">
+            <div className="bg-background text-foreground border border-input rounded-xl">
                 <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                         <div className="flex flex-col items-start justify-center">
