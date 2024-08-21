@@ -27,3 +27,4 @@ export const runQuery = async (query: string, params: any) => {
     console.error(err)
   }
 }
+

@@ -49,11 +49,13 @@ async function NavBar() {
                  
                 ) : (
                     <div className='flex flex-wrap'>
-                        <Link href={"/search"} className="transition-transform text-card-foreground hover:text-muted-foreground px-4 py-2 rounded-full mr-2 "><Store/></Link>
-                        <Link href={"/login"} className="transition-transform text-card-foreground hover:text-muted-foreground px-4 py-2 rounded-full mr-2 "><LogIn /></Link>
                         <div className='my-auto mx-3'>
                             <ModeToggle />
                         </div>
+                        <Link href={"/search"} className="transition-transform text-card-foreground hover:text-muted-foreground px-4 py-2 rounded-full mr-2 "><Store /></Link>
+                        
+                        <Link href={"/login"} className="transition-transform text-card-foreground hover:text-muted-foreground px-4 py-2 rounded-full mr-2 "><LogIn /></Link>
+                        
                         <Link href={"/signup"} className="border-[0.5px] border-input text-card-foreground hover:text-foreground px-4 py-2 rounded-md hover:bg-muted">Sign Up</Link>
                         
 

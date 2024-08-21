@@ -36,7 +36,7 @@ const saveMessage = async (message: any, user1: any, user2: any, ws: any) => {
   const data = JSON.parse(message);
   const messageText = data.CONTENT;
   const senderId = data.SENDER;
-  const query = `INSERT INTO MESSAGES (CONVERSATION_ID,SENDER_ID,MESSAGE) VALUES (:conversationId, :senderId,:messageText)`;
+  const query = `BEGIN SEND_MESSAGE(:conversationId, :senderId,:messageText); END;`;
 
   const res = await runQuery(query, { conversationId, senderId, messageText });
 
@@ -89,16 +89,17 @@ app.get(
         clients[mn + '_' + mx].push(ws);
 
 
-        const c_ = await runQuery(`SELECT * FROM CONVERSATIONS WHERE USER_ID = :user1 AND DELIVERY_PARTNER_ID = :user2`, { user1, user2 });
+        const c_ = await runQuery(`SELECT * FROM CONVERSATIONS WHERE USER_ID = :mn AND DELIVERY_PARTNER_ID = :mx`, { mn, mx });
         if (c_.length > 0) {
           conversationId = c_[0].CONVERSATION_ID;
         }
         else {
-          await runQuery(`INSERT INTO CONVERSATIONS (USER_ID,DELIVERY_PARTNER_ID) VALUES (:user1,:user2)`, { user1, user2 });
-          const res = await runQuery(`SELECT * FROM CONVERSATIONS WHERE USER_ID = :user1 AND DELIVERY_PARTNER_ID = :user2`, { user1, user2 });
+          await runQuery(`INSERT INTO CONVERSATIONS (USER_ID,DELIVERY_PARTNER_ID) VALUES (:mn,:mx)`, { mn, mx });
+          const res = await runQuery(`SELECT * FROM CONVERSATIONS WHERE USER_ID = :mn AND DELIVERY_PARTNER_ID = :mx`, { mn, mx });
           conversationId = res[0].CONVERSATION_ID;
         }
-        const res = await runQuery(`SELECT DATE_ADDED AS timestamp, SENDER_ID AS sender, MESSAGE AS content FROM CONVERSATIONS,MESSAGES WHERE USER_ID = :user1 AND DELIVERY_PARTNER_ID = :user2 AND MESSAGES.CONVERSATION_ID = :conversationId`, { user1, user2, conversationId });
+        const res = await runQuery(`SELECT DATE_ADDED AS timestamp, SENDER_ID AS sender, MESSAGE AS content FROM CONVERSATIONS,MESSAGES WHERE USER_ID = :mn AND DELIVERY_PARTNER_ID = :mx AND MESSAGES.CONVERSATION_ID = :conversationId`, { mn, mx, conversationId });
+        console.log(res)
         ws.send(JSON.stringify(res));
       },
       onMessage: async (event, ws) => {
@@ -186,7 +187,7 @@ app.post('/signup', async (c) => {
     const formattedDob = new Date(dob).toISOString().split('T')[0];
 
     try {
-      const result = await runQuery(`INSERT INTO USERS (FIRST_NAME, LAST_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL, PASSWORD, TYPE) VALUES(:firstName, :lastName, TO_DATE(:formattedDob, 'YYYY-MM-DD'), :address, :mobile, :cityCode, :email, :password, :type)`, { firstName, lastName, formattedDob, address, mobile: mobileNumber, cityCode, email, password, type: 'USER' });
+      const result = await runQuery(`BEGIN REGISTER_USER(:firstName, :lastName, TO_DATE(:formattedDob, 'YYYY-MM-DD'), :address, :mobile, :cityCode, :email, :password, :type); END;`, { firstName, lastName, formattedDob, address, mobile: mobileNumber, cityCode, email, password, type: 'USER' });
       return c.json({ result, token, email });
     } catch (error) {
       return c.json({ error, token, email });
@@ -228,7 +229,7 @@ app.post('/jwt/updateProfile', async (c) => {
   }
 
   const formattedDob = new Date(dob).toISOString().split('T')[0];
-  const result = await runQuery('UPDATE USERS SET FIRST_NAME = :firstName, LAST_NAME = :lastName, DOB = TO_DATE(:formattedDob, \'YYYY-MM-DD\'), ADDRESS = :address, MOBILE = :mobileNumber, CITY_CODE = :cityCode WHERE ID = :id AND EMAIL = :email', { id, email, firstName, lastName, formattedDob, address, mobileNumber, cityCode });
+  const result = await runQuery('BEGIN UPDATE_USER(:id ,:email,:firstName,:lastName,TO_DATE(:formattedDob, \'YYYY-MM-DD\'), :address, :mobileNumber, :cityCode); END;', { id, email, firstName, lastName, formattedDob, address, mobileNumber, cityCode });
   return c.json({ result });
 })
 
@@ -237,8 +238,8 @@ app.post('/jwt/updateProfileImage', async (c) => {
   const { id, email } = payload;
   const { profile_image_url } = await c.req.json<{ profile_image_url: string }>();
 
-  const result = await runQuery('UPDATE USERS SET PROFILE_IMAGE = :profileImage WHERE ID = :id AND EMAIL = :email', { id, email, profileImage: profile_image_url });
-
+  const result = await runQuery(`BEGIN UPDATE_PROFILE_IMAGE(:id,:email,:profileImage); END;`, { id, email, profileImage: profile_image_url });
+  console.log(result)
   return c.json({ result });
 })
 
@@ -252,7 +253,7 @@ app.post('/jwt/applyChef', async (c) => {
   const check = await runQuery('SELECT * FROM CHEF WHERE CHEF_NAME = :name', { name });
   if (check !== undefined && check.length)
     return c.json({ error: 'Name Must be Unique' });
-  const result = await runQuery('INSERT INTO CHEF(USER_ID,CHEF_NAME, SPECIALITY,EXPERIENCE) VALUES(:id,:name,:speciality, :experience)', { id, name, speciality, experience });
+  const result = await runQuery('BEGIN REGISTER_CHEF(:id,:name,:speciality, :experience); END;', { id, name, speciality, experience });
   if (result !== undefined)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -287,7 +288,7 @@ app.get('/jwt/chefDetails', async (c) => {
       KITCHEN.ID AS KITCHEN_ID, 
       KITCHEN.ADDRESS AS KITCHEN_ADDRESS, 
       APPROVED, 
-      (SELECT IMAGE FROM KITCHEN_IMAGES WHERE KITCHEN_IMAGES.KITCHEN_ID = KITCHEN.ID AND ROWNUM = 1) AS KITCHEN_IMAGE, 
+      GET_KITCHEN_IMAGE(KITCHEN.ID) AS KITCHEN_IMAGE, 
       KITCHEN.NAME AS KITCHEN_NAME, 
       KITCHEN.CITY_NAME 
     FROM 
@@ -324,7 +325,7 @@ app.get('/getChef/:cid', async (c) => {
       KITCHEN.ID AS KITCHEN_ID, 
       KITCHEN.ADDRESS AS KITCHEN_ADDRESS, 
       APPROVED, 
-      (SELECT IMAGE FROM KITCHEN_IMAGES WHERE KITCHEN_IMAGES.KITCHEN_ID = KITCHEN.ID AND ROWNUM = 1) AS KITCHEN_IMAGE, 
+      GET_KITCHEN_IMAGE(KITCHEN.ID) AS KITCHEN_IMAGE, 
       KITCHEN.NAME AS KITCHEN_NAME, 
       KITCHEN.CITY_NAME 
     FROM 
@@ -367,7 +368,7 @@ app.post('/jwt/addKitchen', async (c) => {
   const result = await runQuery('SELECT ID FROM CHEF WHERE USER_ID = :id', { id });
   const chefId = result[0]['ID'];
   try {
-    await runQuery('INSERT INTO KITCHEN (NAME, ADDRESS, CITY_NAME, CHEF_ID) VALUES(:KICHEN_NAME, :KITCHEN_ADDRESS, :KITCHEN_CITY_NAME, :chefId)', { KICHEN_NAME, KITCHEN_ADDRESS, KITCHEN_CITY_NAME, chefId });
+    await runQuery('BEGIN REGISTER_KITCHEN(:KICHEN_NAME, :KITCHEN_ADDRESS, :KITCHEN_CITY_NAME, :chefId); END;', { KICHEN_NAME, KITCHEN_ADDRESS, KITCHEN_CITY_NAME, chefId });
     return c.json({ message: 'Kitchen Added' });
   } catch (error) {
     return c.json({ error });
@@ -378,13 +379,7 @@ app.post('/jwt/deleteKitchen', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   const { kitchenId } = await c.req.json<{ kitchenId: string }>()
-  await runQuery('DELETE FROM KITCHEN_IMAGES WHERE KITCHEN_ID = :kitchenId', { kitchenId });
-  await runQuery("DELETE FROM INGREDIENT WHERE FOOD_ID IN (SELECT ID FROM FOOD WHERE CATEGORY_ID IN (SELECT ID FROM CATEGORY WHERE KITCHEN_ID = :kitchenId))", { kitchenId });
-  await runQuery("DELETE FROM CART WHERE FOOD_ID IN (SELECT ID FROM FOOD WHERE CATEGORY_ID IN (SELECT ID FROM CATEGORY WHERE KITCHEN_ID = :kitchenId))", { kitchenId });
-  await runQuery("DELETE FROM FOOD WHERE CATEGORY_ID IN (SELECT ID FROM CATEGORY WHERE KITCHEN_ID = :kitchenId)", { kitchenId });
-  await runQuery("DELETE FROM CATEGORY WHERE KITCHEN_ID = :kitchenId", { kitchenId });
-  await runQuery("DELETE FROM KITCHEN WHERE ID = :kitchenId", { kitchenId });
-
+  await runQuery('BEGIN DELETE_KITCHEN(:kitchenId); END;', { kitchenId });
   return c.json({ message: 'Kitchen Deleted' });
 })
 
@@ -393,7 +388,7 @@ app.post('/jwt/editKitchen', async (c) => {
   const { kitchenId, KICHEN_NAME, KITCHEN_ADDRESS, KITCHEN_CITY_NAME } = await c.req.json<{ kitchenId: string, KICHEN_NAME: string, KITCHEN_ADDRESS: string, KITCHEN_CITY_NAME: string }>()
 
   try {
-    await runQuery('UPDATE KITCHEN SET NAME = :KICHEN_NAME, ADDRESS = :KITCHEN_ADDRESS, CITY_NAME = :KITCHEN_CITY_NAME WHERE ID = :kitchenId', { KICHEN_NAME, KITCHEN_ADDRESS, KITCHEN_CITY_NAME, kitchenId });
+    await runQuery('BEGIN UPDATE_KITCHEN(:KICHEN_NAME, :KITCHEN_ADDRESS, :KITCHEN_CITY_NAME, :kitchenId); END;', { KICHEN_NAME, KITCHEN_ADDRESS, KITCHEN_CITY_NAME, kitchenId });
     return c.json({ message: 'Kitchen Updated' });
   } catch (error) {
     return c.json({ error });
@@ -407,7 +402,7 @@ app.post('/jwt/addKitchenImage', async (c) => {
   const result = await runQuery('SELECT ID FROM CHEF WHERE USER_ID = :id', { id });
   const chefId = result[0]['ID'];
   try {
-    await runQuery('INSERT INTO KITCHEN_IMAGES (KITCHEN_ID, IMAGE) VALUES(:kitchenId, :image)', { kitchenId, image });
+    await runQuery('BEGIN ADD_KITCHEN_IMAGE(:kitchenId, :image); END;', { kitchenId, image });
     return c.json({ message: 'Image Added' });
   } catch (error) {
     return c.json({ error });
@@ -437,7 +432,7 @@ app.post('/jwt/getKitchenImage', async (c) => {
 
 app.post('/jwt/deleteKitchenImage', async (c) => {
   const { imageId } = await c.req.json<{ imageId: string }>()
-  const result = await runQuery('DELETE FROM KITCHEN_IMAGES WHERE ID = :imageId', { imageId });
+  const result = await runQuery('BEGIN DELETE_KITCHEN_IMAGE(:imageId); END;', { imageId });
   return c.json({ result });
 })
 
@@ -453,10 +448,10 @@ app.post('/jwt/addCertification', async (c) => {
   if (result !== undefined && result.length) {
     const chef_id = result[0]['ID'];
     if (expiryDate === '') {
-      result = await runQuery('INSERT INTO CERTIFICATION(CHEF_ID, CERTIFICATION, ISSUE_DATE, LINK,CERTIFICATE_IMAGE) VALUES(:chef_id, :name, TO_DATE(:f_issue_date, \'YYYY-MM-DD\'), :link,:certification)', { chef_id, certification, f_issue_date, link, name })
+      result = await runQuery('BEGIN ADD_CERTIFICATION(:chef_id, :name, TO_DATE(:f_issue_date, \'YYYY-MM-DD\'), :link,:certification); END;', { chef_id, certification, f_issue_date, link, name })
     }
     else {
-      result = await runQuery('INSERT INTO CERTIFICATION(CHEF_ID, CERTIFICATION, ISSUE_DATE, EXPIRY_DATE, LINK,CERTIFICATE_IMAGE) VALUES(:chef_id, :name, TO_DATE(:f_issue_date, \'YYYY-MM-DD\'), TO_DATE(:f_expiry_date, \'YYYY-MM-DD\'), :link,:certification)', { chef_id, certification, f_issue_date, f_expiry_date, link, name })
+      result = await runQuery('BEGIN ADD_CERTIFICATION_WITH_EXPIRY(:chef_id, :name, TO_DATE(:f_issue_date, \'YYYY-MM-DD\'), TO_DATE(:f_expiry_date, \'YYYY-MM-DD\'), :link,:certification); END;', { chef_id, certification, f_issue_date, f_expiry_date, link, name })
     }
     return c.json({ result });
   }
@@ -492,7 +487,7 @@ app.post('/jwt/applyKitchen', async (c) => {
   if (result !== undefined && result.length) {
     const chef_id = result[0]['ID'];
     const kitchen_id = uuidv7();
-    result = await runQuery('INSERT INTO KITCHEN VALUES(:kitchen_id, :name, :address, :cityCode, :rating, :chef_id, 0)', { kitchen_id, name, address, cityCode, rating, chef_id });
+    result = await runQuery('BEGIN ADD_KITCHEN(:kitchen_id, :name, :address, :cityCode, :rating, :chef_id, 0); END;', { kitchen_id, name, address, cityCode, rating, chef_id });
     if (result !== undefined && result.length)
       return c.json({ result });
   }
@@ -506,7 +501,7 @@ app.post('/jwt/approveKitchen', async (c) => {
   const user = await runQuery('SELECT * FROM QA_OFFICER WHERE USER_ID = :id', { id });
   if (user[0]['APPROVED'] !== 1)
     return c.json({ error: 'Invalid Token' });
-  const result = await runQuery('UPDATE KITCHEN SET APPROVED = 1 WHERE ID = :kitchen_id', { kitchen_id });
+  const result = await runQuery('BEGIN APPROVE_KITCHEN(:kitchen_id); END;', { kitchen_id });
   return c.json({ result });
 
 })
@@ -519,8 +514,7 @@ app.post('/jwt/disapproveKitchen', async (c) => {
   if (user[0]['APPROVED'] !== 1)
     return c.json({ error: 'Invalid Token' });
 
-  const res = await runQuery('DELETE FROM KITCHEN_IMAGES WHERE KITCHEN_ID = :kitchen_id', { kitchen_id });
-  const result = await runQuery('DELETE FROM KITCHEN WHERE ID = :kitchen_id', { kitchen_id });
+  const result = await runQuery('BEGIN DELETE_KITCHEN_WITH_IMAGES(:kitchen_id); END;', { kitchen_id });
   return c.json({ result });
 })
 
@@ -533,7 +527,7 @@ app.post('/jwt/approveDelivery', async (c) => {
   const user = await runQuery('SELECT * FROM QA_OFFICER WHERE USER_ID = :id', { id });
   if (user[0]['APPROVED'] !== 1)
     return c.json({ error: 'Invalid Token' });
-  const result = await runQuery('UPDATE DELIVERY_PARTNER SET VERIFIED = 1 WHERE ID = :delivery_id', { delivery_id });
+  const result = await runQuery('BEGIN VERIFY_DELIVERY_PARTNER(:delivery_id); END;', { delivery_id });
   return c.json({ result });
 
 })
@@ -546,7 +540,7 @@ app.post('/jwt/disapproveDelivery', async (c) => {
   if (user[0]['APPROVED'] !== 1)
     return c.json({ error: 'Invalid Token' });
 
-  const result = await runQuery('DELETE FROM DELIVERY_PARTNER WHERE ID = :delivery_id CASCADE CONSTRAINTS', { delivery_id });
+  const result = await runQuery('BEGIN DELETE_DELIVERY_PARTNER(:delivery_id); END;', { delivery_id });
   return c.json({ result });
 })
 
@@ -606,7 +600,7 @@ app.post('/jwt/applyQAofficer', async (c) => {
   const check = await runQuery('SELECT * FROM QA_OFFICER WHERE USER_ID = :id', { id });
   if (check !== undefined && check.length)
     return c.json({ error: 'Already Applied' });
-  let result = await runQuery('INSERT INTO QA_OFFICER(USER_ID, ACADEMIC_QUALIFICATION, CV_LINK) VALUES(:id, :ACADEMIC_QUALIFICATION, :CV_LINK)', { id, ACADEMIC_QUALIFICATION, CV_LINK });
+  let result = await runQuery('BEGIN ADD_QA_OFFICER(:id, :ACADEMIC_QUALIFICATION, :CV_LINK); END;', { id, ACADEMIC_QUALIFICATION, CV_LINK });
   return c.json({ result });
 })
 
@@ -641,26 +635,17 @@ app.post('/jwt/approveQA', async (c) => {
   if (st === 1) {
     // const result = await runQuery('UPDATE QA_OFFICER SET APPROVED = 1 WHERE ID = :qa_id', { qa_id });
     // set approved to 1 and DATE_OF_JOINING to sysdate
-    const result = await runQuery('UPDATE QA_OFFICER SET APPROVED = 1, DATE_OF_JOINING = SYSDATE WHERE ID = :qa_id', { qa_id });
+    const result = await runQuery('BEGIN APPROVE_QA_OFFICER(:qa_id); END;', { qa_id });
 
     return c.json({ result });
   }
   else {
-    const result = await runQuery('DELETE FROM QA_OFFICER WHERE ID = :qa_id', { qa_id });
+    const result = await runQuery('BEGIN DELETE_QA_OFFICER(:qa_id); END;', { qa_id });
     return c.json({ result });
   }
 })
 
-// CREATE TABLE FOOD(
-//   ID VARCHAR2(36) PRIMARY KEY,
-//   NAME VARCHAR2(255) NOT NULL,
-//   DESCRIPTION VARCHAR2(300) NOT NULL,
-//   PRICE NUMBER NOT NULL,
-//   RATING NUMBER DEFAULT 0,
-//   CATEGORY_ID VARCHAR2(36) NOT NULL,
-//   FOOD_IMAGE VARCHAR2(255) DEFAULT 'https://placehold.co/600x400',
-//   FOREIGN KEY(CATEGORY_ID) REFERENCES CATEGORY(ID)
-// );
+
 interface FoodRequest { kitchen_id: string, category_id: string, name: string, foodImage: string, description: string, price: string, image: string, [key: string]: string }
 app.post('/jwt/addDish', async (c) => {
   const payload = c.get('jwtPayload')
@@ -670,7 +655,7 @@ app.post('/jwt/addDish', async (c) => {
   const check = await runQuery('SELECT * FROM KITCHEN,USERS, CHEF WHERE KITCHEN.ID = :kitchen_id AND :id = CHEF.USER_ID AND KITCHEN.CHEF_ID = CHEF.ID', { id, kitchen_id });
   if (check === undefined || check.length === 0)
     return c.json({ error: 'Invalid Token' });
-  const result = await runQuery('INSERT INTO FOOD(NAME,DESCRIPTION,PRICE,CATEGORY_ID,FOOD_IMAGE) VALUES(:name, :description, :price, :category_id, :image)', { name, description, price, category_id, image });
+  const result = await runQuery('BEGIN ADD_FOOD(:name, :description, :price, :category_id, :image); END;', { name, description, price, category_id, image });
 
   const fid = await runQuery('SELECT ID FROM FOOD WHERE NAME = :name AND DESCRIPTION = :description AND PRICE = :price AND CATEGORY_ID = :category_id AND FOOD_IMAGE = :image', { name, description, price, category_id, image });
 
@@ -705,15 +690,6 @@ app.get('/getFood/:fid', async (c) => {
 })
 
 
-
-// CREATE TABLE CATEGORY(
-//   ID VARCHAR2(36) PRIMARY KEY,
-//   KITCHEN_ID VARCHAR2(36) NOT NULL,
-//   NAME VARCHAR2(100) NOT NULL,
-//   DESCRIPTION VARCHAR2(300) NOT NULL,
-//   CATEGORY_IMAGE VARCHAR2(300) DEFAULT 'https://placehold.co/600x400',
-//   FOREIGN KEY(KITCHEN_ID) REFERENCES KITCHEN(ID)
-// );
 interface CategoryRequest { name: string, description: string, category_image: string, kitchen_id: string, [key: string]: string }
 app.post('/jwt/addCategory', async (c) => {
   const payload = c.get('jwtPayload')
@@ -723,7 +699,7 @@ app.post('/jwt/addCategory', async (c) => {
   const check = await runQuery('SELECT * FROM KITCHEN,USERS, CHEF WHERE KITCHEN.ID = :kitchen_id AND :id = CHEF.USER_ID AND KITCHEN.CHEF_ID = CHEF.ID', { id, kitchen_id });
   if (check === undefined || check.length === 0)
     return c.json({ error: 'Invalid Token' });
-  const result = await runQuery('INSERT INTO CATEGORY(KITCHEN_ID, NAME, DESCRIPTION, CATEGORY_IMAGE) VALUES(:kitchen_id, :name, :description, :category_image)', { kitchen_id, name, description, category_image });
+  const result = await runQuery('BEGIN ADD_CATEGORY(:kitchen_id, :name, :description, :category_image); END;', { kitchen_id, name, description, category_image });
   return c.json({ result });
 
 })
@@ -740,16 +716,6 @@ app.get('/getCategories/:kid', async (c) => {
 
 })
 
-/** 
- * CREATE TABLE INGREDIENT (
-    ID VARCHAR2(36) PRIMARY KEY,
-    FOOD_ID VARCHAR2(36) NOT NULL,
-    NAME VARCHAR2(255) NOT NULL,
-    QUANTITY NUMBER NOT NULL,
-    CALORIES NUMBER NOT NULL,
-    FOREIGN KEY (FOOD_ID) REFERENCES FOOD(ID)
-);
- */
 interface IngredientRequest { food_id: string, name: string, quantity: string, calories: string }
 app.post('/jwt/addIngredient', async (c) => {
   const payload = c.get('jwtPayload')
@@ -757,7 +723,7 @@ app.post('/jwt/addIngredient', async (c) => {
   const { food_id, name, quantity, calories } = await c.req.json<IngredientRequest>()
 
 
-  const result = await runQuery('INSERT INTO INGREDIENT(FOOD_ID, NAME, QUANTITY, CALORIES) VALUES(:food_id, :name, :quantity, :calories)', { food_id, name, quantity, calories });
+  const result = await runQuery('BEGIN ADD_INGREDIENT(:food_id, :name, :quantity, :calories); END;', { food_id, name, quantity, calories });
   return c.json({ result });
 
 })
@@ -775,30 +741,17 @@ app.get('/getIngredients/:fid', async (c) => {
 app.post('/jwt/deleteIngredient', async (c) => {
   const { iid } = await c.req.json<{ iid: string }>()
 
-  const result = await runQuery('DELETE FROM INGREDIENT WHERE ID = :iid', { iid });
+  const result = await runQuery('BEGIN DELETE_INGREDIENT(:iid); END;', { iid });
   return c.json({ result });
 })
 
-
-/**
- * 
- * CREATE TABLE CART (
-    ID VARCHAR2(36) PRIMARY KEY,
-    USER_ID VARCHAR2(36) NOT NULL,
-    FOOD_ID VARCHAR2(36) NOT NULL,
-    QUANTITY NUMBER NOT NULL,
-    DATE_ADDED DATE DEFAULT SYSDATE,
-    FOREIGN KEY (USER_ID) REFERENCES USERS(ID),
-    FOREIGN KEY (FOOD_ID) REFERENCES FOOD(ID)
-);
- */
 
 interface CartRequest { food_id: string, quantity: string }
 app.post('/jwt/addToCart', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   const { food_id, quantity } = await c.req.json<CartRequest>()
-  const result = await runQuery('INSERT INTO CART(USER_ID, FOOD_ID, QUANTITY) VALUES(:id, :food_id, :quantity)', { id, food_id, quantity });
+  const result = await runQuery('BEGIN ADD_TO_CART(:id, :food_id, :quantity); END;', { id, food_id, quantity });
   return c.json({ result });
 })
 
@@ -807,7 +760,7 @@ app.post('/jwt/deleteFromCart', async (c) => {
 
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery('DELETE FROM CART WHERE USER_ID = :id AND FOOD_ID = :food_id', { id, food_id });
+  const result = await runQuery('BEGIN DELETE_FROM_CART(:id ,:food_id); END;', { id, food_id });
   return c.json({ result });
 })
 
@@ -830,7 +783,7 @@ app.get('/jwt/getOrder', async (c) => {
 app.get('/jwt/getOrders', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, LISTAGG(F.NAME,  ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI WHERE KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'PREPEARED' AND O.DATE_SHIPPED IS NULL  AND O.DATE_PREPARED IS NOT NULL   AND O.DATE_DELIVERED IS NULL AND O.DATE_ADDED <= SYSDATE ORDER BY O.DATE_ADDED", {});
+  const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI WHERE KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'PREPEARED' AND O.DATE_SHIPPED IS NULL  AND O.DATE_PREPARED IS NOT NULL   AND O.DATE_DELIVERED IS NULL AND O.DATE_ADDED <= SYSDATE ORDER BY O.DATE_ADDED", {});
   return c.json({ result });
 })
 
@@ -838,7 +791,7 @@ app.get('/jwt/getOrders', async (c) => {
 app.get('/jwt/activeOrders', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, LISTAGG(F.NAME,  ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI,     ACTIVE_DELIVERY ACD WHERE ACD.DELIVERY_PARTNER_ID = :id AND ACD.ORDER_ID = O.ID AND KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'SHIPPED' AND O.DATE_DELIVERED IS NULL AND O.DATE_ADDED <= SYSDATE ORDER BY O.DATE_ADDED", { id });
+  const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI,     ACTIVE_DELIVERY ACD WHERE ACD.DELIVERY_PARTNER_ID = :id AND ACD.ORDER_ID = O.ID AND KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'SHIPPED' AND O.DATE_DELIVERED IS NULL AND O.DATE_ADDED <= SYSDATE ORDER BY O.DATE_ADDED", { id });
   return c.json({ result });
 })
 
@@ -848,7 +801,7 @@ app.get('/jwt/activeOrders', async (c) => {
 app.get('/jwt/orderHistory', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, LISTAGG(F.NAME,  ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI,     ACTIVE_DELIVERY ACD WHERE ACD.DELIVERY_PARTNER_ID = :id AND ACD.ORDER_ID = O.ID AND KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'DELIVERED' ORDER BY O.DATE_ADDED DESC", { id });
+  const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI,     ACTIVE_DELIVERY ACD WHERE ACD.DELIVERY_PARTNER_ID = :id AND ACD.ORDER_ID = O.ID AND KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'DELIVERED' ORDER BY O.DATE_ADDED DESC", { id });
   return c.json({ result });
 
 })
@@ -858,10 +811,9 @@ app.get('/jwt/orderHistory', async (c) => {
 app.post('/jwt/acceptOrder', async (c) => {
   const { oid } = await c.req.json<{ oid: string }>()
   const payload = c.get('jwtPayload')
-  const { id, email } = payload
-  const result = await runQuery("UPDATE ORDERS SET DATE_SHIPPED = SYSDATE, STATUS = 'SHIPPED' WHERE ID = :oid", { oid });
+  const { id, email } = payload;
 
-  await runQuery("INSERT INTO ACTIVE_DELIVERY(ORDER_ID, DELIVERY_PARTNER_ID) VALUES(:oid, :id)", { oid, id });
+  const result = await runQuery("BEGIN SHIP_ORDER(:oid, :id); END;", { oid, id });
 
   return c.json({ result });
 })
@@ -872,8 +824,7 @@ app.post('/jwt/completeOrder', async (c) => {
   const { oid } = await c.req.json<{ oid: string }>()
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery("UPDATE ORDERS SET DATE_DELIVERED = SYSDATE, STATUS = 'DELIVERED' WHERE ID = :oid", { oid });
-  await runQuery("UPDATE ACTIVE_DELIVERY SET STATUS = 'COMPLETED' WHERE ORDER_ID = :oid", { oid });
+  const result = await runQuery("BEGIN DELIVER_ORDER(:oid); END;", { oid });
   return c.json({ result });
 })
 
@@ -881,19 +832,10 @@ app.post('/jwt/cancelOrder', async (c) => {
   const { oid } = await c.req.json<{ oid: string }>()
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery("UPDATE ORDERS SET STATUS = 'CANCELLED' WHERE ID = :oid", { oid });
-  await runQuery("UPDATE ACTIVE_DELIVERY SET STATUS = 'REJECTED' WHERE ORDER_ID = :oid", { oid });
+  const result = await runQuery("BEGIN CANCEL_ORDER(:oid); END;", { oid });
   return c.json({ result });
 })
 
-/**
- * 
- * CREATE TABLE DELIVERY_COMMISION (
-    DELIVERY_PARTNER_ID VARCHAR2(36) NOT NULL,
-    AMOUNT NUMBER DEFAULT 0.15,
-    FOREIGN KEY (DELIVERY_PARTNER_ID) REFERENCES DELIVERY_PARTNER(ID)
-);
- */
 app.get('/jwt/deliverySummary', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
@@ -952,10 +894,9 @@ app.post('/sslcommerz/success', async (c) => {
   const ammount = res.amount;
   const ord_id = res.tran_id;
   if (valid) {
-    await runQuery('INSERT INTO ORDERS(ID,USER_ID, TOTAL, SHIPPING_ADD, SHIPPING_PHONE,SHIPPING_NAME) VALUES(:ord_id, :id, :ammount, :address, :mobile,:name)', { ord_id, id, ammount, address, mobile, name });
 
-    await runQuery('UPDATE CART SET DELETED = 1, DELETED_ID = :ord_id WHERE USER_ID = :id AND DELETED=0', { ord_id, id });
-
+    await runQuery('BEGIN CHECKOUT(:ord_id, :id, :ammount, :address, :mobile,:name); END;', { ord_id, id, ammount, address, mobile, name });
+    console.log('Order Placed');
     return c.redirect('http://localhost:3000/success_payment');
 
   }
@@ -963,20 +904,12 @@ app.post('/sslcommerz/success', async (c) => {
 
 })
 
-/**
- * CREATE TABLE DELIVERY_PARTNER (
-    ID VARCHAR2(36) PRIMARY KEY,
-    USER_ID VARCHAR2(36) NOT NULL,
-    LICENCE VARCHAR2(255) NOT NULL,
-    VEHICLE VARCHAR2(255) NOT NULL,
-    FOREIGN KEY (USER_ID) REFERENCES USERS(ID)
-);
- */
+
 app.post('/jwt/applyDelivery', async (c) => {
   const { license, vehicle } = await c.req.json<{ license: string, vehicle: string }>();
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery('INSERT INTO DELIVERY_PARTNER(USER_ID, LICENSE, VEHICLE) VALUES(:id, :license, :vehicle)', { id, license, vehicle });
+  const result = await runQuery('BEGIN REGISTER_DELIVERY_PARTNER(:id, :license, :vehicle); END;', { id, license, vehicle });
   return c.json({ result });
 })
 
@@ -1154,15 +1087,6 @@ app.post('/jwt/isOrder', async (c) => {
   return c.json({ status: false });
 })
 
-// CREATE TABLE FOOD_RATING(
-//   ID VARCHAR2(36) PRIMARY KEY,
-//   FOOD_ID VARCHAR2(36) NOT NULL,
-//   USER_ID VARCHAR2(36) NOT NULL,
-//   RATING NUMBER DEFAULT 0,
-//   REVIEW VARCHAR2(255) DEFAULT '',
-//   FOREIGN KEY(FOOD_ID) REFERENCES FOOD(ID),
-//   FOREIGN KEY(USER_ID) REFERENCES USERS(ID)
-// );
 
 interface RatingRequest { food_id: string, rating: string, review: string }
 app.post('/jwt/addRating', async (c) => {
@@ -1171,10 +1095,10 @@ app.post('/jwt/addRating', async (c) => {
   const { food_id, rating, review } = await c.req.json<RatingRequest>();
   const already = await runQuery('SELECT * FROM FOOD_RATING WHERE FOOD_ID = :food_id AND USER_ID = :id', { food_id, id });
   if (already !== undefined && already.length) {
-    const result = await runQuery('UPDATE FOOD_RATING SET RATING = :rating, REVIEW = :review WHERE FOOD_ID = :food_id AND USER_ID = :id', { food_id, id, rating, review });
+    const result = await runQuery('BEGIN RATE_FOOD(:food_id, :id, :rating, :review); END;', { food_id, id, rating, review });
     return c.json({ result });
   }
-  const result = await runQuery('INSERT INTO FOOD_RATING(FOOD_ID, USER_ID, RATING, REVIEW) VALUES(:food_id, :id, :rating, :review)', { food_id, id, rating, review });
+  const result = await runQuery('BEGIN RATE_FOOD_NEW(:food_id, :id, :rating, :review); END;', { food_id, id, rating, review });
   return c.json({ result });
 })
 
@@ -1188,7 +1112,7 @@ app.post('/jwt/deleteRating', async (c) => {
   const { rid } = await c.req.json<{ rid: string }>()
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery('DELETE FROM FOOD_RATING WHERE ID = :rid', { rid });
+  const result = await runQuery('BEGIN DELETE_FOOD_RATING(:rid); END;', { rid });
   return c.json({ result });
 })
 
@@ -1207,13 +1131,7 @@ app.post('/jwt/getReview', async (c) => {
   return c.json({ result });
 })
 
-app.post('/jwt/updateRating', async (c) => {
-  const { rid, rating, review } = await c.req.json<{ rid: string, rating: string, review: string }>()
-  const payload = c.get('jwtPayload')
-  const { id, email } = payload
-  const result = await runQuery('UPDATE FOOD_RATING SET RATING = :rating, REVIEW = :review WHERE ID = :rid', { rid, rating, review });
-  return c.json({ result });
-})
+
 
 
 app.get('/getFoodRating/:fid', async (c) => {
@@ -1310,52 +1228,15 @@ app.get('/jwt/isAdmin', async (c) => {
 })
 
 
-/**
- * 
- * CREATE TABLE DELIVERY_PARTNER (
-    ID VARCHAR2(36) PRIMARY KEY,
-    USER_ID VARCHAR2(36) NOT NULL,
-    LICENSE VARCHAR2(255) NOT NULL,
-    VEHICLE VARCHAR2(255) NOT NULL,
-    FOREIGN KEY (USER_ID) REFERENCES USERS(ID)
-);
-
-CREATE TABLE ORDERS (
-    ID VARCHAR2(255) PRIMARY KEY,
-    USER_ID VARCHAR2(36) NOT NULL,
-    TOTAL NUMBER DEFAULT 0,
-    DATE_ADDED DATE DEFAULT SYSDATE,
-    DATE_PREPARED DATE,
-    DATE_SHIPPED DATE,
-    DATE_DELIVERED DATE,
-    SHIPPING_ADD VARCHAR2(3255) NOT NULL,
-    SHIPPING_PHONE VARCHAR2(255) NOT NULL,
-    SHIPPING_NAME VARCHAR2(255) NOT NULL,
-    STATUS VARCHAR2(255) DEFAULT 'PAID' NOT NULL,
-    FOREIGN KEY (USER_ID) REFERENCES USERS(ID)
-);
-
-CREATE TABLE ACTIVE_DELIVERY (
-    ID VARCHAR2(36) PRIMARY KEY,
-    ORDER_ID VARCHAR2(36) NOT NULL,
-    DELIVERY_PARTNER_ID VARCHAR2(36) NOT NULL,
-    STATUS VARCHAR2(255) DEFAULT 'PENDING' NOT NULL,
-    FOREIGN KEY (ORDER_ID) REFERENCES ORDERS(ID),
-    FOREIGN KEY (DELIVERY_PARTNER_ID) REFERENCES USERS(ID)
-);
- */
-
 app.post('/jwt/orderDetails', async (c) => {
   const { oid } = await c.req.json<{ oid: string }>()
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   console.log(oid)
-  const result = await runQuery(`SELECT * FROM (SELECT FIRST_NAME, PROFILE_IMAGE, ORDERS.ID AS ORDER_ID, ORDERS.TOTAL, SHIPPING_NAME, SHIPPING_PHONE, SHIPPING_ADD  FROM ACTIVE_DELIVERY, USERS, ORDERS WHERE ACTIVE_DELIVERY.DELIVERY_PARTNER_ID = USERS.ID AND ACTIVE_DELIVERY.ORDER_ID = :oid AND ORDERS.ID = :oid) R, (SELECT KI.ID AS KITCHEN_ID,  ORDER_ID, FOOD_NAMES, TOTAL, DATE_ADDED, DATE_SHIPPED, DATE_DELIVERED, SHIPPING_ADD, SHIPPING_PHONE, SHIPPING_NAME, CASE WHEN ORD.STATUS = 'DELIVERED' THEN 'DELIVERED' WHEN ORD.STATUS = 'PREPEARED' THEN 'PREPEARED' WHEN ORD.STATUS = 'SHIPPED' THEN 'SHIPPED' WHEN ORD.STATUS = 'CANCELLED' THEN 'CANCELLED'  ELSE 'PENDING' END AS ORDER_STATUS  FROM(SELECT
+  const result = await runQuery(`SELECT * FROM (SELECT FIRST_NAME, PROFILE_IMAGE, ORDERS.ID AS ORDER_ID, ORDERS.TOTAL, SHIPPING_NAME, SHIPPING_PHONE, SHIPPING_ADD  FROM ACTIVE_DELIVERY, USERS, ORDERS WHERE ACTIVE_DELIVERY.DELIVERY_PARTNER_ID = USERS.ID AND ACTIVE_DELIVERY.ORDER_ID = :oid AND ORDERS.ID = :oid) R, (SELECT KI.ID AS KITCHEN_ID,  ORDER_ID, FOOD_NAMES, TOTAL, DATE_ADDED, DATE_SHIPPED, DATE_DELIVERED, SHIPPING_ADD, SHIPPING_PHONE, SHIPPING_NAME, GET_ORDER_STATUS(ORD.STATUS) AS ORDER_STATUS  FROM(SELECT
     C.DELETED_ID AS ORDER_ID,
     K.ID,
-    LISTAGG(F.NAME
-      || ' x'
-      || C.QUANTITY, ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES
+    GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES
     
 FROM
     CART     C
@@ -1401,12 +1282,10 @@ app.post('/jwt/chefOrder', async (c) => {
   const { kid } = await c.req.json<{ kid: string }>()
   console.log(kid)
   const result = await runQuery(`SELECT KI.ID AS KITCHEN_ID,  ORDER_ID, FOOD_NAMES, TOTAL, DATE_ADDED, DATE_SHIPPED, DATE_DELIVERED, SHIPPING_ADD, SHIPPING_PHONE, SHIPPING_NAME, 
-    CASE WHEN ORD.STATUS = 'DELIVERED' THEN 'DELIVERED' WHEN ORD.STATUS = 'PREPEARED' THEN 'PREPEARED' WHEN ORD.STATUS = 'SHIPPED' THEN 'SHIPPED' WHEN ORD.STATUS = 'CANCELLED' THEN 'CANCELLED'  ELSE 'PENDING' END AS ORDER_STATUS  FROM (SELECT
+    GET_ORDER_STATUS(ORD.STATUS) AS ORDER_STATUS  FROM (SELECT
     C.DELETED_ID AS ORDER_ID,
     K.ID,
-    LISTAGG(F.NAME
-            || ' x'
-            || C.QUANTITY, ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES
+    GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES
     
 FROM
     CART     C
@@ -1429,7 +1308,7 @@ app.post('/jwt/accptOrderChef', async (c) => {
   const { oid } = await c.req.json<{ oid: string }>()
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery('UPDATE ORDERS SET DATE_PREPARED = SYSDATE, STATUS = \'PREPEARED\' WHERE ID = :oid', { oid });
+  const result = await runQuery('BEGIN PREPARE_ORDER(:oid); END;', { oid });
   return c.json({ result });
 })
 
@@ -1437,12 +1316,10 @@ app.post('/jwt/orderHistory', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   const result = await runQuery(`SELECT KI.ID AS KITCHEN_ID,  ORDER_ID, FOOD_NAMES, TOTAL, DATE_ADDED, DATE_SHIPPED, DATE_DELIVERED, SHIPPING_ADD, SHIPPING_PHONE, SHIPPING_NAME, 
-    CASE WHEN ORD.STATUS = 'DELIVERED' THEN 'DELIVERED' WHEN ORD.STATUS = 'PREPEARED' THEN 'PREPEARED' WHEN ORD.STATUS = 'SHIPPED' THEN 'SHIPPED' WHEN ORD.STATUS = 'CANCELLED' THEN 'CANCELLED'  ELSE 'PENDING' END AS ORDER_STATUS  FROM (SELECT
+    GET_ORDER_STATUS(ORD.STATUS) AS ORDER_STATUS  FROM (SELECT
     C.DELETED_ID AS ORDER_ID,
     K.ID,
-    LISTAGG(F.NAME
-            || ' x'
-            || C.QUANTITY, ', ') WITHIN GROUP(ORDER BY F.NAME) AS FOOD_NAMES
+    GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES
     
 FROM
     CART     C
@@ -1464,7 +1341,7 @@ app.post('/jwt/PersonalCancelOrder', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   const { oid } = await c.req.json<{ oid: string }>()
-  const result = await runQuery('UPDATE ORDERS SET STATUS = \'CANCELLED\' WHERE ID = :oid AND USER_ID = :id', { oid, id });
+  const result = await runQuery('BEGIN CANCEL_ORDER_USER(:oid, :id); END;', { oid, id });
   return c.json({ result });
 })
 
