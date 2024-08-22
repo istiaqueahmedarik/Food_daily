@@ -5,6 +5,7 @@ import { Star } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import React from 'react'
+export const experimental_ppr = true;
 
 async function page() {
     const [kitchens, delivery] = await Promise.all([get_with_token('jwt/verifyKitchens'), get_with_token('jwt/verifyDelivery')])

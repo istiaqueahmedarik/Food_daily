@@ -637,8 +637,8 @@ export default function AdvanceQ({ tables }) {
         <div className="container mx-auto p-4 space-y-4">
             <Card>
                 <CardHeader>
-                    <CardTitle>Advanced SQL Query Builder with Aggregate Functions</CardTitle>
-                    <CardDescription>Build complex SQL queries with multiple tables, joins, aggregate functions, and interactive subqueries</CardDescription>
+                    <CardTitle>Query any other data you want</CardTitle>
+                    <CardDescription>Follow Basic SQL and logical process to query data</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <QueryBuilder tableSchemas={tableSchemas} query={mainQuery} updateQuery={setMainQuery} />

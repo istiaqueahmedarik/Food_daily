@@ -641,7 +641,7 @@ export async function reviewFood(formData)
     
     const res = await post_with_token('jwt/addRating', formData);
     
-    revalidatePath(`/chef/my/food/${formData.food_id}`)
+    revalidatePath(`/chef/kitchen/food/${formData.food_id}`)
     
 }
 
@@ -658,6 +658,30 @@ export async function PersonalCancelOrder(st, formData)
 {
     const response = await post_with_token('jwt/PersonalCancelOrder', { 'oid': st })
     revalidatePath('/profile')
+}
+
+
+export async function reportAddFood(st, formData)
+{
+    const report = formData.get('report')
+    const response = await post_with_token('jwt/addReport', {
+        'fid': st,
+        'report': report
+    })
+    redirect(`/success_report`)
+}
+
+export async function resolvedIssue(st)
+{
+    const res = await post_with_token('jwt/resolveReport', { 'rid': st })
+    revalidatePath('/admin/reports')
+}
+
+export async function investigateIssue(st, status)
+{
+    const res = await post_with_token('jwt/investigateReport', { 'rid': st })
+    console.log(st)
+    revalidatePath('/admin/reports')
 }
 
 

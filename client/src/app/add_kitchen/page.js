@@ -1,6 +1,7 @@
 import ApplyKitchen from "@/components/ApplyKitchen"
 import { getBlur } from "@/util"
 import Image from "next/image"
+export const experimental_ppr = true;
 
 function page() {
     return (

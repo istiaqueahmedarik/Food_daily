@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import Link from 'next/link';
 
 async function PopFood() {
-    const res = await get('popularFood/24'); 
+    const res = await get('popularFood/72'); 
     const popularFoods = res.result;
     
   return (

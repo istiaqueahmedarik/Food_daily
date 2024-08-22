@@ -19,15 +19,12 @@ import {
 } from 'lucide-react'
 
 const navItems = [
-    { icon: UserCogIcon, label: 'Admin', href: '/admin' },
     { icon: HomeIcon, label: 'Home', href: '/' },
-    { icon: LayoutDashboardIcon, label: 'Overview', href: '/admin/overview' },
+    { icon: LayoutDashboardIcon, label: 'Overview', href: '/admin' },
     { icon: ClockIcon, label: 'Recent', href: '/admin/recent' },
-    { icon: TrendingUpIcon, label: 'Popular', href: '/popular' },
-    { icon: ActivityIcon, label: 'Active', href: '/active' },
-    { icon: SettingsIcon, label: 'Manage', href: '/manage' },
-    { icon: FileTextIcon, label: 'Reports', href: '/reports' },
-    { icon: CheckCircleIcon, label: 'Approved', href: '/approved' },
+    { icon: SettingsIcon, label: 'Manage', href: '/admin/manage' },
+    { icon: FileTextIcon, label: 'Reports', href: '/admin/reports' },
+    { icon: CheckCircleIcon, label: 'Approved', href: '/admin/approve' },
     { icon: ScanSearch, label: 'Advance Query', href: '/admin/advanced' },
 ]
 

@@ -1417,6 +1417,98 @@ app.post('/jwt/runQuery', async (c) => {
   }
 })
 
+app.post('/jwt/addReport', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const { report, fid } = await c.req.json<{ report: string, fid: string }>();
+  const result = await runQuery('BEGIN ADD_REPORT_FOOD(:fid, :id, :report); END;', { fid, id, report });
+  return c.json({ result });
+})
+
+
+app.get('/jwt/getReport', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const result = await runQuery('SELECT REPORT_FOOD.ID AS REPORT_FOOD_ID, USERS.ID, USERS.EMAIL, USERS.FIRST_NAME, REPORT_FOOD.FOOD_ID, REPORT_FOOD.REASON, REPORT_FOOD.STATUS FROM REPORT_FOOD, USERS WHERE USERS.ID = REPORT_FOOD.USER_ID ORDER BY DATE_ADDED DESC ', {});
+  return c.json({ result });
+})
+
+
+app.post('/jwt/investigateReport', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const { rid } = await c.req.json<{ rid: string }>();
+  const result = await runQuery('BEGIN REPORT_UNDER_REVIEW(:rid); END;', { rid });
+  return c.json({ result });
+})
+
+app.post('/jwt/resolveReport', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const { rid } = await c.req.json<{ rid: string }>();
+  const result = await runQuery('BEGIN REPORT_RESOLVED(:rid); END;', { rid });
+  return c.json({ result });
+})
+
+app.get('/jwt/allSummary', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  if (isAdmin.length === 0)
+    return c.json({ result: [] });
+  const response = {
+    count_user: 0,
+    count_chef: 0,
+    total_order: 0,
+    revenue: 0
+  }
+  let res = await runQuery('SELECT COUNT(*) AS COUNT_USER FROM USERS', {});
+  response.count_user = res[0]['COUNT_USER'];
+  res = await runQuery('SELECT COUNT(*) AS COUNT_CHEF FROM CHEF', {});
+  response.count_chef = res[0]['COUNT_CHEF'];
+  res = await runQuery('SELECT COUNT(*) AS TOTAL_ORDER FROM ORDERS', {});
+  response.total_order = res[0]['TOTAL_ORDER'];
+  res = await runQuery('SELECT COALESCE(SUM(TOTAL),0) AS REVENUE FROM ORDERS', {});
+  response.revenue = res[0]['REVENUE'];
+  return c.json(response);
+})
+
+app.get('/jwt/orderStatusSummary', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  if (isAdmin.length === 0)
+    return c.json({ result: [] });
+  const orderData = [
+    { name: 'Pending', value: 15 },
+    { name: 'Preparing', value: 10 },
+    { name: 'Shipped', value: 5 },
+    { name: 'Delivered', value: 70 },
+  ]
+
+  let res = await runQuery('SELECT COUNT(*) AS PENDING FROM ORDERS WHERE STATUS = \'PENDING\'', {});
+  orderData[0].value = res[0]['PENDING'];
+  res = await runQuery('SELECT COUNT(*) AS SHIPPED FROM ORDERS WHERE STATUS = \'SHIPPED\'', {});
+  orderData[2].value = res[0]['SHIPPED'];
+  res = await runQuery('SELECT COUNT(*) AS DELIVERED FROM ORDERS WHERE STATUS = \'DELIVERED\'', {});
+  orderData[3].value = res[0]['DELIVERED'];
+  res = await runQuery('SELECT COUNT(*) AS PREPEARING FROM ORDERS WHERE STATUS = \'PREPEARED\'', {});
+  orderData[1].value = res[0]['PREPEARING'];
+  return c.json(orderData);
+})
+
+
+
+app.get('/jwt/orderGrowth', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  if (isAdmin.length === 0)
+    return c.json({ result: [] });
+  const orderData = await runQuery('SELECT COUNT(*) AS COUNT, TRUNC(DATE_ADDED) AS DAY FROM ORDERS GROUP BY TRUNC(DATE_ADDED) ORDER BY TRUNC(DATE_ADDED)', {});
+  return c.json(orderData);
+})
+
 
 export default {
   port: process.env.PORT,
