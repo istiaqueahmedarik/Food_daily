@@ -1,10 +1,10 @@
-import AddCertificate from '@/components/AddCertificate'
+import AdminOverview from '@/components/AdminSection/AdminOverview'
 import React from 'react'
 
 function page() {
   return (
       <div>
-          <AddCertificate />
+          <AdminOverview />
     </div>
   )
 }

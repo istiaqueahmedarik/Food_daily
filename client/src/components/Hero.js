@@ -52,28 +52,28 @@ async function Hero() {
           </div>
 
               <div className="md:block hidden absolute bottom-0 left-[5rem] w-1/4">
-                  {/* <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" alt="Food plate" width={500} height={500} className="rounded-full" /> */}
+                  {/* <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" alt="Food plate" width={500} height={500} className="rounded-full" /> */}
                   <Beef size={300} strokeWidth={0.2} className="text-input"/>
               </div>
 
             <div className="md:block hidden absolute top-20 left-12 w-1/6">
-                  {/* <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" alt="Smartphone" width={500} height={500} className="transform -rotate-12" /> */}
+                  {/* <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" alt="Smartphone" width={500} height={500} className="transform -rotate-12" /> */}
               <Heater size={300} strokeWidth={0.2} className="text-input" />
               </div>
 
             <div className=" md:block hidden absolute bottom-10 right-10 w-1/4">
-                  {/* <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" alt="Tacos" width={500} height={500}  className="rounded-lg" /> */}
+                  {/* <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" alt="Tacos" width={500} height={500}  className="rounded-lg" /> */}
               <CroissantIcon size={300} strokeWidth={0.1} className="text-input" />
               </div>
 
             <div className=" md:block hidden absolute top-20 right-20 w-1/6">
-                  {/* <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" width={500} height={500} alt="Candy" className="rounded-full" /> 
+                  {/* <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" width={500} height={500} alt="Candy" className="rounded-full" /> 
               */}
               <Pizza size={300} strokeWidth={0.2} className="text-input" />
           </div>
 
             <div className=" md:block hidden absolute bottom-0 left-[40%] w-1/6">
-              {/* <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" width={500} height={500} alt="Candy" className="rounded-full" /> 
+              {/* <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" width={500} height={500} alt="Candy" className="rounded-full" /> 
               */}
               {/* <HandPlatter size={300} strokeWidth={0.2} className="text-input" /> */}
           </div>

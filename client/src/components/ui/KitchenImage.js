@@ -1,6 +1,6 @@
 'use client'
 import { deleteKitchenImage } from '@/action'
-import { decrypt, encrypt } from '@/util'
+import { decrypt, encrypt, getBlur } from '@/util'
 import { CheckCircleIcon, CircleX, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import React, { useActionState } from 'react'
@@ -13,7 +13,7 @@ const [isDeleted, setIsDeleted] = React.useState(false)
   const img_enc = encrypt(img)
   return (
     <div className='relative border border-input rounded-lg overflow-hidden w-auto h-52 group m-5'>
-      <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={img} alt="kitchen image" width={300} height={300} className='group-hover:scale-125 transition-all duration-500 h-52 w-fit m-auto' />
+      <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={img} alt="kitchen image" width={300} height={300} className='group-hover:scale-125 transition-all duration-500 h-52 w-fit m-auto' />
       {isDeleted ? <ConfirmDelete imageId={imageId} onDelete={onDelete} url={img_enc} kid={kid} /> :
         <Trash2
           className='absolute top-2 right-2 text-background opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer'

@@ -479,20 +479,7 @@ app.get('/getCertifications/:cid', async (c) => {
 
 
 interface KitchenRequest { name: string, address: string, cityCode: string, rating: string, [key: string]: string }
-app.post('/jwt/applyKitchen', async (c) => {
-  const payload = c.get('jwtPayload')
-  const { uid, email } = payload
-  const { name, address, cityCode, rating } = await c.req.json<KitchenRequest>()
-  let result = await runQuery('SELECT * FROM CHEF WHERE USER_ID = :uid', { uid });
-  if (result !== undefined && result.length) {
-    const chef_id = result[0]['ID'];
-    const kitchen_id = uuidv7();
-    result = await runQuery('BEGIN ADD_KITCHEN(:kitchen_id, :name, :address, :cityCode, :rating, :chef_id, 0); END;', { kitchen_id, name, address, cityCode, rating, chef_id });
-    if (result !== undefined && result.length)
-      return c.json({ result });
-  }
-  return c.json({ error: 'Invalid Token' });
-})
+
 
 app.post('/jwt/approveKitchen', async (c) => {
   const payload = c.get('jwtPayload')
@@ -1370,6 +1357,65 @@ app.post('/jwt/PersonalCancelOrder', async (c) => {
   return c.json({ result });
 })
 
+
+app.get('/jwt/logs', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const user = await runQuery('SELECT * FROM USERS WHERE ID = :id', { id });
+  if (user.length === 0)
+    return c.json({ status: false });
+  const result = await runQuery('SELECT * FROM LOGS ORDER BY LOG_TIMESTAMP', {});
+  console.log(result)
+  return c.json({ result });
+})
+
+app.get('/jwt/getTables', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const user = await runQuery('SELECT * FROM USERS WHERE ID = :id', { id });
+  if (user.length === 0)
+    return c.json({ status: false });
+  const result = await runQuery(`
+    SELECT
+    TABLE_NAME,
+    LISTAGG(COLUMN_NAME, ',') WITHIN GROUP (ORDER BY COLUMN_ID) AS COLUMNS
+FROM
+    USER_TAB_COLUMNS
+WHERE
+    TABLE_NAME NOT LIKE '%$%' -- Exclude tables with '$'
+    AND TABLE_NAME NOT LIKE '%SCHEDULER%' -- Exclude tables with 'SCHEDULER' in their names
+    AND TABLE_NAME NOT IN ( 'LOGMNRC_CONCOL_GG', 'LOGMNRC_CON_GG', 'LOGMNRC_DBNAME_UID_MAP', 'LOGMNRC_GSBA', 'LOGMNRC_GSII', 'LOGMNRC_GTCS', 'LOGMNRC_GTLO', 'LOGMNRC_INDCOL_GG', 'LOGMNRC_IND_GG', 'LOGMNRC_SEQ_GG', 'LOGMNRC_SHARD_TS', 'LOGMNRC_TS', 'LOGMNRC_TSPART', 'LOGMNRGGC_GTCS', 'LOGMNRGGC_GTLO', 'LOGMNRP_CTAS_PART_MAP', 'LOGMNR_LOGMNR_BUILDLOG', 'LOGMNR_SHARD_TS', 'MVIEW_EVALUATIONS', 'MVIEW_EXCEPTIONS', 'MVIEW_FILTER', 'MVIEW_FILTERINSTANCE', 'MVIEW_LOG', 'MVIEW_RECOMMENDATIONS', 'MVIEW_WORKLOAD', 'PRODUCT_PRIVS', 'REDO_DB', 'REDO_LOG', 'SQLPLUS_PRODUCT_PROFILE' )
+GROUP BY
+    TABLE_NAME
+ORDER BY
+    TABLE_NAME
+    `, {});
+  return c.json({ result });
+})
+
+app.post('/jwt/runQuery', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  if (isAdmin.length === 0)
+    return c.json({ result: [] });
+  let { query } = await c.req.json<{ query: string }>();
+  if (query.endsWith(';'))
+    query = query.slice(0, -1);
+  if (query.includes('INSERT') || query.includes('UPDATE') || query.includes('DELETE') || query.includes('ADMIN') || query.includes('DROP') || query.includes('TRUNCATE') || query.includes('ALTER') || query.includes('GRANT') || query.includes('REVOKE'))
+    return c.json({ error: 'Invalid Query' });
+  console.log(query)
+  try {
+    const startTime = Date.now();
+    const result = await runQuery(query, {});
+    const endTime = Date.now();
+    const time = endTime - startTime;
+    return c.json({ result, time });
+  } catch (e) {
+    console.log(e)
+    return c.json({ error: (e as Error).message || e });
+  }
+})
 
 
 export default {

@@ -5,6 +5,7 @@ import { Badge, Delete } from 'lucide-react'
 import { buttonVariants } from "@/components/ui/button3"
 
 import Link from 'next/link'
+import { getBlur } from '@/util'
 
 
 async function page() {
@@ -14,7 +15,7 @@ async function page() {
   return (
       <div className='grid grid-cols-2'>
           <div className='m-auto'>
-              <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src='/cart.svg' width={500} height={500} />
+              <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src='/cart.svg' width={500} height={500} />
           </div>
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-md border-input" >
               <div className="flex flex-col space-y-1.5 p-6">

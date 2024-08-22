@@ -1,6 +1,7 @@
 import { get_with_token } from '@/action'
 import { buttonVariants } from '@/components/ui/button3'
 import Success from '@/components/ui/Success'
+import { getBlur } from '@/util'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -15,7 +16,7 @@ async function page() {
           <div className='h-20'></div>
           <div className='grid grid-cols-2'>
               <div className='m-auto'>
-                  <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src={"/succ_payment.svg"} alt="Success Payment" width={500} height={500} />
+                  <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src={"/succ_payment.svg"} alt="Success Payment" width={500} height={500} />
               </div>
               <div className="bg-background border border-input p-8 rounded-lg shadow-md max-w-lg w-full m-auto">
                   <div className="text-center mb-8">

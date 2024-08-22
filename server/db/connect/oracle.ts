@@ -24,7 +24,8 @@ export const runQuery = async (query: string, params: any) => {
     await connection.close()
     return result.rows
   } catch (err) {
-    console.error(err)
+    console.log(err)
+    throw new Error((err as Error).message)
   }
 }
 

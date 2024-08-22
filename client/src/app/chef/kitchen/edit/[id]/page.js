@@ -2,6 +2,7 @@ import { post, post_with_token } from '@/action'
 import ApplyKitchen from '@/components/ApplyKitchen'
 import ImageUploader from '@/components/ImageUploader'
 import KitchenImage from '@/components/ui/KitchenImage'
+import { getBlur } from '@/util'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 
@@ -33,7 +34,7 @@ async function page({params}) {
               </div>
               <div className='m-5 flex flex-wrap p-5'>
                   <div>
-                      <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={'/update_kitchen.svg'} alt='update kitchen' width={600} height={400} />
+                      <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={'/update_kitchen.svg'} alt='update kitchen' width={600} height={400} />
                   </div>
                   <div className='m-auto'>
                       <ApplyKitchen edit={true} kid={params.id} data={{

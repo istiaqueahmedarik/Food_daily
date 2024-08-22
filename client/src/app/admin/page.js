@@ -1,5 +1,6 @@
 import { get_with_token } from '@/action'
-import AdminSummary from '@/components/AdminSummary'
+import AdminManage from '@/components/AdminSection/AdminManage'
+import AdminSummary from '@/components/AdminSection/AdminSummary'
 import QAcard from '@/components/QAcard'
 import QAcard_ from '@/components/QAcard_'
 import { Check, DoorOpen, X } from 'lucide-react'
@@ -13,7 +14,7 @@ async function page() {
         redirect('/profile')
   return (
       <div>
-          <AdminSummary />
+          <AdminManage />
           <div className="grid gap-8 p-4 md:p-8">
               <div>
                   <div className="rounded-lg border bg-background text-card-foreground shadow-sm border-input" >

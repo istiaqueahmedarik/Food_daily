@@ -13,9 +13,10 @@ function ApplyKitchen({ edit = false, kid, header = "Register Your Beautiful Kit
     kitchen_id: ""
 }, button = "Register Kitchen" }) {
     let [state, formAction] = useFormState(add_kitchen, prevState);
+    prevState.kid = kid;
+    let [state2, formAction2] = useFormState(editKitchen, prevState);
     if (edit) {
-        prevState.kid = kid;
-        [state, formAction] = useFormState(editKitchen, prevState);
+        
         button = "Update Kitchen"
         header = "Update Your Beautiful Kitchen!"
         subheader = "Update Your Kitchen (Image and Approval will be processed later)."
@@ -30,7 +31,7 @@ function ApplyKitchen({ edit = false, kid, header = "Register Your Beautiful Kit
               <p className="text-sm text-muted-foreground">{subheader}</p>
           </div>
           <div className="p-5">
-              <form action={formAction} className="grid gap-4">
+              <form action={edit ? formAction2 : formAction} className="grid gap-4">
                   <div className="grid md:grid-cols-2 gap-4">
                       <div className="grid gap-2">
                           <label
@@ -93,7 +94,8 @@ function ApplyKitchen({ edit = false, kid, header = "Register Your Beautiful Kit
                       </button>
                   </div>
                   <p className="text-red-500">
-                        {state.message}
+                      {state.message}
+                      {state2.message}
                   </p>
               </form>
           </div>

@@ -3,6 +3,7 @@ import { applyChef } from '@/action'
 import React, { useActionState } from 'react'
 import Button from './ui/Button';
 import Image from 'next/image';
+import { getBlur } from '@/util';
 const prevState = {
     message: '',
 }
@@ -11,7 +12,7 @@ function ApplyChef() {
   return (
       <>
           <div className="m-auto">
-              <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/apply_chef.svg" alt="Chef" width={500} height={500} />
+              <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/apply_chef.svg" alt="Chef" width={500} height={500} />
           </div>
           <form action={formAction} className="m-auto rounded-lg border border-input bg-card text-card-foreground shadow-sm w-full max-w-md" >
               <div className="flex flex-col space-y-1.5 p-6">

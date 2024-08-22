@@ -17,7 +17,7 @@ async function DeliverySummary() {
 
       >
           <div className="flex flex-col space-y-1.5 p-6">
-              <h3 className="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Today's Deliveries</h3>
+              <h3 className="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Today&apos;s Deliveries</h3>
           </div>
           <div className='w-32 m-auto'>
               <a target="_blank" href={delivery['LICENSE']} className={buttonVariants({ variant: "secondary" })}>

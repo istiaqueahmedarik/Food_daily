@@ -5,6 +5,7 @@ import NavBar from "./NavBar"
 import Button from "./ui/Button"
 import { login } from "@/action"
 import { useFormState } from "react-dom"
+import { getBlur } from "@/util"
 const prevState = {
     message: ''
 }
@@ -65,7 +66,7 @@ function Login() {
                   </div>
               </div>
               <div className="bg-background lg:block">
-                  <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
+                  <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
                       src="/login.svg"
                       alt="Image"
                       width="1920"

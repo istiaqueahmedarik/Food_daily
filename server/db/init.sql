@@ -176,33 +176,28 @@ CREATE TABLE CHEF_COMMISION (
     FOREIGN KEY (CHEF_ID) REFERENCES CHEF(ID)
 );
 
-SELECT
-    *
-FROM
-    ACTIVE_DELIVERY;
+CREATE TABLE LOGS(
+    ID VARCHAR2(36) PRIMARY KEY,
+    LOG_TIMESTAMP DATE DEFAULT SYSDATE,
+    TYPE VARCHAR2(255) NOT NULL,
+    MESSAGE VARCHAR2(255) NOT NULL,
+    STATUS VARCHAR2(255) DEFAULT 'INFO' NOT NULL
+);
 
-SELECT
-    *
-FROM
-    ORDERS,
-    ACTIVE_DELIVERY,
-    DELIVERY_COMMISION,
-    DELIVERY_PARTNER
-WHERE
-    ORDERS. 'DELIVERED'
-    AND ACTIVE_DELIVERY.DELIVERY_PARTNER_ID = DELIVERY_PARTNER.USER_ID
-    AND DELIVERY_COMMISION.DELIVERY_PARTNER_ID = DELIVERY_PARTNER.ID
-    AND DELIVERY_PARTNER.USER_ID = :ID
-    AND ACTIVE_DELIVERY.ORDER_ID = ORDERS.ID;
+CREATE SEQUENCE LOGS_SEQUENCE START WITH 1;
 
-CREATE OR REPLACE TRIGGER DELIVERY_COMMISION_TRIGGER AFTER
-    INSERT ON DELIVERY_PARTNER FOR EACH ROW
+CREATE OR REPLACE TRIGGER LOGS_TRIGGER BEFORE
+    INSERT ON LOGS FOR EACH ROW
 BEGIN
-    INSERT INTO DELIVERY_COMMISION (
-        DELIVERY_PARTNER_ID
-    ) VALUES (
-        :NEW.ID
-    );
+    :NEW.ID := 'LOG'
+               || LOGS_SEQUENCE.NEXTVAL;
+END;
+
+CREATE OR REPLACE TRIGGER DELIVERY_COMMISION_TRIGGER AFTER INSERT ON DELIVERY_PARTNER FOR EACH ROW BEGIN INSERT INTO DELIVERY_COMMISION (
+    DELIVERY_PARTNER_ID
+) VALUES (
+    :NEW.ID
+);
 END;
 /
 
@@ -468,18 +463,6 @@ BEGIN
 END;
 /
 
-SELECT
-    DATE_ADDED AS TIMESTAMP,
-    SENDER_ID  AS SENDER,
-    MESSAGE    AS CONTENT
-FROM
-    CONVERSATIONS,
-    MESSAGES
-WHERE
-    USER_ID = :USER1
-    AND DELIVERY_PARTNER_ID = :USER2
-    AND MESSAGES.CONVERSATION_ID = :CONVERSATIONID;
-
 -- INSERT INTO USERS (FIRST_NAME, LAST_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL, PASSWORD, TYPE) VALUES(:firstName, :lastName, TO_DATE(:formattedDob, 'YYYY-MM-DD'), :address, :mobile, :cityCode, :email, :password, :type)
 CREATE OR REPLACE PROCEDURE REGISTER_USER(
     FIRST_NAME VARCHAR2,
@@ -514,6 +497,17 @@ BEGIN
         PASSWORD,
         TYPE
     );
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'USER_REGISTER',
+        'User Registered - '
+        || EMAIL,
+        'INFO'
+    );
 END;
 /
 
@@ -540,6 +534,17 @@ BEGIN
     WHERE
         ID = U_ID
         AND EMAIL = U_EMAIL;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'USER_UPDATE',
+        'User Updated - '
+        || U_EMAIL,
+        'INFO'
+    );
 END;
 /
 
@@ -561,6 +566,16 @@ BEGIN
         U_NAME,
         U_SPECIALITY,
         U_EXPERIENCE
+    );
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'CHEF_REGISTER',
+        'Chef Registered - '
+        || U_NAME,
+        'INFO'
     );
 END;
 /
@@ -599,6 +614,16 @@ BEGIN
         K_ADDRESS,
         K_CITY_NAME,
         K_CHEF_ID
+    );
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'KITCHEN_REGISTER',
+        'Kitchen Registered - '
+        || K_NAME,
+        'INFO'
     );
 END;
 /
@@ -672,6 +697,16 @@ BEGIN
     DELETE FROM KITCHEN
     WHERE
         ID = KITCHEN_ID;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'KITCHEN_DELETE',
+        'Kitchen Deleted - '
+        || KITCHEN_ID,
+        'INFO'
+    );
 END;
 /
 
@@ -691,6 +726,16 @@ BEGIN
         CITY_NAME = K_CITY_NAME
     WHERE
         ID = K_ID;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'KITCHEN_UPDATE',
+        'Kitchen Updated - '
+        || K_ID,
+        'SUCCESS'
+    );
 END;
 /
 
@@ -774,33 +819,6 @@ BEGIN
 END;
 /
 
---INSERT INTO KITCHEN VALUES(:kitchen_id, :name, :address, :cityCode, :rating, :chef_id, 0)
-CREATE OR REPLACE PROCEDURE ADD_KITCHEN(
-    KITCHEN_ID VARCHAR2,
-    NAME VARCHAR2,
-    ADDRESS VARCHAR2,
-    CITY_CODE VARCHAR2,
-    CHEF_ID VARCHAR2
-) IS
-BEGIN
-    INSERT INTO KITCHEN (
-        ID,
-        NAME,
-        ADDRESS,
-        CITY_NAME,
-        CHEF_ID,
-        APPROVED
-    ) VALUES (
-        KITCHEN_ID,
-        NAME,
-        ADDRESS,
-        CITY_CODE,
-        CHEF_ID,
-        0
-    );
-END;
-/
-
 --UPDATE KITCHEN SET APPROVED = 1 WHERE ID = :kitchen_id
 CREATE OR REPLACE PROCEDURE APPROVE_KITCHEN(
     A_KITCHEN_ID VARCHAR2
@@ -811,6 +829,16 @@ BEGIN
         APPROVED = 1
     WHERE
         ID = A_KITCHEN_ID;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'KITCHEN_APPROVE',
+        'Kitchen Approved - '
+        || A_KITCHEN_ID,
+        'SUCCESS'
+    );
 END;
 /
 
@@ -830,6 +858,16 @@ BEGIN
     DELETE FROM KITCHEN
     WHERE
         ID = KITCHEN_ID;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'KITCHEN_DELETE',
+        'Kitchen Deleted - '
+        || KITCHEN_ID,
+        'SUCCESS'
+    );
 END;
 /
 
@@ -843,6 +881,16 @@ BEGIN
         VERIFIED = 1
     WHERE
         ID = V_DELIVERY_ID;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'DELIVERY_PARTNER_VERIFY',
+        'Delivery Partner Verified - '
+        || V_DELIVERY_ID,
+        'SUCCESS'
+    );
 END;
 /
 
@@ -854,6 +902,16 @@ BEGIN
     DELETE FROM DELIVERY_PARTNER
     WHERE
         ID = DELIVERY_ID;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'DELIVERY_PARTNER_DELETE',
+        'Delivery Partner Deleted - '
+        || DELIVERY_ID,
+        'WARNING'
+    );
 END;
 /
 
@@ -873,6 +931,16 @@ BEGIN
         ACADEMIC_QUALIFICATION,
         CV_LINK
     );
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'QA_OFFICER_REGISTER',
+        'QA Officer Registered - '
+        || U_ID,
+        'SUCCESS'
+    );
 END;
 /
 
@@ -887,6 +955,16 @@ BEGIN
         DATE_OF_JOINING = SYSDATE
     WHERE
         ID = A_QA_ID;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'QA_OFFICER_APPROVE',
+        'QA Officer Approved - '
+        || A_QA_ID,
+        'SUCCESS'
+    );
 END;
 /
 
@@ -898,6 +976,16 @@ BEGIN
     DELETE FROM QA_OFFICER
     WHERE
         ID = QA_ID;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'QA_OFFICER_DELETE',
+        'QA Officer Deleted - '
+        || QA_ID,
+        'WARNING'
+    );
 END;
 /
 
@@ -924,6 +1012,16 @@ BEGIN
         CATEGORY_ID,
         IMAGE
     );
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'FOOD_ADD',
+        'Food Added - '
+        || NAME,
+        'SUCCESS'
+    );
 END;
 /
 
@@ -945,6 +1043,16 @@ BEGIN
         NAME,
         DESCRIPTION,
         CATEGORY_IMAGE
+    );
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'CATEGORY_ADD',
+        'Category Added - '
+        || NAME,
+        'SUCCESS'
     );
 END;
 /
@@ -1057,6 +1165,16 @@ BEGIN
         O_ID,
         S_ID
     );
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'ORDER_SHIPPED',
+        'Order Shipped - '
+        || O_ID,
+        'SUCCESS'
+    );
 END;
 /
 
@@ -1079,6 +1197,16 @@ BEGIN
         STATUS = 'COMPLETED'
     WHERE
         ORDER_ID = O_ID;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'ORDER_DELIVERED',
+        'Order Delivered - '
+        || O_ID,
+        'SUCCESS'
+    );
 END;
 /
 
@@ -1099,6 +1227,16 @@ BEGIN
         STATUS = 'REJECTED'
     WHERE
         ORDER_ID = O_ID;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'ORDER_CANCELLED',
+        'Order Cancelled - '
+        || O_ID,
+        'WARNING'
+    );
 END;
 /
 
@@ -1143,6 +1281,16 @@ BEGIN
         AND DELETED = 0;
     DBMS_OUTPUT.PUT_LINE('CART UPDATED');
     COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'ORDER_PLACED',
+        'Order Placed - '
+        || O_ID,
+        'INFO'
+    );
 END;
 /
 
@@ -1161,6 +1309,16 @@ BEGIN
         U_ID,
         LICENSE,
         VEHICLE
+    );
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'DELIVERY_PARTNER_REGISTER',
+        'Delivery Partner Registered - '
+        || U_ID,
+        'INFO'
     );
 END;
 /
@@ -1243,6 +1401,17 @@ BEGIN
     WHERE
         ID = O_ID
         AND USER_ID = C_ID;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'ORDER_CANCELLED',
+        'Order Cancelled - '
+        || O_ID,
+        'WARNING'
+    );
 END;
 /
 

@@ -19,7 +19,7 @@ async function NotFound() {
         />
         <h1 className="mt-8 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Oops, page not found!</h1>
         <p className="mt-4 text-muted-foreground">
-          The page you're looking for doesn't exist. It might have been moved or deleted.
+          The page you&apos;re looking for doesn&apos;t exist. It might have been moved or deleted.
         </p>
         <div className="mt-6">
           <Link

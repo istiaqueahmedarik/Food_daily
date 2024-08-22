@@ -15,7 +15,9 @@ async function layout({ children }) {
       <div>
       <div className='h-20'></div>
       <Suspense fallback={<LoadingSearch/>}>
-        <SearchSide children={children} cities={cities} chefs={chefs} kitchens={kitchens} prices={prices} />
+        <SearchSide cities={cities} chefs={chefs} kitchens={kitchens} prices={prices}>
+          {children}
+        </SearchSide>
       </Suspense>
     </div>
   )

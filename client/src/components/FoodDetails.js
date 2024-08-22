@@ -1,3 +1,4 @@
+import { getBlur } from '@/util'
 import { Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import React from 'react'
@@ -6,7 +7,7 @@ function FoodDetails() {
   return (
       <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-start max-w-6xl px-4 mx-auto py-6">
           <div className="grid gap-4">
-              <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
+              <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
                   src="/food.svg"
                   alt="Food Image"
                   width="600"

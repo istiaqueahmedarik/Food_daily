@@ -2,6 +2,7 @@ import Image from 'next/image'
 import React from 'react'
 import DeleteIng from './ui/DeleteIng'
 import { ScrollArea } from './ui/scroll-area'
+import { getBlur } from '@/util'
 
 async function Ingredients({ res, params, profile = false }) {
     
@@ -9,7 +10,7 @@ async function Ingredients({ res, params, profile = false }) {
       <div>
           {res.ingr.length === 0 ? (
               <>
-                  {profile ? <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={"/food.svg"} width={500} height={500} className='m-auto' /> : null}
+                  {profile ? <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={"/food.svg"} width={500} height={500} className='m-auto' /> : null}
               </>
           ) : (
               <>

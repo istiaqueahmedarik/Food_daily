@@ -3,6 +3,7 @@ import { addKitchenImage } from '@/action';
 import Image from 'next/image';
 import React, { useActionState, useState } from 'react';
 import Button from './ui/Button';
+import { getBlur } from '@/util';
 
 const prevState = {
     message: '',
@@ -30,7 +31,7 @@ function ImageUploader({ kid }) {
                 <p className="text-sm text-muted-foreground mb-4">Accepted formats: .png, .jpg, .gif, .svg</p>
                 <div className="mb-4">
                     {selectedFile ? (
-                            <Image blurDataURL='/blur_food.png' placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} width={500} height={500} src={selectedFile} alt="Selected file" className="bg-background h-48 flex items-center justify-center border border-input" />
+                            <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} width={500} height={500} src={selectedFile} alt="Selected file" className="bg-background h-48 flex items-center justify-center border border-input" />
                     ) : (
                             <div className="bg-background h-48 flex items-center justify-center border border-input">
                             <p className="text-card-foreground">No file selected</p>

@@ -12,14 +12,17 @@ const server_url = 'http://localhost:5001/'
 export const post = cache(async(url, data)=>{
     url = server_url + url
 
-    try {
+   
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data)
-        })
+        }, {
+            cache: 'force-cache'
+        },
+            { next: { revalidate: 6000 } })
         try {
             const json = await response.json()
             return json
@@ -27,14 +30,12 @@ export const post = cache(async(url, data)=>{
         catch (error) {
             console.error('Error:', error)
         }
-    } catch (error) {
-        console.error('Error:', error)
-    }
+    
 })
 
 export const basic_post = cache(async (url, data) => {
 
-    try {
+   
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -49,14 +50,12 @@ export const basic_post = cache(async (url, data) => {
         catch (error) {
             console.error('Error:', error)
         }
-    } catch (error) {
-        console.error('Error:', error)
-    }
+    
 })
 
 export const get = cache(async (url) => { 
     url = server_url + url
-    try {
+   
         const response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -75,9 +74,7 @@ export const get = cache(async (url) => {
         catch (error) {
             console.error('Error:', error)
         }
-    } catch (error) {
-        console.error('Error:', error)
-    }
+    
 })
 
 export const post_with_token = cache(async (url, data) => {
@@ -87,7 +84,7 @@ export const post_with_token = cache(async (url, data) => {
         return {
             error: 'Unauthorized'
         }
-    try {
+    
         const response = await fetch(server_url + url, {
             method: 'POST',
             headers: {
@@ -111,13 +108,7 @@ export const post_with_token = cache(async (url, data) => {
                 error: 'An error occurred'
             }
         }
-    }
-    catch (error) {
-        console.error('Error:', error)
-        return {
-            error: 'An error occurred'
-        }
-    }
+   
 })
 
 export const get_with_token = cache(async (url) => {
@@ -126,7 +117,7 @@ export const get_with_token = cache(async (url) => {
         return {
             error: 'Unauthorized'
         }
-    try {
+   
         const response = await fetch(server_url + url, {
             method: 'GET',
             headers: {
@@ -147,12 +138,7 @@ export const get_with_token = cache(async (url) => {
                 error: 'An error occurred ' + error
             }
         }
-    }
-    catch (error) {
-        return {
-            error: 'An error occurred ' + error
-        }
-    }
+    
 })
 export async function deleteKitchenImage(prevState, formData) 
 {
@@ -672,4 +658,15 @@ export async function PersonalCancelOrder(st, formData)
 {
     const response = await post_with_token('jwt/PersonalCancelOrder', { 'oid': st })
     revalidatePath('/profile')
+}
+
+
+export async function runQuery(query) { 
+    const res = await post_with_token('jwt/runQuery', { 'query': query })
+    console.log(query)
+    if (res.error !== undefined)
+        return {
+            error: res.error
+        }
+    return res;
 }
