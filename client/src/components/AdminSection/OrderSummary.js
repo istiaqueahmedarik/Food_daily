@@ -6,7 +6,6 @@ import OrderSummaryContent from './OrderSummaryContent'
 
 async function OrderSummary() {
     const orderData = await get_with_token('jwt/orderStatusSummary');
-    console.log(orderData)
     
   return (
       <OrderSummaryContent orderData={orderData} />

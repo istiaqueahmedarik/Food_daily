@@ -1,14 +1,9 @@
 import { get_with_token } from '@/action'
+import OrderSummary from '@/components/AdminSection/OrderSummary';
+import Revenue from '@/components/AdminSection/Revenue';
 
-import AdminSummary from '@/components/AdminSection/AdminSummary'
-import OrderSummary from '@/components/AdminSection/OrderSummary'
-import Revenue from '@/components/AdminSection/Revenue'
-import QAcard from '@/components/QAcard'
-import QAcard_ from '@/components/QAcard_'
-import { Check, DoorOpen, X } from 'lucide-react'
-import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import React, { Suspense } from 'react'
+
 export const experimental_ppr = true;
 
 async function page() {

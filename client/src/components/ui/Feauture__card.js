@@ -33,7 +33,7 @@ async function Feauture__card(props) {
     status = res.status
     if (status) {
       statusText = "QA Dashboard"
-      statusLink = "/admin/qa"
+      statusLink = "/qa_dashboard/qa"
     }
   }
   const blurImg = await getImage();

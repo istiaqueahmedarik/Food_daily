@@ -382,7 +382,7 @@ export async function approveKitchen(st,formData)
         return {
             message: response.error
         }
-    revalidatePath('/admin/qa')
+    revalidatePath('/qa_dashboard/qa')
 }
 
 export async function approveDelivery(st, formData) {
@@ -392,7 +392,7 @@ export async function approveDelivery(st, formData) {
         return {
             message: response.error
         }
-    revalidatePath('/admin/qa')
+    revalidatePath('/qa_dashboard/qa')
 }
 
 export async function disapproveDelivery(st, formData) { 
@@ -402,7 +402,7 @@ export async function disapproveDelivery(st, formData) {
         return {
             message: response.error
         }
-    revalidatePath('/admin/qa')
+    revalidatePath('/qa_dashboard/qa')
 }
 
 export async function disapproveKitchen(st, formData) {
@@ -418,7 +418,7 @@ export async function disapproveKitchen(st, formData) {
         return {
             message: response.error
         }
-    revalidatePath('/admin/qa')
+    revalidatePath('/qa_dashboard/qa')
 }
 
 export async function addCategory(st, formData)

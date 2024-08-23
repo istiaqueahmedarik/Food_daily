@@ -24,7 +24,7 @@ async function NavBar() {
 
     if (qa.status)
     {
-        status.push(<Link href={"/admin/qa"} key={4} className="transition-transform text-card-foreground hover:text-muted-foreground px-4 py-2 rounded-full mr-2 "><ShieldCheck/></Link>)
+        status.push(<Link href={"/qa_dashboard/qa"} key={4} className="transition-transform text-card-foreground hover:text-muted-foreground px-4 py-2 rounded-full mr-2 "><ShieldCheck/></Link>)
     }
 
 

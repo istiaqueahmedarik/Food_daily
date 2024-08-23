@@ -8,7 +8,7 @@ import React from 'react'
 async function page() {
     const data = await get_with_token('jwt/getQAofficer')
     if (data.error === undefined) 
-        redirect('/admin/qa')
+        redirect('/qa_dashboard/qa')
     
     return (
         <div>
