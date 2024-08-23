@@ -6,6 +6,7 @@ import { Button3 } from './ui/button3'
 import { reviewFood } from '@/action'
 import RatingWrite from './RatingWrite'
 import { Suspense } from 'react'
+import Link from 'next/link'
 
 const mockReviews = [
     { id: 1, author: 'Alice', rating: 5, content: 'Excellent service and delicious food!' },
@@ -38,7 +39,7 @@ export default async function Rating(props) {
     return (
         <Card className="w-full lg:max-w-7xl md:max-w-6xl sm:max-w-5xl mx-auto mb-5">
             <CardHeader>
-                <CardTitle>Rate This Food</CardTitle>
+                <CardTitle>Rate This Food or <Link href={`/chef/kitchen/food/${props.fid}/report`}>Report?</Link></CardTitle>
                 <CardDescription>How was your experience related to this food?</CardDescription>
             </CardHeader>
             <div className="flex flex-col md:flex-row">

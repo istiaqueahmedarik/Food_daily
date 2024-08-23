@@ -8,6 +8,7 @@ CREATE TABLE USERS (
     CITY_CODE VARCHAR2(255) NOT NULL,
     EMAIL VARCHAR2(255) NOT NULL,
     PASSWORD VARCHAR2(255) NOT NULL,
+    REGISTERED DATE DEFAULT SYSDATE,
     TYPE VARCHAR2(255) DEFAULT 'USER' NOT NULL, -- USER, ADMIN
     PROFILE_IMAGE VARCHAR2(255) DEFAULT 'https://placehold.co/600x400'
 );
@@ -28,6 +29,7 @@ CREATE TABLE CHEF (
     USER_ID VARCHAR2(36) NOT NULL,
     SPECIALITY VARCHAR2(100) NOT NULL,
     EXPERIENCE NUMBER DEFAULT 0,
+    STATUS VARCHAR2(255) DEFAULT 'ACTIVE' NOT NULL,
     FOREIGN KEY (USER_ID) REFERENCES USERS(ID)
 );
 
@@ -195,6 +197,108 @@ CREATE TABLE REPORT_FOOD(
     FOREIGN KEY (USER_ID) REFERENCES USERS(ID)
 );
 
+CREATE OR REPLACE FUNCTION GET_RATING_FOOD(
+    F_ID VARCHAR2
+) RETURN VARCHAR2 IS
+    RATING NUMBER;
+BEGIN
+    SELECT
+        COALESCE(AVG(RATING), 0) INTO RATING
+    FROM
+        FOOD_RATING
+    WHERE
+        FOOD_ID = F_ID;
+    RETURN RATING;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GET_RATING_CATEGORY(
+    CAT_ID VARCHAR2
+) RETURN NUMBER IS
+    RATING NUMBER;
+BEGIN
+    SELECT
+        COALESCE(AVG(RATING), 0) INTO RATING
+    FROM
+        FOOD_RATING
+    WHERE
+        FOOD_ID IN (
+            SELECT
+                ID
+            FROM
+                FOOD
+            WHERE
+                CATEGORY_ID = CAT_ID
+        );
+    RETURN RATING;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GET_RATING_KITCHEN(
+    K_ID VARCHAR2
+) RETURN NUMBER IS
+    RATING NUMBER;
+BEGIN
+    SELECT
+        COALESCE(AVG(RATING), 0) INTO RATING
+    FROM
+        FOOD_RATING
+    WHERE
+        FOOD_ID IN (
+            SELECT
+                ID
+            FROM
+                FOOD
+            WHERE
+                CATEGORY_ID IN (
+                    SELECT
+                        ID
+                    FROM
+                        CATEGORY
+                    WHERE
+                        KITCHEN_ID = K_ID
+                )
+        );
+    RETURN RATING;
+END;
+/
+
+CREATE OR REPLACE FUNCTION GET_RATING_CHEF(
+    C_ID VARCHAR2
+) RETURN NUMBER IS
+    RATING NUMBER DEFAULT 0;
+BEGIN
+    SELECT
+        COALESCE(AVG(RATING), 0) INTO RATING
+    FROM
+        FOOD_RATING
+    WHERE
+        FOOD_ID IN (
+            SELECT
+                ID
+            FROM
+                FOOD
+            WHERE
+                CATEGORY_ID IN (
+                    SELECT
+                        ID
+                    FROM
+                        CATEGORY
+                    WHERE
+                        KITCHEN_ID IN (
+                            SELECT
+                                ID
+                            FROM
+                                KITCHEN
+                            WHERE
+                                CHEF_ID = C_ID
+                        )
+                )
+        );
+    RETURN RATING;
+END;
+/
+
 CREATE OR REPLACE PROCEDURE ADD_REPORT_FOOD(
     F_ID VARCHAR2,
     U_ID VARCHAR2,
@@ -259,10 +363,103 @@ BEGIN
         'SUCCESS'
     );
 END;
+/
+
+CREATE OR REPLACE PROCEDURE BAN_CHEF(
+    C_ID VARCHAR2
+) IS
+BEGIN
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'CHEF_DELETE',
+        'Chef Deleted - '
+        || C_ID,
+        'WARNING'
+    );
+    UPDATE CHEF
+    SET
+        STATUS = 'BANNED'
+    WHERE
+        ID = C_ID;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE UNBAN_CHEF(
+    C_ID VARCHAR2
+) IS
+BEGIN
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'CHEF_UNBAN',
+        'Chef Unbanned - '
+        || C_ID,
+        'SUCCESS'
+    );
+    UPDATE CHEF
+    SET
+        STATUS = 'ACTIVE'
+    WHERE
+        ID = C_ID;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE MAKE_ADMIN(
+    U_EMAIL VARCHAR2
+) IS
+BEGIN
+    UPDATE USERS
+    SET
+        TYPE = 'ADMIN'
+    WHERE
+        EMAIL = U_EMAIL;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'MAKE_ADMIN',
+        'User Made Admin - '
+        || U_EMAIL,
+        'WARNING'
+    );
+END;
+/
+
+CREATE OR REPLACE PROCEDURE REMOVE_ADMIN(
+    U_EMAIL VARCHAR2
+) IS
+BEGIN
+    UPDATE USERS
+    SET
+        TYPE = 'USER'
+    WHERE
+        EMAIL = U_EMAIL;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'REMOVE_ADMIN',
+        'Admin Removed - '
+        || U_EMAIL,
+        'WARNING'
+    );
+END;
+/
 
 CREATE SEQUENCE REPORT_ID_SEQUENCE START WITH 1;
-CREATE OR REPLACE TRIGGER REPORT_ID_TRIGGER BEFORE INSERT ON REPORT_FOOD FOR EACH ROW BEGIN :NEW.ID := 'RF'
-                                                                                                       || REPORT_ID_SEQUENCE.NEXTVAL;
+
+CREATE OR REPLACE TRIGGER REPORT_ID_TRIGGER BEFORE
+    INSERT ON REPORT_FOOD FOR EACH ROW
+BEGIN
+    :NEW.ID := 'RF'
+               || REPORT_ID_SEQUENCE.NEXTVAL;
 END;
 /
 

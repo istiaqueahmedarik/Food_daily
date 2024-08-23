@@ -684,6 +684,30 @@ export async function investigateIssue(st, status)
     revalidatePath('/admin/reports')
 }
 
+export async function banChef(st)
+{
+    const res = await post_with_token('jwt/banChef', { 'cid': st })
+    revalidatePath('/admin/manage')
+}
+export async function unbanChef(st)
+{
+    const res = await post_with_token('jwt/unbanChef', { 'cid': st })
+    revalidatePath('/admin/manage')
+}
+
+export async function addAdmin(formData)
+{
+    const email = formData.get('email')
+    const response = await post_with_token('jwt/addAdmin', { 'email': email })
+    revalidatePath('/admin/approve')
+}
+
+export async function removeAdmin(st)
+{
+    const response = await post_with_token('jwt/removeAdmin', { 'email': st })
+    revalidatePath('/admin/approve')
+}
+
 
 export async function runQuery(query) { 
     const res = await post_with_token('jwt/runQuery', { 'query': query })

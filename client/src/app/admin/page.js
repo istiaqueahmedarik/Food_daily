@@ -1,5 +1,5 @@
 import { get_with_token } from '@/action'
-import AdminManage from '@/components/AdminSection/AdminManage'
+
 import AdminSummary from '@/components/AdminSection/AdminSummary'
 import OrderSummary from '@/components/AdminSection/OrderSummary'
 import Revenue from '@/components/AdminSection/Revenue'

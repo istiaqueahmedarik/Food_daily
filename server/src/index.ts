@@ -1364,7 +1364,7 @@ app.get('/jwt/logs', async (c) => {
   const user = await runQuery('SELECT * FROM USERS WHERE ID = :id', { id });
   if (user.length === 0)
     return c.json({ status: false });
-  const result = await runQuery('SELECT * FROM LOGS ORDER BY LOG_TIMESTAMP', {});
+  const result = await runQuery('SELECT * FROM LOGS ORDER BY LOG_TIMESTAMP DESC', {});
   console.log(result)
   return c.json({ result });
 })
@@ -1509,6 +1509,72 @@ app.get('/jwt/orderGrowth', async (c) => {
   return c.json(orderData);
 })
 
+
+app.get('/jwt/allChefs', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  if (isAdmin.length === 0)
+    return c.json({ result: [] });
+  const result = await runQuery('SELECT CHEF.ID,CHEF_NAME AS NAME, SPECIALITY, GET_RATING_CHEF(CHEF.ID) AS RATING, STATUS FROM CHEF,USERS WHERE USERS.ID = CHEF.USER_ID', {});
+  console.log(result)
+  return c.json({ result });
+})
+
+app.post('/jwt/banChef', async (c) => {
+  const { cid } = await c.req.json<{ cid: string }>();
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  if (isAdmin.length === 0)
+    return c.json({ result: [] });
+  const result = await runQuery('BEGIN BAN_CHEF(:cid); END;', { cid });
+  return c.json(result);
+})
+
+app.post('/jwt/unbanChef', async (c) => {
+  const { cid } = await c.req.json<{ cid: string }>();
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  if (isAdmin.length === 0)
+    return c.json({ result: [] });
+  const result = await runQuery('BEGIN UNBAN_CHEF(:cid); END;', { cid });
+  return c.json(result);
+})
+
+
+app.get('/jwt/allAdmin', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  if (isAdmin.length === 0)
+    return c.json([]);
+  const result = await runQuery('SELECT ID, EMAIL, REGISTERED FROM USERS WHERE TYPE = \'ADMIN\'', {});
+  return c.json(result);
+})
+
+app.post('/jwt/addAdmin', async (c) => {
+  const payload = c.get('jwtPayload');
+  const { id } = payload;
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  const { email } = await c.req.json<{ email: string }>();
+  if (isAdmin.length === 0)
+    return c.json({ status: false });
+  const result = await runQuery('BEGIN MAKE_ADMIN(:email); END;', { email });
+  return c.json({ result });
+})
+
+app.post('/jwt/removeAdmin', async (c) => {
+  const payload = c.get('jwtPayload');
+  const { id } = payload;
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  const { email } = await c.req.json<{ email: string }>();
+  if (isAdmin.length === 0)
+    return c.json({ status: false });
+  const result = await runQuery('BEGIN REMOVE_ADMIN(:email); END;', { email });
+  return c.json({ result });
+})
 
 export default {
   port: process.env.PORT,
