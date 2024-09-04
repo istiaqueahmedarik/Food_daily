@@ -6,6 +6,7 @@ import Button from "./ui/Button"
 import { login } from "@/action"
 import { useFormState } from "react-dom"
 import { getBlur } from "@/util"
+import Loginsvg from "./ui/svg/Loginsvg"
 const prevState = {
     message: ''
 }
@@ -65,14 +66,15 @@ function Login() {
                       </div>
                   </div>
               </div>
-              <div className="bg-background lg:block">
-                  <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
+              <div className="bg-background lg:block w-full grid place-content-center">
+                  {/* <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
                       src="/login.svg"
                       alt="Image"
                       width="1920"
                       height="1080"
                       className="h-full w-96 m-auto  "
-                  />
+                  /> */}
+                  <Loginsvg  className=""/>
               </div>
           </div>
       </div>

@@ -30,7 +30,7 @@ async function NavBar() {
 
 
     return (
-        <header className={` transition-all will-change-transform flex  justify-between items-center mb-12 z-30 fixed bg-transparent  backdrop-blur-lg  w-full p-6`}>
+        <header className={` transition-all will-change-transform flex  justify-between items-center mb-12 z-30 fixed bg-background  w-full p-6`}>
             <Link href={"/"} className="text-2xl font-bold text-foreground">Food-Daily</Link>
             
                 {cookies().get('token') ? (

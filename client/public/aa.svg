@@ -44,6 +44,18 @@
     stroke-dashoffset: 0;
   }
 }
+   :root {
+            --primary-color: var(--color-primary, #E4335A);
+            --secondary-color: var(--color-secondary, #ca7285);
+            --background-color: var(--color-background, #fff);
+            --text-color: var(--color-text, #a6a6a6);
+          }
+            .dark{
+                --primary-color: var(--color-primary, 	#e11d48);
+            --secondary-color: var(--color-secondary, #ca7285);
+            --background-color: var(--color-background, #0c0a09);
+            --text-color: var(--color-text, #a6a6a6);
+            }
 </style>
 
 
