@@ -68,7 +68,6 @@ CREATE TABLE CATEGORY (
     CATEGORY_IMAGE VARCHAR2(300) DEFAULT 'https://placehold.co/600x400',
     FOREIGN KEY (KITCHEN_ID) REFERENCES KITCHEN(ID)
 );
-
 CREATE TABLE FOOD (
     ID VARCHAR2(36) PRIMARY KEY,
     NAME VARCHAR2(255) NOT NULL,
@@ -175,7 +174,23 @@ CREATE TABLE CHEF_COMMISION (
     AMOUNT NUMBER DEFAULT 0.8,
     FOREIGN KEY (CHEF_ID) REFERENCES CHEF(ID)
 );
+DECLARE 
+    CURSOR chef_cursor
+    IS
+    SELECT CHEF_NAME,SPECIALITY,EXPERIENCE
+    FROM CHEF;
 
+    chef_cursor_value chef_cursor%ROWTYPE;
+
+    BEGIN
+        OPEN chef_cursor;
+        LOOP
+            FETCH chef_cursor INTO chef_cursor_value;
+            DBMS_OUTPUT.PUT_LINE(chef_cursor_value.CHEF_NAME || ' has speciality in ' || chef_cursor_value.SPECIALITY);
+            exit when chef_cursor%NOTFOUND;
+        END LOOP;
+        CLOSE chef_cursor;  
+    END;
 SELECT
     *
 FROM
@@ -307,7 +322,6 @@ BEGIN
                || FOOD_SEQUENCE.NEXTVAL;
 END;
 /
-
 CREATE SEQUENCE SEQUENCE1 START WITH 1;
 
 CREATE OR REPLACE TRIGGER TRIGGER1 BEFORE
@@ -392,7 +406,7 @@ INSERT INTO USERS (
     'ADMIN'
 );
 
-SELECT * FROM USERS;
+-- SELECT * FROM USERS;
 -- -- DROP SEQUENCES
 -- DROP SEQUENCE SEQUENCE1;
 
