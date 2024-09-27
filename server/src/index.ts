@@ -213,7 +213,7 @@ app.get('/jwt/Profile', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
 
-  const result = await runQuery('SELECT FIRST_NAME, LAST_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL, TYPE, PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY FROM USERS,CHEF WHERE USERS.ID = :id AND USERS.EMAIL = :email AND CHEF.USER_ID(+) = USERS.ID', { id, email });
+  const result = await runQuery('SELECT NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL, TYPE, PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY FROM USERS,CHEF WHERE USERS.ID = :id AND USERS.EMAIL = :email AND CHEF.USER_ID(+) = USERS.ID', { id, email });
   if (result !== undefined && result.length)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -262,7 +262,7 @@ app.post('/jwt/applyChef', async (c) => {
 app.get('/jwt/getChef', async (c) => {
   const payload = c.get('jwtPayload')
   const { id } = payload
-  const result = await runQuery('SELECT FIRST_NAME, LAST_NAME, CHEF.CHEF_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL,  PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY FROM USERS ,CHEF WHERE USERS.ID = CHEF.USER_ID AND CHEF.USER_ID = :id', { id });
+  const result = await runQuery('SELECT NAME, CHEF.CHEF_NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL,  PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY FROM USERS ,CHEF WHERE USERS.ID = CHEF.USER_ID AND CHEF.USER_ID = :id', { id });
   if (result !== undefined)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -273,8 +273,7 @@ app.get('/jwt/chefDetails', async (c) => {
   const { id } = payload
   const result = await runQuery(`
     SELECT 
-      USERS.FIRST_NAME, 
-      USERS.LAST_NAME, 
+      USERS.NAME, 
       USERS.DOB, 
       USERS.ADDRESS, 
       USERS.MOBILE, 
@@ -310,8 +309,8 @@ app.get('/getChef/:cid', async (c) => {
   const { cid } = c.req.param();
   const result = await runQuery(`
     SELECT 
-      USERS.FIRST_NAME, 
-      USERS.LAST_NAME, 
+      USERS.NAME, 
+      
       USERS.DOB, 
       USERS.ADDRESS, 
       USERS.MOBILE, 
@@ -415,7 +414,7 @@ app.post('/getKitchen', async (c) => {
   kitchenId = kitchenId.toUpperCase();
 
 
-  const result = await runQuery('SELECT CHEF.ID AS CHEF_ID,   USERS.ID, USERS.FIRST_NAME, USERS.LAST_NAME, KITCHEN.ID AS KITCHEN_ID, KITCHEN.ADDRESS AS KITCHEN_ADDRESS,KITCHEN.CITY_NAME AS KITCHEN_CITY_NAME, KITCHEN.APPROVED AS KITCHEN_APPROVED, KITCHEN.NAME AS KICHEN_NAME FROM KITCHEN, USERS, CHEF WHERE KITCHEN.ID = :kitchenId AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID', { kitchenId });
+  const result = await runQuery('SELECT CHEF.ID AS CHEF_ID,   USERS.ID, USERS.NAME, KITCHEN.ID AS KITCHEN_ID, KITCHEN.ADDRESS AS KITCHEN_ADDRESS,KITCHEN.CITY_NAME AS KITCHEN_CITY_NAME, KITCHEN.APPROVED AS KITCHEN_APPROVED, KITCHEN.NAME AS KICHEN_NAME FROM KITCHEN, USERS, CHEF WHERE KITCHEN.ID = :kitchenId AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID', { kitchenId });
   const image = await runQuery('SELECT IMAGE FROM KITCHEN_IMAGES WHERE KITCHEN_ID = :kitchenId', { kitchenId });
   if (result !== undefined)
     return c.json({ result, image });
@@ -563,7 +562,7 @@ app.get('/jwt/verifyDelivery', async (c) => {
   const user = await runQuery('SELECT * FROM QA_OFFICER WHERE USER_ID = :id', { id });
   if (user[0]['APPROVED'] !== 1)
     return c.json({ error: 'Invalid Token' });
-  const result = await runQuery('SELECT USERS.ID AS USER_ID, DELIVERY_PARTNER.ID AS DELIVERY_ID, LICENSE, VEHICLE, FIRST_NAME, LAST_NAME FROM DELIVERY_PARTNER,USERS WHERE USERS.ID = DELIVERY_PARTNER.USER_ID AND VERIFIED = 0', {});
+  const result = await runQuery('SELECT USERS.ID AS USER_ID, DELIVERY_PARTNER.ID AS DELIVERY_ID, LICENSE, VEHICLE, NAME FROM DELIVERY_PARTNER,USERS WHERE USERS.ID = DELIVERY_PARTNER.USER_ID AND VERIFIED = 0', {});
   console.log(result)
   if (result !== undefined)
     return c.json({ result });
@@ -928,7 +927,7 @@ app.post('/jwt/applyDelivery', async (c) => {
 app.post('/jwt/getDelivery', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery('SELECT D.ID, D.LICENSE, D.VEHICLE, U.FIRST_NAME, U.LAST_NAME, U.ADDRESS, U.MOBILE, U.CITY_CODE, U.EMAIL, U.PROFILE_IMAGE  FROM DELIVERY_PARTNER  D,USERS U WHERE USER_ID = :id AND USER_ID = U.ID', { id });
+  const result = await runQuery('SELECT D.ID, D.LICENSE, D.VEHICLE, U.NAME.FIRST_NAME, U.NAME.LAST_NAME, U.ADDRESS, U.MOBILE, U.CITY_CODE, U.EMAIL, U.PROFILE_IMAGE  FROM DELIVERY_PARTNER  D,USERS U WHERE USER_ID = :id AND USER_ID = U.ID', { id });
   return c.json({ result });
 })
 
@@ -942,7 +941,7 @@ app.post('/search', async (c) => {
   const cityVals = city ? city.split(',') : [];
   const chefVals = chef ? chef.split(',') : [];
   const kitchenVals = kitchen ? kitchen.split(',') : [];
-  let query = 'SELECT  FOOD.ID AS FOOD_ID, CHEF.ID AS CHEF_ID, CHEF_NAME, KITCHEN.ID AS KITCHEN_ID, FOOD.NAME,FOOD.PRICE,  COALESCE(FOOD_RATING.RATING,0) as RATING, FOOD.FOOD_IMAGE, KITCHEN.CITY_NAME, KITCHEN.NAME AS KITCHEN_NAME, CATEGORY.NAME AS CATEGORY_NAME, USERS.PROFILE_IMAGE FROM FOOD, KITCHEN, CATEGORY, CHEF, USERS, FOOD_RATING WHERE FOOD_RATING.FOOD_ID(+) = FOOD.ID AND  FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND KITCHEN.APPROVED = 1 AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID  :where';
+  let query = 'SELECT  FOOD.ID AS FOOD_ID, CHEF.ID AS CHEF_ID, CHEF_NAME, KITCHEN.ID AS KITCHEN_ID, FOOD.NAME,FOOD.PRICE,  COALESCE(FOOD_RATING.RATING,0) as RATING, FOOD.FOOD_IMAGE, KITCHEN.CITY_NAME, KITCHEN.NAME AS KITCHEN_NAME, CATEGORY.NAME AS CATEGORY_NAME, U.PROFILE_IMAGE FROM FOOD, KITCHEN, CATEGORY, CHEF, USERS U, FOOD_RATING WHERE FOOD_RATING.FOOD_ID(+) = FOOD.ID AND  FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND KITCHEN.APPROVED = 1 AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = U.ID  :where';
 
 
   let where = '';
@@ -965,9 +964,9 @@ app.post('/search', async (c) => {
     where += ')';
   }
   if (chefVals !== undefined && chefVals.length > 0) {
-    where += ` AND ( USERS.FIRST_NAME || ' ' || USERS.LAST_NAME = :chef0`;
+    where += ` AND ( U.NAME.FIRST_NAME || ' ' || U.NAME.LAST_NAME = :chef0`;
     for (let i = 1; i < chefVals.length; i++) {
-      where += ` OR USERS.FIRST_NAME || ' ' || USERS.LAST_NAME = :chef${i}`;
+      where += ` OR U.NAME.FIRST_NAME || ' ' || U.NAME.LAST_NAME = :chef${i}`;
     }
     where += ')';
   }
@@ -1116,7 +1115,7 @@ app.post('/jwt/addRating', async (c) => {
 
 app.get('/getRating/:fid', async (c) => {
   const { fid } = c.req.param();
-  const result = await runQuery('SELECT FOOD_ID, USER_ID, RATING, REVIEW, FIRST_NAME, LAST_NAME FROM FOOD_RATING, USERS WHERE FOOD_ID = :fid AND USERS.ID = FOOD_RATING.USER_ID ORDER BY DATE_ADDED', { fid });
+  const result = await runQuery('SELECT FOOD_ID, USER_ID, RATING, REVIEW, NAME FROM FOOD_RATING, USERS WHERE FOOD_ID = :fid AND USERS.ID = FOOD_RATING.USER_ID ORDER BY DATE_ADDED', { fid });
   return c.json({ result });
 })
 
@@ -1198,7 +1197,7 @@ app.get('/bestFoodCategory/:cid', async (c) => {
 
 app.get('/popularFood/:hour', async (c) => {
   const { hour } = c.req.param();
-  const result = await runQuery('SELECT FOOD.NAME, FOOD.PRICE, USERS.ID AS USERS_ID, FOOD.ID AS ID, FIRST_NAME, PROFILE_IMAGE, CHEF_NAME, FOOD.DESCRIPTION, FOOD.FOOD_IMAGE AS FOOD_IMAGE FROM USERS, CHEF, CATEGORY, KITCHEN, FOOD, (SELECT FOOD_ID, COUNT(FOOD_ID) AS COUNT FROM CART WHERE DATE_ADDED >= SYSDATE - :hour/24 GROUP BY FOOD_ID ORDER BY COUNT DESC FETCH FIRST 10 ROWS ONLY) B WHERE B.FOOD_ID = FOOD.ID AND FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND CHEF.ID = KITCHEN.CHEF_ID AND CHEF.USER_ID = USERS.ID', { hour });
+  const result = await runQuery('SELECT FOOD.NAME, FOOD.PRICE, USERS.ID AS USERS_ID, FOOD.ID AS ID, USERS.NAME, PROFILE_IMAGE, CHEF_NAME, FOOD.DESCRIPTION, FOOD.FOOD_IMAGE AS FOOD_IMAGE FROM USERS, CHEF, CATEGORY, KITCHEN, FOOD, (SELECT FOOD_ID, COUNT(FOOD_ID) AS COUNT FROM CART WHERE DATE_ADDED >= SYSDATE - :hour/24 GROUP BY FOOD_ID ORDER BY COUNT DESC FETCH FIRST 10 ROWS ONLY) B WHERE B.FOOD_ID = FOOD.ID AND FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND CHEF.ID = KITCHEN.CHEF_ID AND CHEF.USER_ID = USERS.ID', { hour });
   return c.json({ result });
 })
 
@@ -1245,7 +1244,7 @@ app.post('/jwt/orderDetails', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   console.log(oid)
-  const result = await runQuery(`SELECT * FROM (SELECT FIRST_NAME, PROFILE_IMAGE, ORDERS.ID AS ORDER_ID, ORDERS.TOTAL, SHIPPING_NAME, SHIPPING_PHONE, SHIPPING_ADD  FROM ACTIVE_DELIVERY, USERS, ORDERS WHERE ACTIVE_DELIVERY.DELIVERY_PARTNER_ID = USERS.ID AND ACTIVE_DELIVERY.ORDER_ID = :oid AND ORDERS.ID = :oid) R, (SELECT KI.ID AS KITCHEN_ID,  ORDER_ID, FOOD_NAMES, TOTAL, DATE_ADDED, DATE_SHIPPED, DATE_DELIVERED, SHIPPING_ADD, SHIPPING_PHONE, SHIPPING_NAME, GET_ORDER_STATUS(ORD.STATUS) AS ORDER_STATUS  FROM(SELECT
+  const result = await runQuery(`SELECT * FROM (SELECT NAME, PROFILE_IMAGE, ORDERS.ID AS ORDER_ID, ORDERS.TOTAL, SHIPPING_NAME, SHIPPING_PHONE, SHIPPING_ADD  FROM ACTIVE_DELIVERY, USERS, ORDERS WHERE ACTIVE_DELIVERY.DELIVERY_PARTNER_ID = USERS.ID AND ACTIVE_DELIVERY.ORDER_ID = :oid AND ORDERS.ID = :oid) R, (SELECT KI.ID AS KITCHEN_ID,  ORDER_ID, FOOD_NAMES, TOTAL, DATE_ADDED, DATE_SHIPPED, DATE_DELIVERED, SHIPPING_ADD, SHIPPING_PHONE, SHIPPING_NAME, GET_ORDER_STATUS(ORD.STATUS) AS ORDER_STATUS  FROM(SELECT
     C.DELETED_ID AS ORDER_ID,
     K.ID,
     GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES
@@ -1273,8 +1272,8 @@ app.post('/jwt/orderDetailsConnection', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
 
-  const delivery = await runQuery('SELECT USERS.ID, USERS.CITY_CODE, USERS.MOBILE, USERS.FIRST_NAME, USERS.PROFILE_IMAGE FROM ACTIVE_DELIVERY,USERS WHERE ORDER_ID = :oid AND USERS.ID = ACTIVE_DELIVERY.DELIVERY_PARTNER_ID', { oid });
-  const user = await runQuery('SELECT USERS.ID, USERS.CITY_CODE, USERS.MOBILE, USERS.FIRST_NAME, USERS.PROFILE_IMAGE FROM USERS,ORDERS WHERE USERS.ID = ORDERS.USER_ID AND ORDERS.ID = :oid', { oid });
+  const delivery = await runQuery('SELECT USERS.ID, USERS.CITY_CODE, USERS.MOBILE, USERS.NAME, USERS.PROFILE_IMAGE FROM ACTIVE_DELIVERY,USERS WHERE ORDER_ID = :oid AND USERS.ID = ACTIVE_DELIVERY.DELIVERY_PARTNER_ID', { oid });
+  const user = await runQuery('SELECT USERS.ID, USERS.CITY_CODE, USERS.MOBILE, USERS.NAME, USERS.PROFILE_IMAGE FROM USERS,ORDERS WHERE USERS.ID = ORDERS.USER_ID AND ORDERS.ID = :oid', { oid });
 
   if (delivery.length === 0 || user.length === 0)
     return c.json({ status: false });
@@ -1429,7 +1428,7 @@ app.post('/jwt/addReport', async (c) => {
 app.get('/jwt/getReport', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload;
-  const result = await runQuery('SELECT REPORT_FOOD.ID AS REPORT_FOOD_ID, USERS.ID, USERS.EMAIL, USERS.FIRST_NAME, REPORT_FOOD.FOOD_ID, REPORT_FOOD.REASON, REPORT_FOOD.STATUS FROM REPORT_FOOD, USERS WHERE USERS.ID = REPORT_FOOD.USER_ID ORDER BY DATE_ADDED DESC ', {});
+  const result = await runQuery('SELECT REPORT_FOOD.ID AS REPORT_FOOD_ID, USERS.ID, USERS.EMAIL, USERS.NAME, REPORT_FOOD.FOOD_ID, REPORT_FOOD.REASON, REPORT_FOOD.STATUS FROM REPORT_FOOD, USERS WHERE USERS.ID = REPORT_FOOD.USER_ID ORDER BY DATE_ADDED DESC ', {});
   return c.json({ result });
 })
 

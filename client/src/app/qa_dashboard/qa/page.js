@@ -69,7 +69,7 @@ async function page() {
                       <div key={idx} className="rounded-lg border border-input bg-card text-card-foreground shadow-sm grid gap-4">
                           <div className="flex flex-col space-y-1.5 p-6">
                               <div className="flex items-center justify-between">
-                                  <div className="font-semibold text-4xl">{del['FIRST_NAME']} {del['LAST_NAME']}</div>
+                                  <div className="font-semibold text-4xl">{del['NAME']['FIRST_NAME']} {del['NAME']['LAST_NAME']}</div>
                                   <div
                                       className="inline-flex w-fit items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground text-xs border-[#ffffff25]"
 

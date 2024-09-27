@@ -79,10 +79,10 @@ export default function DeliveryChat(props) {
                 <div className="flex items-center space-x-4">
                     <Avatar>
                         <AvatarImage src={topPart[0]['PROFILE_IMAGE']} alt="Delivery Person" />
-                        <AvatarFallback>{topPart[0]['FIRST_NAME'][0]}</AvatarFallback>
+                        <AvatarFallback>{topPart[0]['NAME']['FIRST_NAME'][0]}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <h2 className="text-lg font-semibold">{topPart[0]['FIRST_NAME']} (Delivery Person - {topPart[0]['CITY_CODE']} {topPart[0]['MOBILE']})</h2>
+                        <h2 className="text-lg font-semibold">{topPart[0]['NAME']['FIRST_NAME']} (Delivery Person - {topPart[0]['CITY_CODE']} {topPart[0]['MOBILE']})</h2>
                     </div>
                 </div>
                 

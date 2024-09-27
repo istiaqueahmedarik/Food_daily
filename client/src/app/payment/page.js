@@ -41,7 +41,7 @@ async function page() {
                                       <div className="flex flex-col">
                                           <label className="leading-loose">Name</label>
                                           <div className="px-4 py-2 border focus:ring-muted-foreground focus:border-background w-full sm:text-sm  rounded-md focus:outline-none text-foreground border-input">
-                                              {res.result[0]['FIRST_NAME']} {res.result[0]['LAST_NAME']}
+                                              {res.result[0]['NAME']['FIRST_NAME']} {res.result[0]['NAME']['LAST_NAME']}
                                               </div>
                                       </div>
                                       <div className="flex flex-col">

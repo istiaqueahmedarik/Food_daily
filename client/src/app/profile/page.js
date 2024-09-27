@@ -13,6 +13,7 @@ export const experimental_ppr = true
 async function page() {
   const res = await get_with_token('jwt/chefDetails');
   
+  console.log(res);
 
   return (
     <div className=" bg-background flex flex-col gap-8">

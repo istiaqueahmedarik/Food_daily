@@ -15,7 +15,7 @@ async function layout({ params, children }) {
         'use server'
         const search = formData.get('search')
         const city = data['KITCHEN_CITY_NAME']
-        const chef_name = data['FIRST_NAME'] + ' ' + data['LAST_NAME']
+        const chef_name = data['NAME']['FIRST_NAME'] + ' ' + data['NAME']['LAST_NAME']
         // ?city=DHAKA&chef=Istiaque%20Ahmed&kitchen=Hungry%20hungry&price=34,235
         const query = `?city=${city}&chef=${chef_name}&kitchen=${data['KICHEN_NAME']}&search=${search}`
         redirect(`/search${query}`)
@@ -31,7 +31,7 @@ async function layout({ params, children }) {
                       <div class="space-y-2">
                       <h1 class="text-3xl font-bold">{data['KICHEN_NAME']}</h1>
                       <Link href={`/chef/${data['CHEF_ID']}`}>
-                          <p class="font-thin ">{data['FIRST_NAME']} {data['LAST_NAME']}</p>
+                          <p class="font-thin ">{data['NAME']['FIRST_NAME']} {data['NAME']['LAST_NAME']}</p>
                         </Link>
                       <p class="font-thin flex flex-wrap">
                           <span>
