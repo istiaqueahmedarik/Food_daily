@@ -534,7 +534,7 @@ export async function checkout(formData)
         product_name: 'Food.',
         product_category: 'Food',
         product_profile: 'Food',
-        cus_name: res.result[0]['FIRST_NAME'] + ' ' + res.result[0]['LAST_NAME'],
+        cus_name: res.result[0]['NAME']['FIRST_NAME'] + ' ' + res.result[0]['NAME']['LAST_NAME'],
         cus_email: res.result[0]['EMAIL'],
         cus_add1: res.result[0]['ADDRESS'],
         cus_add2: '',

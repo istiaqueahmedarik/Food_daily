@@ -1,6 +1,7 @@
 import { get_with_token } from '@/action'
 import OrderSummary from '@/components/AdminSection/OrderSummary';
 import Revenue from '@/components/AdminSection/Revenue';
+import { redirect } from 'next/navigation';
 
 import React, { Suspense } from 'react'
 

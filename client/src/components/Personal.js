@@ -8,13 +8,14 @@ async function Personal({ mine = true, path, res }) {
     if(mine===false)
         res = await get_with_token(path);
     const image = await getImage();
+    console.log(res)
   return (
       <div>
           {
               res.result ? (
                   <div className="border border-input bg-background p-9 rounded-md m-8 flex flex-row w-full justify-around gap-5">
                       <div className="relative group m-auto">
-                          <h1 className="text-[4rem] font-extrabold text-foreground">{`${res.result[0]['FIRST_NAME']} ${res.result[0]['LAST_NAME']}`}</h1>
+                          <h1 className="text-[4rem] font-extrabold text-foreground">{`${res.result[0]['NAME']['FIRST_NAME']} ${res.result[0]['NAME']['LAST_NAME']}`}</h1>
                           <h2 className="italic font-mono  text-muted-foreground font-medium">{res.result[0]['EMAIL']}</h2>
                           <h2 className="italic font-mono text-muted-foreground font-medium">
                               {res.result[0]['ADDRESS']}

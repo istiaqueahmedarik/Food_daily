@@ -73,7 +73,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                         </div>
                         {profile ? <div className='m-auto'>
 
-                            <Image blurDataURL={image} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={data['PROFILE_IMAGE']} width="400" height="400" alt={data['FIRST_NAME']} className="rounded-lg object-cover" />
+                            <Image blurDataURL={image} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={data['PROFILE_IMAGE']} width="400" height="400" alt={data['NAME']['FIRST_NAME']} className="rounded-lg object-cover" />
                         </div>:
                             <div className={`grid grid-cols-2 gap-4`}>
                                 {bestImages.result.map((image, index) => {
