@@ -282,10 +282,6 @@ export async function applyChef(prevState,formData) {
     const rawFormData = Object.fromEntries(formData)
     const response = await post_with_token('jwt/applyChef', rawFormData)
     
-    if (response.error !== undefined)
-        return {
-            message: response.error
-        }
     redirect('/success')
 }
 
