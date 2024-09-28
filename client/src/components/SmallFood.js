@@ -8,6 +8,7 @@ import { put } from '@vercel/blob';
 import { post_with_token } from '@/action';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import Button from './ui/Button';
 
 async function SmallFood({ res }) {
     const blurImg = await getImage();
@@ -54,10 +55,10 @@ async function SmallFood({ res }) {
                   <Input defaultValue="" className="text-sm text-muted-foreground font-extralight" type="file" name="image"></Input>
                </div>
               <Input defaultValue={res.food[0]['PRICE']} type="text" name="price" className="text-sm text-muted-foreground font-extralight"></Input>
-              <Button3 type="submit">Update</Button3>
+              <Button txt={'Update'} type="submit"></Button>
           </form>
           <form action={deleteFood} className='col-span-2'>
-              <Button3 type="submit" className='bg-destructive'>Delete</Button3>
+              <Button txt={'Delete'} type="submit" className='bg-destructive'></Button>
           </form>
       </div>
   )

@@ -6,6 +6,7 @@ import { Card } from "./ui/card"
 import Image from "next/image"
 import { put } from "@vercel/blob"
 import { revalidatePath } from "next/cache"
+import Button from "./ui/Button"
 
 
 export default async function CategoryTable({id}) {
@@ -86,12 +87,12 @@ export default async function CategoryTable({id}) {
                     <Image src={category['CATEGORY_IMAGE']} alt={category['NAME']} width={50} height={30} className="rounded-md h-8 w-8" />
                   </div>
                   <div>
-                    <Button3 type="submit">Save</Button3>
+                    <Button txt="Save" type="submit"></Button>
                   </div>
                   
                 </form>
                 <form action={bindedDelete}>
-                  <Button3 className="bg-destructive" type="submit">Delete</Button3>
+                  <Button txt="Delete" className="bg-destructive" type="submit"></Button>
                 </form>
               </div>
             )
