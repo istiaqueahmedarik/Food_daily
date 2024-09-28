@@ -14,7 +14,7 @@ function ScheduledOrder({ kid, params }) {
     const [date, setDate] = useState([])
     const [scheduledOrders, setScheduledOrders] = useState([]);
     const handleSubmission = async() => {
-        console.log(scheduledOrders);
+        
         const data = {
             kid: kid,
             orders: scheduledOrders.map(order => ({

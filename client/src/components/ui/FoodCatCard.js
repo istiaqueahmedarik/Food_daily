@@ -26,7 +26,7 @@ export default async function FoodCatCard({ edit, cat, title, subtitle }) {
                     className="absolute inset-0 h-full object-cover"
                     fill
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/80">
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/80 to-transparent">
                     <div className="flex h-full">
                         <div className="mt-auto mb-2 p-6 text-4xl font-semibold leading-none tracking-tight text-primary">
                             {title}

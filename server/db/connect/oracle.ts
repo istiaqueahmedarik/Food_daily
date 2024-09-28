@@ -24,7 +24,7 @@ export const runQuery = async (query: string, params: any) => {
     return result.rows;
   } catch (err) {
     await connection.rollback(); // Ensure atomicity
-    console.log(err);
+
     throw new Error((err as Error).message);
   } finally {
     await connection.close(); // Ensure resources are released
@@ -56,7 +56,7 @@ export const runCursorQuery = async (query: string, params: any) => {
     await connection.close()
     return rows
   } catch (err) {
-    console.log(err)
+
     throw new Error((err as Error).message)
   }
 }

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 function RevenueContent({ data }) {
-    console.log(data)
+    
    
     return (
     <Card className="col-span-8">

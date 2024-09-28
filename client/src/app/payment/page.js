@@ -28,7 +28,7 @@ async function page() {
                                       </div>
                                       <div className="flex flex-col">
                                           <label className="leading-loose">Currency</label>
-                                          <input type="text" name="currency" className="px-4 py-2 border focus:ring focus:border-background w-full sm:text-sm  rounded-md focus:outline-none text-foreground border-input bg-background" placeholder="BDT" defaultValue={"BDT"} disabled/>
+                                          <input type="text" name="currency" className="px-4 py-2 border focus:ring focus:border-background w-full sm:text-sm  rounded-md focus:outline-none text-foreground border-input bg-background" placeholder="BDT" defaultValue={"BDT"}  />
                                       </div>
                                   </div>
                                  

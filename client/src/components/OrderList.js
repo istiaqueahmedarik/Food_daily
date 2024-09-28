@@ -9,7 +9,7 @@ import Link from 'next/link'
 async function OrderList() {
     const data = await post_with_token('jwt/orderHistory', {});
     const orders = data.result;
-    console.log(orders)
+    
   return (
       <div>
           <Card className="w-full max-w-4xl mx-auto">

@@ -15,7 +15,7 @@ export default function DeliveryChat(props) {
     
     const [newMessage, setNewMessage] = useState('')
     const messageEndRef = useRef(null);
-    console.log(props.type)
+    
     useEffect(() => {
         scrollToBottom();
      }, [messages])
@@ -28,8 +28,8 @@ export default function DeliveryChat(props) {
 
         socket.onopen = (event) => {
             // const data = JSON.parse(event.data);
-            console.log(event)
-            console.log("Connected")
+            
+            
             scrollToBottom();
         };
 
@@ -38,7 +38,7 @@ export default function DeliveryChat(props) {
             if (Array.isArray(data)) {
                 setMessages(data);
             } else {
-                console.log("Data: ", data)
+                
                 setMessages((prev) => [...prev, data]);
             }
             scrollToBottom();
@@ -58,7 +58,7 @@ export default function DeliveryChat(props) {
    
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        console.log("Scrolling")
+        
     };
     const handleSendMessage = (e) => {
         e.preventDefault()

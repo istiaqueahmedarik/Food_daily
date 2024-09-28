@@ -50,7 +50,7 @@ const saveMessage = async (message: any, user1: any, user2: any, ws: any) => {
     mn = user2;
     mx = user1;
   }
-  console.log(data)
+
   for (let i = 0; i < clients[mn + '_' + mx].length; i++) {
     clients[mn + '_' + mx][i].send(JSON.stringify(data));
   }
@@ -69,7 +69,7 @@ app.get(
       onOpen: async (_event, ws) => {
 
         const { user1, user2 } = c.req.param();
-        console.log(user1, user2);
+
 
         let mn: string = "";
         let mx: string = "";
@@ -100,7 +100,7 @@ app.get(
         }
 
         const res = await runCursorQuery(`BEGIN GET_CONVERSATION_MESSAGES(:mn, :mx, :conversationId, :cursor); END;`, { mn, mx, conversationId });
-        console.log(res)
+
         ws.send(JSON.stringify(res));
       },
       onMessage: async (event, ws) => {
@@ -244,7 +244,7 @@ app.post('/jwt/updateProfileImage', async (c) => {
   const { profile_image_url } = await c.req.json<{ profile_image_url: string }>();
 
   const result = await runQuery(`BEGIN UPDATE_PROFILE_IMAGE(:id,:email,:profileImage); END;`, { id, email, profileImage: profile_image_url });
-  console.log(result)
+
   return c.json({ result });
 })
 
@@ -279,6 +279,14 @@ app.get('/jwt/chefDetails', async (c) => {
 
   const result = await runCursorQuery('BEGIN GET_USER_CHEF_KITCHEN_DETAILS(:id,:cursor); END;', { id })
 
+  if (result !== undefined)
+    return c.json({ result });
+  return c.json({ error: 'Invalid Token' });
+})
+
+app.get('/getChefOfKitchen/:kid', async (c) => {
+  const { kid } = c.req.param();
+  const result = await runQuery('SELECT * FROM CHEF WHERE ID = (SELECT CHEF_ID FROM KITCHEN WHERE ID = :kid)', { kid });
   if (result !== undefined)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -515,7 +523,7 @@ app.get('/jwt/verifyDelivery', async (c) => {
   if (user[0]['APPROVED'] !== 1)
     return c.json({ error: 'Invalid Token' });
   const result = await runQuery('SELECT USERS.ID AS USER_ID, DELIVERY_PARTNER.ID AS DELIVERY_ID, LICENSE, VEHICLE, NAME FROM DELIVERY_PARTNER,USERS WHERE USERS.ID = DELIVERY_PARTNER.USER_ID AND VERIFIED = 0', {});
-  console.log(result)
+
   if (result !== undefined)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -705,14 +713,14 @@ app.post('/jwt/addToCartScheduled', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   const { kid, fid, orders } = await c.req.json<{ kid: string, fid: string, orders: any[] }>()
-  console.log(kid, fid, orders)
+
   for (let i = 0; i < orders.length; i++) {
     const dt = orders[i].date;
     const quantity = orders[i].quantity;
     const time = orders[i].time;
     const combineDate = dt + ' ' + time;
     const converted = formatDate(new Date(combineDate));
-    console.log(converted)
+
     await runQuery('BEGIN ADD_TO_CART_SCHEDULED(:id, :fid, :quantity, TO_DATE(:converted, \'DD-MM-YYYY HH24:MI:SS\')); END;', { id, fid, quantity, converted });
   }
   return c.json({ result: 'ok' });
@@ -860,7 +868,7 @@ app.post('/sslcommerz/success', async (c) => {
   if (valid) {
 
     await runQuery('BEGIN CHECKOUT(:ord_id, :id, :ammount, :address, :mobile,:name); END;', { ord_id, id, ammount, address, mobile, name });
-    console.log('Order Placed');
+
     return c.redirect('http://localhost:3000/success_payment');
 
   }
@@ -914,9 +922,9 @@ app.post('/search', async (c) => {
     where += ')';
   }
   if (chefVals !== undefined && chefVals.length > 0) {
-    where += ` AND ( U.NAME.FIRST_NAME || ' ' || U.NAME.LAST_NAME = :chef0`;
+    where += ` AND ( CHEF.CHEF_NAME = :chef0`;
     for (let i = 1; i < chefVals.length; i++) {
-      where += ` OR U.NAME.FIRST_NAME || ' ' || U.NAME.LAST_NAME = :chef${i}`;
+      where += ` OR CHEF.CHEF_NAME = :chef${i}`;
     }
     where += ')';
   }
@@ -1184,7 +1192,7 @@ app.post('/jwt/orderDetails', async (c) => {
   const { oid } = await c.req.json<{ oid: string }>()
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  console.log(oid)
+
   const result = await runCursorQuery('BEGIN GET_ORDER_DETAILS(:oid, :cursor); END;', { oid });
 
   return c.json({ result });
@@ -1215,7 +1223,7 @@ app.post('/jwt/chefOrder', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   const { kid } = await c.req.json<{ kid: string }>()
-  console.log(kid)
+
 
   const result = await runCursorQuery('BEGIN GET_ORDER_DETAILS_BY_CHEF_AND_KITCHEN(:kid, :id, :cursor); END;', { kid, id });
 
@@ -1254,7 +1262,7 @@ app.get('/jwt/logs', async (c) => {
   if (user.length === 0)
     return c.json({ status: false });
   const result = await runQuery('SELECT * FROM LOGS ORDER BY LOG_TIMESTAMP DESC', {});
-  console.log(result)
+
   return c.json({ result });
 })
 
@@ -1280,7 +1288,7 @@ app.post('/jwt/runQuery', async (c) => {
     query = query.slice(0, -1);
   if (query.includes('INSERT') || query.includes('UPDATE') || query.includes('DELETE') || query.includes('ADMIN') || query.includes('DROP') || query.includes('TRUNCATE') || query.includes('ALTER') || query.includes('GRANT') || query.includes('REVOKE'))
     return c.json({ error: 'Invalid Query' });
-  console.log(query)
+
   try {
     const startTime = Date.now();
     const result = await runQuery(query, {});
@@ -1288,7 +1296,7 @@ app.post('/jwt/runQuery', async (c) => {
     const time = endTime - startTime;
     return c.json({ result, time });
   } catch (e) {
-    console.log(e)
+
     return c.json({ error: (e as Error).message || e });
   }
 })
@@ -1393,7 +1401,7 @@ app.get('/jwt/allChefs', async (c) => {
   if (isAdmin.length === 0)
     return c.json({ result: [] });
   const result = await runQuery('SELECT CHEF.ID,CHEF_NAME AS NAME, SPECIALITY, GET_RATING_CHEF(CHEF.ID) AS RATING, STATUS FROM CHEF,USERS WHERE USERS.ID = CHEF.USER_ID', {});
-  console.log(result)
+
   return c.json({ result });
 })
 
@@ -1430,6 +1438,47 @@ app.get('/jwt/allAdmin', async (c) => {
   return c.json(result);
 })
 
+
+app.get('/jwt/allDeliveryPartner', async (c) => {
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  if (isAdmin.length === 0)
+    return c.json([]);
+  const result = await runQuery('SELECT DELIVERY_PARTNER.ID, EMAIL, VERIFIED FROM USERS,DELIVERY_PARTNER WHERE USERS.ID = DELIVERY_PARTNER.USER_ID', {});
+
+  return c.json(result);
+})
+
+app.post('/jwt/banDelivery', async (c) => {
+  const { did } = await c.req.json<{ did: string }>();
+
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  if (isAdmin.length === 0)
+    return c.json({ result: [] });
+  const result = await runQuery('BEGIN BAN_DELIVERY_PARTNER(:did); END;', { did });
+  return c.json(result);
+})
+
+app.post('/jwt/unbanDelivery', async (c) => {
+  const { did } = await c.req.json<{ did: string }>();
+  const payload = c.get('jwtPayload')
+  const { id, email } = payload;
+
+  const isAdmin = await runQuery('SELECT * FROM USERS WHERE ID = :id AND TYPE = \'ADMIN\'', { id });
+  if (isAdmin.length === 0)
+    return c.json({ result: [] });
+  const result = await runQuery('BEGIN UNBAN_DELIVERY_PARTNER(:did); END;', { did });
+  return c.json(result);
+})
+
+
+
+
 app.post('/jwt/addAdmin', async (c) => {
   const payload = c.get('jwtPayload');
   const { id } = payload;
@@ -1450,6 +1499,160 @@ app.post('/jwt/removeAdmin', async (c) => {
     return c.json({ status: false });
   const result = await runQuery('BEGIN REMOVE_ADMIN(:email); END;', { email });
   return c.json({ result });
+})
+
+
+app.get('/jwt/isItMyKitchen/:kid', async (c) => {
+  const payload = c.get('jwtPayload');
+  const { id } = payload;
+  const { kid } = c.req.param();
+  const result = await runQuery('SELECT * FROM KITCHEN WHERE ID = :kid AND CHEF_ID = (SELECT ID FROM CHEF WHERE USER_ID = :id)', { kid, id });
+  if (result.length === 0)
+    return c.json({ status: false });
+  return c.json({ status: true });
+})
+
+app.get('/jwt/allCategory/:kid', async (c) => {
+  const payload = c.get('jwtPayload');
+  const { id } = payload;
+  const { kid } = c.req.param();
+  const result = await runQuery('SELECT * FROM CATEGORY WHERE KITCHEN_ID = :kid', { kid });
+  return c.json(result);
+})
+
+/**
+ * CREATE TABLE CATEGORY (
+    ID VARCHAR2(36) PRIMARY KEY,
+    KITCHEN_ID VARCHAR2(36) NOT NULL,
+    NAME VARCHAR2(100) NOT NULL,
+    DESCRIPTION VARCHAR2(300) NOT NULL,
+    CATEGORY_IMAGE VARCHAR2(300) DEFAULT 'https://placehold.co/600x400',
+    FOREIGN KEY (KITCHEN_ID) REFERENCES KITCHEN(ID)
+);
+ */
+app.post('/jwt/updateCategory', async (c) => {
+  const payload = c.get('jwtPayload');
+  const { id } = payload;
+  const { cat_id, name, description, image } = await c.req.json<{ cat_id: string, name: string, description: string, image: string }>();
+  const result = await runQuery('BEGIN UPDATE_CATEGORY(:cat_id, :name, :description, :image); END;', { cat_id, name, description, image });
+  console.log(cat_id, name, description, image);
+  return c.json(result);
+})
+
+app.post('/jwt/deleteCategory', async (c) => {
+  const payload = c.get('jwtPayload');
+  const { id } = payload;
+  const { cat_id } = await c.req.json<{ cat_id: string }>();
+  const result = await runQuery('BEGIN DELETE_CATEGORY(:cat_id); END;', { cat_id });
+  return c.json(result);
+})
+/**
+ * 
+CREATE OR REPLACE PROCEDURE UPDATE_FOOD(
+    F_ID VARCHAR2,
+    F_NAME VARCHAR2,
+    F_DESCRIPTION VARCHAR2,
+    F_PRICE NUMBER,
+    F_IMAGE VARCHAR2
+) IS
+BEGIN
+    UPDATE FOOD
+    SET
+        NAME = F_NAME,
+        DESCRIPTION = F_DESCRIPTION,
+        PRICE = F_PRICE,
+        FOOD_IMAGE = F_IMAGE
+    WHERE
+        ID = F_ID;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'FOOD_UPDATE',
+        'Food Updated - '
+        || F_ID
+        || ' '
+        || F_NAME,
+        'SUCCESS'
+    );
+END;
+/
+
+CREATE OR REPLACE PROCEDURE DELETE_FOOD(
+    D_FOOD_ID VARCHAR2
+) IS
+BEGIN
+    DELETE FROM INGREDIENT
+    WHERE
+        FOOD_ID = D_FOOD_ID;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'INGREDIENT DELETED BECAUSE OF FOOD',
+        'Ingredients Deleted - '
+        || D_FOOD_ID,
+        'SUCCESS'
+    );
+    DELETE FROM CART
+    WHERE
+        FOOD_ID = D_FOOD_ID;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'CART DELETED BECAUSE OF FOOD',
+        'Cart Deleted - '
+        || D_FOOD_ID,
+        'SUCCESS'
+    );
+    DELETE FROM FOOD_RATING
+    WHERE
+        FOOD_ID = D_FOOD_ID;
+    COMMIT;
+    DELETE FROM REPORT_FOOD
+    WHERE
+        FOOD_ID = D_FOOD_ID;
+    COMMIT;
+    DELETE FROM FOOD
+    WHERE
+        ID = D_FOOD_ID;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'FOOD_DELETE',
+        'Food Deleted - '
+        || D_FOOD_ID,
+        'SUCCESS'
+    );
+END;
+/
+ */
+
+app.post('/jwt/updateFood', async (c) => {
+  const payload = c.get('jwtPayload');
+  const { id } = payload;
+  const { fid, name, description, price, image } = await c.req.json<{ fid: string, name: string, description: string, price: number, image: string }>();
+  console.log(fid, name, description, price, image);
+  const result = await runQuery('BEGIN UPDATE_FOOD(:fid, :name, :description, :price, :image); END;', { fid, name, description, price, image });
+  return c.json(result);
+})
+
+app.post('/jwt/deleteFood', async (c) => {
+  const payload = c.get('jwtPayload');
+  const { id } = payload;
+  const { fid } = await c.req.json<{ fid: string }>();
+  const result = await runQuery('BEGIN DELETE_FOOD(:fid); END;', { fid });
+  return c.json(result);
 })
 
 export default {

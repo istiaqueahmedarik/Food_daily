@@ -11,7 +11,7 @@ async function Personal({ mine = true, path, res }) {
         res = await get_with_token(path)
     }
     const image = await getImage()
-    console.log(res)
+    
 
     if (!res.result) {
         return (

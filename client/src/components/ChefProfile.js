@@ -24,7 +24,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
         get(`bestFood/${chef.result[0]['CHEF_ID']}`),
         get(`bestFoodCategory/${chef.result[0]['CHEF_ID']}`)
     ])
-    console.log('b',bestImages);
+    
 
     const blurImg = await getImage()
     const data = chef.result[0]
