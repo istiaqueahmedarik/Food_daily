@@ -1,39 +1,44 @@
 import { getImage } from '@/util'
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
 
-async function FoodCatCard(props) {
-    const blurImg = await getImage();
-  return (
-      <Link href={props.edit ? `/chef/my/add_food/${props.cat['KITCHEN_ID']}/category/${props.cat['ID']}`:`/chef/kitchen/${props.cat['KITCHEN_ID']}/category/${props.cat['ID']}`} className='m-5'>
-          <div className="card-shadow rounded-2xl p-0 bg-cover bg-center h-96 relative overflow-hidden">
-              <Image blurDataURL={blurImg}  placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
-                  src={props.cat['CATEGORY_IMAGE']}
-                  alt="Background"
-                  className="absolute inset-0  h-full object-cover"
-                  fill
-              />
-              <div
-                  className="absolute inset-0 bg-[linear-gradient(transparent_0%,rgb(69,69,69)_100%)]"
 
-              >
-                  <div className="h-full flex">
-                      <div
-                          className="leading-none p-6 rounded-2xl mt-auto mb-2 text-4xl font-semibold drop-shadow-sm tracking-tight text-card"
-                      >
-                          {props.title}
-                          <br />
-                          <span className='text-muted-foreground'>
-                            {props.subtitle} 
-                              {props.cat['NAME']}</span>
-                      </div>
-                  </div>
-              </div>
-          </div>
+export default async function FoodCatCard({ edit, cat, title, subtitle }) {
+    const blurImg = await getImage()
 
-      </Link>
-  )
+    return (
+        <Link
+            href={
+                edit
+                    ? `/chef/my/add_food/${cat.KITCHEN_ID}/category/${cat.ID}`
+                    : `/chef/kitchen/${cat.KITCHEN_ID}/category/${cat.ID}`
+            }
+            className="m-5 block"
+        >
+            <div className="card-shadow relative h-96 overflow-hidden rounded-2xl bg-cover bg-center p-0">
+                <Image
+                    blurDataURL={blurImg}
+                    placeholder="blur"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    quality={60}
+                    src={cat.CATEGORY_IMAGE}
+                    alt="Background"
+                    className="absolute inset-0 h-full object-cover"
+                    fill
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/80">
+                    <div className="flex h-full">
+                        <div className="mt-auto mb-2 p-6 text-4xl font-semibold leading-none tracking-tight text-primary">
+                            {title}
+                            <br />
+                            <span className="text-foreground">
+                                {subtitle}
+                                {cat.NAME}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Link>
+    )
 }
-
-export default FoodCatCard
