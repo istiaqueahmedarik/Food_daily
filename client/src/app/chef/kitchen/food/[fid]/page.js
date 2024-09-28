@@ -1,5 +1,6 @@
 import { get } from '@/action'
 import Food from '@/components/Food'
+import { FoodReportCta } from '@/components/food-report-cta'
 import LoadingSection from '@/components/LoadingSection'
 import Rating from '@/components/Rating'
 import RatingCard from '@/components/RatingCard'

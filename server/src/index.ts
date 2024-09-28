@@ -366,7 +366,7 @@ app.post('/getKitchen', async (c) => {
   kitchenId = kitchenId.toUpperCase();
 
 
-  const result = await runCursorQuery('BEGIN GET_KITCHEN_DETAILS(:kitchenId,:cursor)', kitchenId);
+  const result = await runCursorQuery('BEGIN GET_KITCHEN_DETAILS(:kitchenId,:cursor); END;', { kitchenId });
   const image = await runQuery('SELECT IMAGE FROM KITCHEN_IMAGES WHERE KITCHEN_ID = :kitchenId', { kitchenId });
   if (result !== undefined)
     return c.json({ result, image });

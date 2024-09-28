@@ -28,7 +28,7 @@ async function Personal({ mine = true, path, res }) {
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
             <Card className="w-full max-w-4xl overflow-hidden">
                 <div className="relative h-64">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-90" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-ring to-secondary opacity-90" />
                     <Image
                         src={PROFILE_IMAGE}
                         alt="Profile background"
@@ -45,7 +45,7 @@ async function Personal({ mine = true, path, res }) {
                                 alt={`${FIRST_NAME} ${LAST_NAME}`}
                                 width={200}
                                 height={200}
-                                className="rounded-full border-4 border-background "
+                                className="rounded-full border-4 border-background object-cover aspect-square"
                             />
                             {mine && (
                                 <Link href="/profile/edit" passHref>

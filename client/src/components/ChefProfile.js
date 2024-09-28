@@ -24,6 +24,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
         get(`bestFood/${chef.result[0]['CHEF_ID']}`),
         get(`bestFoodCategory/${chef.result[0]['CHEF_ID']}`)
     ])
+    console.log('b',bestImages);
 
     const blurImg = await getImage()
     const data = chef.result[0]
@@ -106,7 +107,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                             ) : (
                                 <div className="grid grid-cols-2 gap-2 h-full">
                                     {bestImages.result.slice(0, 4).map((image, index) => (
-                                        <Link href={`/chef/kitchen/food/${image['FOOD_ID']}`} key={index} className="relative h-full overflow-hidden rounded-lg group">
+                                        <Link href={`/chef/kitchen/food/${image['ID']}`} key={index} className="relative h-full overflow-hidden rounded-lg group">
                                             <Image
                                                 src={image['FOOD_IMAGE']}
                                                 alt={`Chef's Dish ${index + 1}`}
@@ -118,11 +119,7 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                                                 quality={60}
                                                 className="transition-transform duration-300 group-hover:scale-110"
                                             />
-                                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity duration-300 flex items-end justify-center">
-                                                <span className="text-white text-sm font-medium p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                    View Dish
-                                                </span>
-                                            </div>
+                                           
                                         </Link>
                                     ))}
                                 </div>

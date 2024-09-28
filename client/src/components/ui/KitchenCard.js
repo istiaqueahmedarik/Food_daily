@@ -13,7 +13,7 @@ async function KitchenCard({ name = "Hungry", image = "/food.svg", address = "12
   if(image===null || image===undefined){ image="/food.svg" }
   return (
       <div className="relative w-[300px] h-[400px] rounded-xl overflow-hidden group border border-input ">
-      <div className="absolute inset-0 bg-gradient-to-b from-[rgba(228,235,247,0.95)] via-[rgba(233,238,246,0.75)] to-[rgba(239,240,243,0.1)] dark:from-[rgba(13,17,23,0.95)] via-[rgba(13,17,23,0.75)] to-[rgba(13,17,23,0.1)] z-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-ring/15 to-secondary/80 z-10"></div>
       <Image blurDataURL={blurImg} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
                 src={image}
                 alt="Stay ahead, always"

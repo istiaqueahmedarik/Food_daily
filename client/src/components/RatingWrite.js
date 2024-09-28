@@ -6,6 +6,7 @@ import { reviewFood } from '@/action'
 import { StarIcon } from 'lucide-react'
 import { Textarea } from './ui/textarea'
 import { Button3 } from './ui/button3'
+import { FoodReportCta } from './food-report-cta'
 
 function RatingWrite(props) {
     
@@ -54,10 +55,12 @@ function RatingWrite(props) {
                   />
               </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col gap-7">
               <Button3 onClick={handleSubmit} type="submit" className="w-full">
                   Submit Review
               </Button3>
+              <FoodReportCta fid={props.fid} />
+
           </CardFooter>
       </div>
   )
