@@ -12,6 +12,7 @@ function Button2({icon,st,id,url="-1"}) {
     qa_id: id,
     url: url
   })
+  
   return (
     <form action={binded}>
       <button

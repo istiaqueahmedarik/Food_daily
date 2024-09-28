@@ -357,6 +357,7 @@ export async function qa_apply(formData)
 export async function approveQAofficer(st,formData)
 {
     // const rawFormData = Object.fromEntries(formData)
+    
     if (st.st === 2)
     {
         const url = st.url
@@ -368,6 +369,18 @@ export async function approveQAofficer(st,formData)
             message: response.error
         }
     revalidatePath('/admin')
+}
+
+export async function banDelivery(did)
+{
+    const response = await post_with_token('jwt/banDelivery', { did })
+    revalidatePath('/admin/manage')
+}
+
+export async function unbanDelivery(did)
+{
+    const response = await post_with_token('jwt/unbanDelivery', { did })
+    revalidatePath('/admin/manage')
 }
 
 export async function approveKitchen(st,formData)
@@ -401,6 +414,11 @@ export async function disapproveDelivery(st, formData) {
     revalidatePath('/qa_dashboard/qa')
 }
 
+export async function updateCategory(formData)
+{
+
+}
+
 export async function disapproveKitchen(st, formData) {
     // const rawFormData = Object.fromEntries(formData)
     const imgs = await post_with_token('jwt/getKitchenImages', st)
@@ -428,6 +446,7 @@ export async function addCategory(st, formData)
     
     redirect(`/chef/my/${kitchen_id}`)
 }
+
 
 
 export async function addDish(st, formData)
@@ -506,7 +525,7 @@ export async function checkout(formData)
 {
     const raw = Object.fromEntries(formData)
     
-    console.log(raw)
+    
     const cart = await get_with_token('jwt/getCart');
     const res = await get_with_token('jwt/chefDetails');
     const token = cookies().get('token')
@@ -565,7 +584,7 @@ export async function checkout(formData)
         body: rawbody
     });
     const dt = await response.json();
-    console.log(dt)
+    
     redirect(dt.GatewayPageURL);
 }
 

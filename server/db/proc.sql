@@ -1141,3 +1141,282 @@ BEGIN
     );
 END;
 /
+
+CREATE OR REPLACE PROCEDURE BAN_DELIVERY_PARTNER(
+    B_ID VARCHAR2
+) IS
+BEGIN
+    UPDATE DELIVERY_PARTNER
+    SET
+        VERIFIED = 0
+    WHERE
+        ID = B_ID;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'DELIVERY_PARTNER_BAN',
+        'Delivery Partner Banned - '
+        || B_ID,
+        'WARNING'
+    );
+END;
+/
+
+CREATE OR REPLACE PROCEDURE UNBAN_DELIVERY_PARTNER(
+    U_ID VARCHAR2
+) IS
+BEGIN
+    UPDATE DELIVERY_PARTNER
+    SET
+        VERIFIED = 1
+    WHERE
+        ID = U_ID;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'DELIVERY_PARTNER_UNBAN',
+        'Delivery Partner Unbanned - '
+        || U_ID,
+        'SUCCESS'
+    );
+END;
+/
+
+CREATE OR REPLACE PROCEDURE UPDATE_CATEGORY(
+    C_CAT_ID VARCHAR2,
+    C_CAT_NAME VARCHAR2,
+    C_CAT_DESCRIPTION VARCHAR2,
+    C_IMAGE VARCHAR2
+) IS
+BEGIN
+    UPDATE CATEGORY
+    SET
+        CATEGORY.NAME = C_CAT_NAME,
+        CATEGORY.DESCRIPTION = C_CAT_DESCRIPTION,
+        CATEGORY.CATEGORY_IMAGE = C_IMAGE
+    WHERE
+        CATEGORY.ID = C_CAT_ID;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'CATEGORY_UPDATE',
+        'Category Updated - '
+        || C_CAT_ID
+        || ' '
+        || C_CAT_NAME,
+        'SUCCESS'
+    );
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error updating category');
+        RAISE;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE DELETE_CATEGORY(
+    D_CAT_ID VARCHAR2
+) IS
+BEGIN
+    DELETE FROM INGREDIENT
+    WHERE
+        FOOD_ID IN (
+            SELECT
+                ID
+            FROM
+                FOOD
+            WHERE
+                CATEGORY_ID = D_CAT_ID
+        );
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'INGREDIENT DELETED BECAUSE OF CATEGORY',
+        'Ingredients Deleted - '
+        || D_CAT_ID,
+        'SUCCESS'
+    );
+    DELETE FROM CART
+    WHERE
+        FOOD_ID IN (
+            SELECT
+                ID
+            FROM
+                FOOD
+            WHERE
+                CATEGORY_ID = D_CAT_ID
+        );
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'CART DELETED BECAUSE OF CATEGORY',
+        'Cart Deleted - '
+        || D_CAT_ID,
+        'SUCCESS'
+    );
+    DELETE FROM FOOD_RATING
+    WHERE
+        FOOD_ID IN (
+            SELECT
+                ID
+            FROM
+                FOOD
+            WHERE
+                CATEGORY_ID = D_CAT_ID
+        );
+    COMMIT;
+    DELETE FROM REPORT_FOOD
+    WHERE
+        FOOD_ID IN (
+            SELECT
+                ID
+            FROM
+                FOOD
+            WHERE
+                CATEGORY_ID = D_CAT_ID
+        );
+    COMMIT;
+    DELETE FROM FOOD
+    WHERE
+        CATEGORY_ID = D_CAT_ID;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'FOOD DELETED BECAUSE OF CATEGORY',
+        'Food Deleted - '
+        || D_CAT_ID,
+        'SUCCESS'
+    );
+    DELETE FROM CATEGORY
+    WHERE
+        ID = D_CAT_ID;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'CATEGORY_DELETE',
+        'Category Deleted - '
+        || D_CAT_ID,
+        'SUCCESS'
+    );
+END;
+/
+
+/**
+CREATE TABLE FOOD (
+    ID VARCHAR2(36) PRIMARY KEY,
+    NAME VARCHAR2(255) NOT NULL,
+    DESCRIPTION VARCHAR2(300) NOT NULL,
+    PRICE NUMBER NOT NULL,
+    RATING NUMBER DEFAULT 0,
+    CATEGORY_ID VARCHAR2(36) NOT NULL,
+    FOOD_IMAGE VARCHAR2(255) DEFAULT 'https://placehold.co/600x400',
+    FOREIGN KEY (CATEGORY_ID) REFERENCES CATEGORY(ID)
+);
+**/
+
+CREATE OR REPLACE PROCEDURE UPDATE_FOOD(
+    F_ID VARCHAR2,
+    F_NAME VARCHAR2,
+    F_DESCRIPTION VARCHAR2,
+    F_PRICE NUMBER,
+    F_IMAGE VARCHAR2
+) IS
+BEGIN
+    UPDATE FOOD
+    SET
+        NAME = F_NAME,
+        DESCRIPTION = F_DESCRIPTION,
+        PRICE = F_PRICE,
+        FOOD_IMAGE = F_IMAGE
+    WHERE
+        ID = F_ID;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'FOOD_UPDATE',
+        'Food Updated - '
+        || F_ID
+        || ' '
+        || F_NAME,
+        'SUCCESS'
+    );
+END;
+/
+
+CREATE OR REPLACE PROCEDURE DELETE_FOOD(
+    D_FOOD_ID VARCHAR2
+) IS
+BEGIN
+    DELETE FROM INGREDIENT
+    WHERE
+        FOOD_ID = D_FOOD_ID;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'INGREDIENT DELETED BECAUSE OF FOOD',
+        'Ingredients Deleted - '
+        || D_FOOD_ID,
+        'SUCCESS'
+    );
+    DELETE FROM CART
+    WHERE
+        FOOD_ID = D_FOOD_ID;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'CART DELETED BECAUSE OF FOOD',
+        'Cart Deleted - '
+        || D_FOOD_ID,
+        'SUCCESS'
+    );
+    DELETE FROM FOOD_RATING
+    WHERE
+        FOOD_ID = D_FOOD_ID;
+    COMMIT;
+    DELETE FROM REPORT_FOOD
+    WHERE
+        FOOD_ID = D_FOOD_ID;
+    COMMIT;
+    DELETE FROM FOOD
+    WHERE
+        ID = D_FOOD_ID;
+    COMMIT;
+    INSERT INTO LOGS (
+        TYPE,
+        MESSAGE,
+        STATUS
+    ) VALUES (
+        'FOOD_DELETE',
+        'Food Deleted - '
+        || D_FOOD_ID,
+        'SUCCESS'
+    );
+END;
+/

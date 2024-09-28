@@ -9,12 +9,14 @@ import { redirect } from 'next/navigation'
 async function page({params}) {
     // const data = await post_with_token('jwt/getKitchen', { kitchenId: params.id })
     const [kitchen, kitchen_images] = await Promise.all([post('getKitchen', { kitchenId: params.id }), post_with_token('jwt/getKitchenImage', { kitchenId: params.id })])
+    console.log(kitchen)
+
     if (kitchen.error !== undefined || kitchen.result.length === 0) {
         redirect('/404')
     }
   return (
       <div>
-          <div className='h-20'></div>
+          <div className='h-24'></div>
           <div className='h-auto w-full'>
               <h1 className='text-center mb-2 w-full text-2xl font-bold'>
                   Your Kitchen Images
@@ -38,7 +40,7 @@ async function page({params}) {
                   </div>
                   <div className='m-auto'>
                       <ApplyKitchen edit={true} kid={params.id} data={{
-                          KICHEN_NAME: kitchen.result[0]['KICHEN_NAME'],
+                          KICHEN_NAME: kitchen.result[0]['KITCHEN_NAME'],
                           KITCHEN_CITY_NAME: kitchen.result[0]['KITCHEN_CITY_NAME'],
                           KITCHEN_ADDRESS: kitchen.result[0]['KITCHEN_ADDRESS']
                       }} />
