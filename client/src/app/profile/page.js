@@ -17,11 +17,9 @@ async function page() {
 
   return (
     <div className=" bg-background flex flex-col gap-8">
-      <div className="h-[100vh] m-auto grid place-content-center">
         <Suspense fallback={<div>Loading...</div>}>
           <Personal res={res} />
         </Suspense>
-      </div>
       <Suspense fallback={<div>Loading...</div>}>
         <OrderList />
       </Suspense>

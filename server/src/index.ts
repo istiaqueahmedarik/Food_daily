@@ -2,7 +2,7 @@ import { Hono } from 'hono/quick'
 import { jwt } from 'hono/jwt'
 import type { JwtVariables } from 'hono/jwt'
 import * as dotenv from 'dotenv'
-import { runQuery } from '../db/connect/oracle'
+import { runCursorQuery, runQuery } from '../db/connect/oracle'
 import { uuidv7 } from 'uuidv7'
 import { prettyJSON } from 'hono/pretty-json'
 import { cors } from 'hono/cors'
@@ -89,7 +89,7 @@ app.get(
         clients[mn + '_' + mx].push(ws);
 
 
-        const c_ = await runQuery(`SELECT * FROM CONVERSATIONS WHERE USER_ID = :mn AND DELIVERY_PARTNER_ID = :mx`, { mn, mx });
+        const c_ = await runCursorQuery(`BEGIN GET_CONVERSATIONS(:mn, :mx, :cursor); END;`, { mn, mx });
         if (c_.length > 0) {
           conversationId = c_[0].CONVERSATION_ID;
         }
@@ -98,7 +98,8 @@ app.get(
           const res = await runQuery(`SELECT * FROM CONVERSATIONS WHERE USER_ID = :mn AND DELIVERY_PARTNER_ID = :mx`, { mn, mx });
           conversationId = res[0].CONVERSATION_ID;
         }
-        const res = await runQuery(`SELECT DATE_ADDED AS timestamp, SENDER_ID AS sender, MESSAGE AS content FROM CONVERSATIONS,MESSAGES WHERE USER_ID = :mn AND DELIVERY_PARTNER_ID = :mx AND MESSAGES.CONVERSATION_ID = :conversationId`, { mn, mx, conversationId });
+
+        const res = await runCursorQuery(`BEGIN GET_CONVERSATION_MESSAGES(:mn, :mx, :conversationId, :cursor); END;`, { mn, mx, conversationId });
         console.log(res)
         ws.send(JSON.stringify(res));
       },
@@ -142,9 +143,12 @@ app.get('/', (c) => {
 
 
 app.get('/ping', async (c) => {
-  const result = await runQuery('SELECT * FROM PING', {});
+  // const result = await runQuery('SELECT * FROM PING', {});
+  // if (result !== undefined && result.length)
+  //   return c.text(result[0]['COLUMN1'] + ' (from Oracle)');
+  const result = await runCursorQuery('BEGIN GET_ALL_USERS(:cursor); END;', {});
   if (result !== undefined && result.length)
-    return c.text(result[0]['COLUMN1'] + ' (from Oracle)');
+    return c.json(result);
   return c.text('PONG (DB Error But Still Alive)');
 })
 
@@ -200,7 +204,8 @@ app.post('/signup', async (c) => {
 interface Login { email: string, password: string, [key: string]: string }
 app.post('/login', async (c) => {
   const { email, password } = await c.req.json<Login>()
-  const result = await runQuery('SELECT * FROM USERS WHERE EMAIL = :email AND PASSWORD = :password', { email, password });
+  // const result = await runQuery('SELECT * FROM USERS WHERE EMAIL = :email AND PASSWORD = :password', { email, password });
+  const result = await runCursorQuery('BEGIN GET_USER_WITH_PASSWORD(:email, :password, :cursor); END;', { email, password });
   if (result !== undefined && result.length) {
     const token = jwt_.sign({ id: result[0]['ID'], email: result[0]['EMAIL'] }, process.env.JWT_SECRET)
     return c.json({ result, token });
@@ -213,7 +218,7 @@ app.get('/jwt/Profile', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
 
-  const result = await runQuery('SELECT NAME, DOB, ADDRESS, MOBILE, CITY_CODE, EMAIL, TYPE, PROFILE_IMAGE, CHEF.ID AS CHEF_ID, SPECIALITY FROM USERS,CHEF WHERE USERS.ID = :id AND USERS.EMAIL = :email AND CHEF.USER_ID(+) = USERS.ID', { id, email });
+  const result = await runCursorQuery('BEGIN GET_USER_DETAILS(:id, :email, :cursor); END;', { id, email });
   if (result !== undefined && result.length)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -271,34 +276,8 @@ app.get('/jwt/getChef', async (c) => {
 app.get('/jwt/chefDetails', async (c) => {
   const payload = c.get('jwtPayload')
   const { id } = payload
-  const result = await runQuery(`
-    SELECT 
-      USERS.NAME, 
-      USERS.DOB, 
-      USERS.ADDRESS, 
-      USERS.MOBILE, 
-      USERS.CITY_CODE, 
-      USERS.EMAIL, 
-      USERS.PROFILE_IMAGE, 
-      CHEF_NAME,
-      CHEF.ID AS CHEF_ID, 
-      CHEF.SPECIALITY, 
-      CHEF.EXPERIENCE, 
-      KITCHEN.ID AS KITCHEN_ID, 
-      KITCHEN.ADDRESS AS KITCHEN_ADDRESS, 
-      APPROVED, 
-      GET_KITCHEN_IMAGE(KITCHEN.ID) AS KITCHEN_IMAGE, 
-      KITCHEN.NAME AS KITCHEN_NAME, 
-      KITCHEN.CITY_NAME 
-    FROM 
-      USERS, 
-      CHEF, 
-      KITCHEN 
-    WHERE 
-      USERS.ID = CHEF.USER_ID(+) 
-      AND USERS.ID = :id 
-      AND CHEF.ID = KITCHEN.CHEF_ID(+)
-  `, { id });
+
+  const result = await runCursorQuery('BEGIN GET_USER_CHEF_KITCHEN_DETAILS(:id,:cursor); END;', { id })
 
   if (result !== undefined)
     return c.json({ result });
@@ -307,35 +286,8 @@ app.get('/jwt/chefDetails', async (c) => {
 
 app.get('/getChef/:cid', async (c) => {
   const { cid } = c.req.param();
-  const result = await runQuery(`
-    SELECT 
-      USERS.NAME, 
-      
-      USERS.DOB, 
-      USERS.ADDRESS, 
-      USERS.MOBILE, 
-      USERS.CITY_CODE, 
-      USERS.EMAIL, 
-      USERS.PROFILE_IMAGE, 
-      CHEF_NAME,
-      CHEF.ID AS CHEF_ID, 
-      CHEF.SPECIALITY, 
-      CHEF.EXPERIENCE, 
-      KITCHEN.ID AS KITCHEN_ID, 
-      KITCHEN.ADDRESS AS KITCHEN_ADDRESS, 
-      APPROVED, 
-      GET_KITCHEN_IMAGE(KITCHEN.ID) AS KITCHEN_IMAGE, 
-      KITCHEN.NAME AS KITCHEN_NAME, 
-      KITCHEN.CITY_NAME 
-    FROM 
-      USERS, 
-      CHEF, 
-      KITCHEN 
-    WHERE 
-      USERS.ID = CHEF.USER_ID 
-      AND CHEF.ID = :cid 
-      AND CHEF.ID = KITCHEN.CHEF_ID(+)
-  `, { cid });
+
+  const result = await runCursorQuery('BEGIN GET_CHEF_DETAILS(:cid, :cursor); END;', { cid });
 
   if (result !== undefined)
     return c.json({ result });
@@ -414,7 +366,7 @@ app.post('/getKitchen', async (c) => {
   kitchenId = kitchenId.toUpperCase();
 
 
-  const result = await runQuery('SELECT CHEF.ID AS CHEF_ID,   USERS.ID, USERS.NAME, KITCHEN.ID AS KITCHEN_ID, KITCHEN.ADDRESS AS KITCHEN_ADDRESS,KITCHEN.CITY_NAME AS KITCHEN_CITY_NAME, KITCHEN.APPROVED AS KITCHEN_APPROVED, KITCHEN.NAME AS KICHEN_NAME FROM KITCHEN, USERS, CHEF WHERE KITCHEN.ID = :kitchenId AND KITCHEN.CHEF_ID = CHEF.ID AND CHEF.USER_ID = USERS.ID', { kitchenId });
+  const result = await runCursorQuery('BEGIN GET_KITCHEN_DETAILS(:kitchenId,:cursor)', kitchenId);
   const image = await runQuery('SELECT IMAGE FROM KITCHEN_IMAGES WHERE KITCHEN_ID = :kitchenId', { kitchenId });
   if (result !== undefined)
     return c.json({ result, image });
@@ -880,7 +832,8 @@ app.get('/jwt/earningByDay/:days', async (c) => {
   const { days } = c.req.param();
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery("SELECT SUM(TOTAL*DELIVERY_COMMISION.AMOUNT) AS TOTAL_EARNING, TRUNC(DATE_ADDED) AS DAY FROM ORDERS, ACTIVE_DELIVERY, DELIVERY_COMMISION, DELIVERY_PARTNER WHERE ORDERS.DATE_ADDED >= TRUNC(SYSDATE) - :days AND DELIVERY_COMMISION.DELIVERY_PARTNER_ID = DELIVERY_PARTNER.ID  AND DELIVERY_PARTNER.USER_ID = : ID  AND ACTIVE_DELIVERY.DELIVERY_PARTNER_ID = :id AND ORDERS.STATUS = 'DELIVERED' AND ACTIVE_DELIVERY.ORDER_ID = ORDERS.ID GROUP BY TRUNC(DATE_ADDED) ORDER BY TRUNC(DATE_ADDED)", { days, id });
+
+  const result = await runCursorQuery('BEGIN GET_TOTAL_EARNINGS_BY_DELIVERY_PARTNER(:id, :days, :cursor); END;', { id, days });
   return c.json({ result });
 })
 
@@ -946,10 +899,7 @@ app.post('/search', async (c) => {
 
   let where = '';
   if (searchVals.length > 0) {
-    // where += ` AND UTL_MATCH.JARO_WINKLER_SIMILARITY(FOOD.NAME, :search0) > 60`;
-    // for (let i = 1; i < searchVals.length; i++) {
-    //   where += ` OR UTL_MATCH.JARO_WINKLER_SIMILARITY(FOOD.NAME, :search${i}) > 60`;
-    // }
+
     where += ` AND ( UPPER(FOOD.NAME) LIKE UPPER('%' || :search0 || '%')`;
     for (let i = 1; i < searchVals.length; i++) {
       where += ` OR UPPER(FOOD.NAME) LIKE UPPER('%' || :search${i} || '%')`;
@@ -1027,15 +977,6 @@ app.post('/search', async (c) => {
     sortWhere = ' ORDER BY RATING DESC';
   }
   else {
-    // if (searchVals.length > 0) {
-    //   sortWhere = ' ORDER BY UTL_MATCH.JARO_WINKLER_SIMILARITY(FOOD.NAME, :search0) DESC';
-    //   for (let i = 1; i < searchVals.length; i++) {
-    //     sortWhere += ` , UTL_MATCH.JARO_WINKLER_SIMILARITY(FOOD.NAME, :search${i}) DESC`;
-    //   }
-    // }
-    // else {
-    //   sortWhere = ' ORDER BY FOOD.RATING DESC';
-    // }
 
     sortWhere = ' ORDER BY RATING DESC';
 
@@ -1185,19 +1126,19 @@ app.get('/bestFoodCategory', async (c) => {
 
 app.get('/bestFood/:cid', async (c) => {
   const { cid } = c.req.param();
-  const result = await runQuery('SELECT * FROM FOOD, (SELECT FOOD_ID, COUNT(FOOD_ID) AS COUNT FROM CART WHERE FOOD_ID IN (SELECT ID FROM FOOD WHERE CATEGORY_ID IN (SELECT ID FROM CATEGORY WHERE KITCHEN_ID IN (SELECT ID FROM KITCHEN WHERE CHEF_ID = :cid))) GROUP BY FOOD_ID ORDER BY COUNT DESC FETCH FIRST 4 ROWS ONLY) B WHERE B.FOOD_ID = FOOD.ID', { cid });
+  const result = await runCursorQuery('BEGIN GET_TOP_FOOD_ITEMS_BY_CHEF(:cid, :cursor); END;', { cid });
   return c.json({ result });
 })
 
 app.get('/bestFoodCategory/:cid', async (c) => {
   const { cid } = c.req.param();
-  const result = await runQuery('SELECT * FROM CATEGORY, (SELECT CATEGORY_ID, COUNT(CATEGORY_ID) AS COUNT FROM FOOD WHERE CATEGORY_ID IN (SELECT ID FROM CATEGORY WHERE KITCHEN_ID IN (SELECT ID FROM KITCHEN WHERE CHEF_ID = :cid)) GROUP BY CATEGORY_ID ORDER BY COUNT DESC FETCH FIRST 5 ROWS ONLY) B WHERE B.CATEGORY_ID = CATEGORY.ID', { cid });
+  const result = await runCursorQuery('BEGIN GET_TOP_CATEGORIES_BY_CHEF(:cid, :cursor); END;', { cid });
   return c.json({ result });
 })
 
 app.get('/popularFood/:hour', async (c) => {
   const { hour } = c.req.param();
-  const result = await runQuery('SELECT FOOD.NAME, FOOD.PRICE, USERS.ID AS USERS_ID, FOOD.ID AS ID, USERS.NAME, PROFILE_IMAGE, CHEF_NAME, FOOD.DESCRIPTION, FOOD.FOOD_IMAGE AS FOOD_IMAGE FROM USERS, CHEF, CATEGORY, KITCHEN, FOOD, (SELECT FOOD_ID, COUNT(FOOD_ID) AS COUNT FROM CART WHERE DATE_ADDED >= SYSDATE - :hour/24 GROUP BY FOOD_ID ORDER BY COUNT DESC FETCH FIRST 10 ROWS ONLY) B WHERE B.FOOD_ID = FOOD.ID AND FOOD.CATEGORY_ID = CATEGORY.ID AND CATEGORY.KITCHEN_ID = KITCHEN.ID AND CHEF.ID = KITCHEN.CHEF_ID AND CHEF.USER_ID = USERS.ID', { hour });
+  const result = await runCursorQuery('BEGIN GET_TOP_FOOD_ITEMS(:hour, :cursor); END;', { hour });
   return c.json({ result });
 })
 
@@ -1244,24 +1185,7 @@ app.post('/jwt/orderDetails', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   console.log(oid)
-  const result = await runQuery(`SELECT * FROM (SELECT NAME, PROFILE_IMAGE, ORDERS.ID AS ORDER_ID, ORDERS.TOTAL, SHIPPING_NAME, SHIPPING_PHONE, SHIPPING_ADD  FROM ACTIVE_DELIVERY, USERS, ORDERS WHERE ACTIVE_DELIVERY.DELIVERY_PARTNER_ID = USERS.ID AND ACTIVE_DELIVERY.ORDER_ID = :oid AND ORDERS.ID = :oid) R, (SELECT KI.ID AS KITCHEN_ID,  ORDER_ID, FOOD_NAMES, TOTAL, DATE_ADDED, DATE_SHIPPED, DATE_DELIVERED, SHIPPING_ADD, SHIPPING_PHONE, SHIPPING_NAME, GET_ORDER_STATUS(ORD.STATUS) AS ORDER_STATUS  FROM(SELECT
-    C.DELETED_ID AS ORDER_ID,
-    K.ID,
-    GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES
-    
-FROM
-    CART     C
-    JOIN FOOD F
-    ON C.FOOD_ID = F.ID
-    JOIN CATEGORY CAT
-    ON F.CATEGORY_ID = CAT.ID
-    JOIN KITCHEN K
-    ON CAT.KITCHEN_ID = K.ID
-WHERE
-    C.DELETED_ID IS NOT NULL
-GROUP BY
-    C.DELETED_ID,
-    K.ID) Q, ORDERS ORD, KITCHEN KI, CHEF, USERS WHERE Q.ID = KI.ID AND CHEF.ID = KI.CHEF_ID AND USERS.ID = CHEF.USER_ID AND Q.ORDER_ID = ORD.ID  AND ORD.ID = : oid ORDER BY CASE WHEN ORD.STATUS = 'DELIVERED' THEN 1 ELSE 0 END ASC, ORD.DATE_ADDED ASC) S WHERE R.ORDER_ID = S.ORDER_ID`, { oid });
+  const result = await runCursorQuery('BEGIN GET_ORDER_DETAILS(:oid, :cursor); END;', { oid });
 
   return c.json({ result });
 })
@@ -1292,25 +1216,8 @@ app.post('/jwt/chefOrder', async (c) => {
   const { id, email } = payload
   const { kid } = await c.req.json<{ kid: string }>()
   console.log(kid)
-  const result = await runQuery(`SELECT KI.ID AS KITCHEN_ID,  ORDER_ID, FOOD_NAMES, TOTAL, DATE_ADDED, DATE_SHIPPED, DATE_DELIVERED, SHIPPING_ADD, SHIPPING_PHONE, SHIPPING_NAME, 
-    GET_ORDER_STATUS(ORD.STATUS) AS ORDER_STATUS  FROM (SELECT
-    C.DELETED_ID AS ORDER_ID,
-    K.ID,
-    GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES
-    
-FROM
-    CART     C
-    JOIN FOOD F
-    ON C.FOOD_ID = F.ID
-    JOIN CATEGORY CAT
-    ON F.CATEGORY_ID = CAT.ID
-    JOIN KITCHEN K
-    ON CAT.KITCHEN_ID = K.ID
-WHERE
-    C.DELETED_ID IS NOT NULL
-GROUP BY
-    C.DELETED_ID,
-    K.ID) Q, ORDERS ORD, KITCHEN KI,CHEF, USERS WHERE Q.ID = KI.ID AND CHEF.ID = KI.CHEF_ID AND USERS.ID = CHEF.USER_ID AND Q.ORDER_ID = ORD.ID AND CHEF.USER_ID = :id AND KI.ID = :kid ORDER BY CASE WHEN ORD.STATUS = 'DELIVERED' THEN 1 ELSE 0 END ASC, ORD.DATE_ADDED ASC`, { kid, id })
+
+  const result = await runCursorQuery('BEGIN GET_ORDER_DETAILS_BY_CHEF_AND_KITCHEN(:kid, :id, :cursor); END;', { kid, id });
 
   return c.json({ result });
 })
@@ -1326,25 +1233,8 @@ app.post('/jwt/accptOrderChef', async (c) => {
 app.post('/jwt/orderHistory', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  const result = await runQuery(`SELECT KI.ID AS KITCHEN_ID,  ORDER_ID, FOOD_NAMES, TOTAL, DATE_ADDED, DATE_SHIPPED, DATE_DELIVERED, SHIPPING_ADD, SHIPPING_PHONE, SHIPPING_NAME, 
-    GET_ORDER_STATUS(ORD.STATUS) AS ORDER_STATUS  FROM (SELECT
-    C.DELETED_ID AS ORDER_ID,
-    K.ID,
-    GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES
-    
-FROM
-    CART     C
-    JOIN FOOD F
-    ON C.FOOD_ID = F.ID
-    JOIN CATEGORY CAT
-    ON F.CATEGORY_ID = CAT.ID
-    JOIN KITCHEN K
-    ON CAT.KITCHEN_ID = K.ID
-WHERE
-    C.DELETED_ID IS NOT NULL
-GROUP BY
-    C.DELETED_ID,
-    K.ID) Q, ORDERS ORD, KITCHEN KI,CHEF, USERS WHERE Q.ID = KI.ID AND CHEF.ID = KI.CHEF_ID AND USERS.ID = CHEF.USER_ID AND Q.ORDER_ID = ORD.ID AND ORD.USER_ID = :id  ORDER BY  ORD.DATE_ADDED DESC`, { id })
+
+  const result = await runCursorQuery('BEGIN GET_ORDER_DETAILS_BY_USER_ID(:id, :cursor); END;', { id });
   return c.json({ result });
 })
 
@@ -1374,21 +1264,8 @@ app.get('/jwt/getTables', async (c) => {
   const user = await runQuery('SELECT * FROM USERS WHERE ID = :id', { id });
   if (user.length === 0)
     return c.json({ status: false });
-  const result = await runQuery(`
-    SELECT
-    TABLE_NAME,
-    LISTAGG(COLUMN_NAME, ',') WITHIN GROUP (ORDER BY COLUMN_ID) AS COLUMNS
-FROM
-    USER_TAB_COLUMNS
-WHERE
-    TABLE_NAME NOT LIKE '%$%' -- Exclude tables with '$'
-    AND TABLE_NAME NOT LIKE '%SCHEDULER%' -- Exclude tables with 'SCHEDULER' in their names
-    AND TABLE_NAME NOT IN ( 'LOGMNRC_CONCOL_GG', 'LOGMNRC_CON_GG', 'LOGMNRC_DBNAME_UID_MAP', 'LOGMNRC_GSBA', 'LOGMNRC_GSII', 'LOGMNRC_GTCS', 'LOGMNRC_GTLO', 'LOGMNRC_INDCOL_GG', 'LOGMNRC_IND_GG', 'LOGMNRC_SEQ_GG', 'LOGMNRC_SHARD_TS', 'LOGMNRC_TS', 'LOGMNRC_TSPART', 'LOGMNRGGC_GTCS', 'LOGMNRGGC_GTLO', 'LOGMNRP_CTAS_PART_MAP', 'LOGMNR_LOGMNR_BUILDLOG', 'LOGMNR_SHARD_TS', 'MVIEW_EVALUATIONS', 'MVIEW_EXCEPTIONS', 'MVIEW_FILTER', 'MVIEW_FILTERINSTANCE', 'MVIEW_LOG', 'MVIEW_RECOMMENDATIONS', 'MVIEW_WORKLOAD', 'PRODUCT_PRIVS', 'REDO_DB', 'REDO_LOG', 'SQLPLUS_PRODUCT_PROFILE' )
-GROUP BY
-    TABLE_NAME
-ORDER BY
-    TABLE_NAME
-    `, {});
+
+  const result = await runCursorQuery('BEGIN GET_TABLE_COLUMNS(:cursor); END;', {});
   return c.json({ result });
 })
 
