@@ -50,7 +50,7 @@ const saveMessage = async (message: any, user1: any, user2: any, ws: any) => {
     mn = user2;
     mx = user1;
   }
-  console.log(data)
+
   for (let i = 0; i < clients[mn + '_' + mx].length; i++) {
     clients[mn + '_' + mx][i].send(JSON.stringify(data));
   }
@@ -69,7 +69,7 @@ app.get(
       onOpen: async (_event, ws) => {
 
         const { user1, user2 } = c.req.param();
-        console.log(user1, user2);
+
 
         let mn: string = "";
         let mx: string = "";
@@ -100,7 +100,7 @@ app.get(
         }
 
         const res = await runCursorQuery(`BEGIN GET_CONVERSATION_MESSAGES(:mn, :mx, :conversationId, :cursor); END;`, { mn, mx, conversationId });
-        console.log(res)
+
         ws.send(JSON.stringify(res));
       },
       onMessage: async (event, ws) => {
@@ -244,7 +244,7 @@ app.post('/jwt/updateProfileImage', async (c) => {
   const { profile_image_url } = await c.req.json<{ profile_image_url: string }>();
 
   const result = await runQuery(`BEGIN UPDATE_PROFILE_IMAGE(:id,:email,:profileImage); END;`, { id, email, profileImage: profile_image_url });
-  console.log(result)
+
   return c.json({ result });
 })
 
@@ -515,7 +515,7 @@ app.get('/jwt/verifyDelivery', async (c) => {
   if (user[0]['APPROVED'] !== 1)
     return c.json({ error: 'Invalid Token' });
   const result = await runQuery('SELECT USERS.ID AS USER_ID, DELIVERY_PARTNER.ID AS DELIVERY_ID, LICENSE, VEHICLE, NAME FROM DELIVERY_PARTNER,USERS WHERE USERS.ID = DELIVERY_PARTNER.USER_ID AND VERIFIED = 0', {});
-  console.log(result)
+
   if (result !== undefined)
     return c.json({ result });
   return c.json({ error: 'Invalid Token' });
@@ -705,14 +705,14 @@ app.post('/jwt/addToCartScheduled', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   const { kid, fid, orders } = await c.req.json<{ kid: string, fid: string, orders: any[] }>()
-  console.log(kid, fid, orders)
+
   for (let i = 0; i < orders.length; i++) {
     const dt = orders[i].date;
     const quantity = orders[i].quantity;
     const time = orders[i].time;
     const combineDate = dt + ' ' + time;
     const converted = formatDate(new Date(combineDate));
-    console.log(converted)
+
     await runQuery('BEGIN ADD_TO_CART_SCHEDULED(:id, :fid, :quantity, TO_DATE(:converted, \'DD-MM-YYYY HH24:MI:SS\')); END;', { id, fid, quantity, converted });
   }
   return c.json({ result: 'ok' });
@@ -860,7 +860,7 @@ app.post('/sslcommerz/success', async (c) => {
   if (valid) {
 
     await runQuery('BEGIN CHECKOUT(:ord_id, :id, :ammount, :address, :mobile,:name); END;', { ord_id, id, ammount, address, mobile, name });
-    console.log('Order Placed');
+
     return c.redirect('http://localhost:3000/success_payment');
 
   }
@@ -1184,7 +1184,7 @@ app.post('/jwt/orderDetails', async (c) => {
   const { oid } = await c.req.json<{ oid: string }>()
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-  console.log(oid)
+
   const result = await runCursorQuery('BEGIN GET_ORDER_DETAILS(:oid, :cursor); END;', { oid });
 
   return c.json({ result });
@@ -1215,7 +1215,7 @@ app.post('/jwt/chefOrder', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   const { kid } = await c.req.json<{ kid: string }>()
-  console.log(kid)
+
 
   const result = await runCursorQuery('BEGIN GET_ORDER_DETAILS_BY_CHEF_AND_KITCHEN(:kid, :id, :cursor); END;', { kid, id });
 
@@ -1254,7 +1254,7 @@ app.get('/jwt/logs', async (c) => {
   if (user.length === 0)
     return c.json({ status: false });
   const result = await runQuery('SELECT * FROM LOGS ORDER BY LOG_TIMESTAMP DESC', {});
-  console.log(result)
+
   return c.json({ result });
 })
 
@@ -1280,7 +1280,7 @@ app.post('/jwt/runQuery', async (c) => {
     query = query.slice(0, -1);
   if (query.includes('INSERT') || query.includes('UPDATE') || query.includes('DELETE') || query.includes('ADMIN') || query.includes('DROP') || query.includes('TRUNCATE') || query.includes('ALTER') || query.includes('GRANT') || query.includes('REVOKE'))
     return c.json({ error: 'Invalid Query' });
-  console.log(query)
+
   try {
     const startTime = Date.now();
     const result = await runQuery(query, {});
@@ -1288,7 +1288,7 @@ app.post('/jwt/runQuery', async (c) => {
     const time = endTime - startTime;
     return c.json({ result, time });
   } catch (e) {
-    console.log(e)
+
     return c.json({ error: (e as Error).message || e });
   }
 })
@@ -1393,7 +1393,7 @@ app.get('/jwt/allChefs', async (c) => {
   if (isAdmin.length === 0)
     return c.json({ result: [] });
   const result = await runQuery('SELECT CHEF.ID,CHEF_NAME AS NAME, SPECIALITY, GET_RATING_CHEF(CHEF.ID) AS RATING, STATUS FROM CHEF,USERS WHERE USERS.ID = CHEF.USER_ID', {});
-  console.log(result)
+
   return c.json({ result });
 })
 

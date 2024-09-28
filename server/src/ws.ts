@@ -41,7 +41,7 @@ const saveMessage = async (message: any, user1: any, user2: any, ws: any) => {
         mn = user2;
         mx = user1;
     }
-    console.log(data)
+
     for (let i = 0; i < clients[mn + '_' + mx].length; i++) {
         clients[mn + '_' + mx][i].send(JSON.stringify(data));
     }
@@ -60,7 +60,7 @@ app.get(
             onOpen: async (_event, ws) => {
 
                 const { user1, user2 } = c.req.param();
-                console.log(user1, user2);
+
 
                 let mn: string = "";
                 let mx: string = "";
