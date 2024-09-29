@@ -11,12 +11,12 @@ import Button from "./ui/Button"
 
 export default async function CategoryTable({id}) {
   const categories = await get_with_token(`jwt/allCategory/${id}`)
-  console.log('Categories:', categories)
-  console.log(categories)
+  
+  
   const handleSubmit = async (st,formData) => {
     'use server'
     const rawFormData = Object.fromEntries(formData)
-    console.log('Form Data:', rawFormData)
+    
     // const noFileSelected = (image size is 0) 
     const noFileSelected = (rawFormData.image.size === 0)
     let url1 = st.img;
@@ -32,7 +32,7 @@ export default async function CategoryTable({id}) {
       description: rawFormData.description,
       image: url1
     })
-    console.log('No File Selected:', noFileSelected)
+    
     revalidatePath(`/chef/my/${id}`)
   }
 

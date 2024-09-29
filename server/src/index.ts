@@ -755,7 +755,7 @@ app.get('/jwt/getOrders', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI WHERE KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'PREPEARED' AND O.DATE_SHIPPED IS NULL  AND O.DATE_PREPARED IS NOT NULL   AND O.DATE_DELIVERED IS NULL AND O.DATE_ADDED <= SYSDATE ORDER BY O.DATE_ADDED", {});
-  console.log(result)
+  
   return c.json({ result });
 })
 
@@ -763,6 +763,7 @@ app.get('/jwt/getOrders', async (c) => {
 app.get('/jwt/activeOrders', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
+  console.log(id);
   const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI,     ACTIVE_DELIVERY ACD WHERE ACD.DELIVERY_PARTNER_ID = :id AND ACD.ORDER_ID = O.ID AND KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'SHIPPED' AND O.DATE_DELIVERED IS NULL AND O.DATE_ADDED <= SYSDATE ORDER BY O.DATE_ADDED", { id });
   return c.json({ result });
 })
@@ -841,8 +842,8 @@ app.get('/jwt/earningByDay/:days', async (c) => {
   const { days } = c.req.param();
   const payload = c.get('jwtPayload')
   const { id, email } = payload
-
-  const result = await runCursorQuery('BEGIN GET_TOTAL_EARNINGS_BY_DELIVERY_PARTNER(:id, :days, :cursor); END;', { id, days });
+  let num = Number(days);
+  const result = await runCursorQuery('BEGIN GET_TOTAL_EARNINGS_BY_DELIVERY_PARTNER(:id, :num, :cursor); END;', { id, num });
   return c.json({ result });
 })
 
@@ -1225,8 +1226,8 @@ app.post('/jwt/chefOrder', async (c) => {
   const { id, email } = payload
   const { kid } = await c.req.json<{ kid: string }>()
 
-
-  const result = await runCursorQuery('BEGIN GET_ORDER_DETAILS_BY_CHEF_AND_KITCHEN(:kid, :id, :cursor); END;', { kid, id });
+  console.log(kid,id);
+  const result = await runCursorQuery(`BEGIN GET_ORDER_DETAILS_BY_CHEF_AND_KITCHEN(:id, :kid, :cursor); END;`, { kid, id });
 
   return c.json({ result });
 })
@@ -1536,7 +1537,7 @@ app.post('/jwt/updateCategory', async (c) => {
   const { id } = payload;
   const { cat_id, name, description, image } = await c.req.json<{ cat_id: string, name: string, description: string, image: string }>();
   const result = await runQuery('BEGIN UPDATE_CATEGORY(:cat_id, :name, :description, :image); END;', { cat_id, name, description, image });
-  console.log(cat_id, name, description, image);
+  
   return c.json(result);
 })
 
@@ -1643,7 +1644,7 @@ app.post('/jwt/updateFood', async (c) => {
   const payload = c.get('jwtPayload');
   const { id } = payload;
   const { fid, name, description, price, image } = await c.req.json<{ fid: string, name: string, description: string, price: number, image: string }>();
-  console.log(fid, name, description, price, image);
+  
   const result = await runQuery('BEGIN UPDATE_FOOD(:fid, :name, :description, :price, :image); END;', { fid, name, description, price, image });
   return c.json(result);
 })

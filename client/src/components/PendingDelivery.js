@@ -9,6 +9,7 @@ async function PendingDelivery(url,style) {
     const [orders, pending] = await Promise.all([get_with_token('jwt/getOrders'), get_with_token('jwt/activeOrders')]);
     const data = orders.result;
     const length = pending.result.length;
+    console.log(data,pending);
   return (
       <div className="p-6 border border-input rounded-xl">
           <h2 className="text-xl font-bold mb-4">Pending Offers</h2>
