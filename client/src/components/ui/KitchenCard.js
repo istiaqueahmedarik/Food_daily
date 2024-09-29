@@ -11,7 +11,7 @@ export const experimental_ppr = true
 async function KitchenCard({ name = "Hungry", image = "/food.svg", address = "123, Food Street", edit = "", profile, approved = false }) {
   const blurImg = await getImage();
   if(image===null || image===undefined || image==='No image found'){ image="/burger.svg" }
-  console.log(image)
+  
   return (
       <div className="relative w-[300px] h-[400px] rounded-xl overflow-hidden group border border-input ">
       <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-ring/15 to-secondary/80 z-10"></div>

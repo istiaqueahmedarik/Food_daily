@@ -31,7 +31,7 @@ const initialOrders = [
 
 export default async function ChefsOrder({ kid }) {
     const data = await post_with_token('jwt/chefOrder',{kid:kid});
-
+    console.log(data);
     const orders = data.result;
 
     
