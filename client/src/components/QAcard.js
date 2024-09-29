@@ -7,7 +7,7 @@ import Button2 from './ui/Button2'
 function QAcard(person) {
   return (
       <tr key={person['ID']} className="border-b transition-colors border-input  hover:bg-muted/50 data-[state=selected]:bg-muted">
-          <td className="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{person['FIRST_NAME']} {person['LAST_NAME']}</td>
+          <td className="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{person['NAME']['FIRST_NAME']} {person['NAME']['LAST_NAME']}</td>
           <td className="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">{person['EMAIL']}</td>
           <td className="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
               <Link className="text-primary rounded-full border border-input px-4 py-2" href={person['CV_LINK']}>

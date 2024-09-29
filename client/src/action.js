@@ -282,10 +282,6 @@ export async function applyChef(prevState,formData) {
     const rawFormData = Object.fromEntries(formData)
     const response = await post_with_token('jwt/applyChef', rawFormData)
     
-    if (response.error !== undefined)
-        return {
-            message: response.error
-        }
     redirect('/success')
 }
 
@@ -361,6 +357,7 @@ export async function qa_apply(formData)
 export async function approveQAofficer(st,formData)
 {
     // const rawFormData = Object.fromEntries(formData)
+    
     if (st.st === 2)
     {
         const url = st.url
@@ -372,6 +369,18 @@ export async function approveQAofficer(st,formData)
             message: response.error
         }
     revalidatePath('/admin')
+}
+
+export async function banDelivery(did)
+{
+    const response = await post_with_token('jwt/banDelivery', { did })
+    revalidatePath('/admin/manage')
+}
+
+export async function unbanDelivery(did)
+{
+    const response = await post_with_token('jwt/unbanDelivery', { did })
+    revalidatePath('/admin/manage')
 }
 
 export async function approveKitchen(st,formData)
@@ -405,6 +414,11 @@ export async function disapproveDelivery(st, formData) {
     revalidatePath('/qa_dashboard/qa')
 }
 
+export async function updateCategory(formData)
+{
+
+}
+
 export async function disapproveKitchen(st, formData) {
     // const rawFormData = Object.fromEntries(formData)
     const imgs = await post_with_token('jwt/getKitchenImages', st)
@@ -432,6 +446,7 @@ export async function addCategory(st, formData)
     
     redirect(`/chef/my/${kitchen_id}`)
 }
+
 
 
 export async function addDish(st, formData)
@@ -494,7 +509,7 @@ export async function addCart(st, formData)
 }
 
 export async function addCartScheduled(data) {
-    console.log(data)
+    
     await post_with_token('jwt/addToCartScheduled', data)
     redirect(`/chef/kitchen/${data.kid}`)
 }
@@ -510,7 +525,7 @@ export async function checkout(formData)
 {
     const raw = Object.fromEntries(formData)
     
-
+    
     const cart = await get_with_token('jwt/getCart');
     const res = await get_with_token('jwt/chefDetails');
     const token = cookies().get('token')
@@ -534,7 +549,7 @@ export async function checkout(formData)
         product_name: 'Food.',
         product_category: 'Food',
         product_profile: 'Food',
-        cus_name: res.result[0]['FIRST_NAME'] + ' ' + res.result[0]['LAST_NAME'],
+        cus_name: res.result[0]['NAME']['FIRST_NAME'] + ' ' + res.result[0]['NAME']['LAST_NAME'],
         cus_email: res.result[0]['EMAIL'],
         cus_add1: res.result[0]['ADDRESS'],
         cus_add2: '',
@@ -568,8 +583,8 @@ export async function checkout(formData)
         },
         body: rawbody
     });
-
     const dt = await response.json();
+    
     redirect(dt.GatewayPageURL);
 }
 
@@ -680,7 +695,7 @@ export async function resolvedIssue(st)
 export async function investigateIssue(st, status)
 {
     const res = await post_with_token('jwt/investigateReport', { 'rid': st })
-    console.log(st)
+    
     revalidatePath('/admin/reports')
 }
 
@@ -711,7 +726,7 @@ export async function removeAdmin(st)
 
 export async function runQuery(query) { 
     const res = await post_with_token('jwt/runQuery', { 'query': query })
-    console.log(query)
+    
     if (res.error !== undefined)
         return {
             error: res.error

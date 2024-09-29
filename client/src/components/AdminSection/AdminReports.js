@@ -29,7 +29,7 @@ function AdminReports({data}) {
                               const binded2 = resolvedIssue.bind(null, report['REPORT_FOOD_ID']);
                               return (
                                   <TableRow key={report['ID']}>
-                                      <TableCell>{report['FIRST_NAME']}</TableCell>
+                                      <TableCell>{report['NAME']['FIRST_NAME']}</TableCell>
                                       <TableCell>{report['REASON']}</TableCell>
                                       <TableCell>{report['STATUS']}</TableCell>
                                       <TableCell>

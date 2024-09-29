@@ -11,7 +11,7 @@ import { getBlur } from '@/util'
 async function page() {
     const res = await get_with_token('jwt/getCart');
     const data = res.result;
-    console.log(data)
+    
   return (
       <div className='grid grid-cols-2'>
           <div className='m-auto'>

@@ -21,7 +21,7 @@ function ReviewCard({ review }) {
     return (
         <div className="mb-4 p-4 bg-muted rounded-lg">
             <div className="flex items-center justify-between mb-2">
-                <span className="font-semibold">{review['FIRST_NAME']}</span>
+                <span className="font-semibold">{review['NAME']['FIRST_NAME']}</span>
                 <div className="flex">
                     {[...Array(5)].map((_, i) => (
                         <StarIcon key={i} className={`w-4 h-4 ${i < review['RATING'] ? 'text-primary fill-primary' : 'text-muted-foreground'}`} />

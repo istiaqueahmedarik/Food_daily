@@ -5,7 +5,7 @@ import { get_with_token } from '@/action';
 
 export async function AdminTop() {
     const data = await get_with_token('jwt/allSummary');
-    console.log(data)
+    
   return (
       <div className="grid grid-cols-12 gap-6 m-5">
           <Card className="col-span-3">

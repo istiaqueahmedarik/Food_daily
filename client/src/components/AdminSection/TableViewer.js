@@ -3,10 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Label } from '../ui/label'
 
-
-
-
-export default function TableViewer({ data  }) {
+export default function TableViewer({ data }) {
     if (!data || data.length === 0) {
         return <p className="text-center text-muted-foreground">No data available.</p>
     }
@@ -45,9 +42,11 @@ export default function TableViewer({ data  }) {
         </div>
     )
 }
+
 var isDate = function (date) {
     return (new Date(date) !== "Invalid Date") && !isNaN(new Date(date));
 }
+
 function formatCellValue(value) {
     if (value === null || value === undefined) {
         return 'N/A'
@@ -57,6 +56,9 @@ function formatCellValue(value) {
     }
     if (isDate(value)) {
         return new Date(value).toLocaleString()
+    }
+    if (typeof value === 'object') {
+        return JSON.stringify(value)
     }
     return String(value)
 }
