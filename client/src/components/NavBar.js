@@ -4,6 +4,7 @@ import { ChefHat, Lock, LogIn, LogOut, SearchCode, ShieldCheck, ShoppingCartIcon
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { ModeToggle } from './ThemeSwtich';
+import Image from 'next/image';
 
 async function NavBar() {
     let status = []
@@ -30,8 +31,10 @@ async function NavBar() {
 
 
     return (
-        <header className={` transition-all will-change-transform flex  justify-between items-center mb-12 z-30 fixed bg-transparent  backdrop-blur-lg  w-full p-6`}>
-            <Link href={"/"} className="text-2xl font-bold text-foreground">Food-Daily</Link>
+        <header className={`backdrop-blur-sm transition-all will-change-transform flex  justify-between items-center mb-12 z-30 fixed bg-transparent  w-full p-6`}>
+            <Link href={"/"} className="text-2xl font-bold text-foreground">
+                <Image src="/logo.jpg" alt="logo" width={50} height={50} className='rounded-full h-12 w-12' />
+            </Link>
             
                 {cookies().get('token') ? (
                 <div className='flex flex-wrap items-end'>

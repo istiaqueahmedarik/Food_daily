@@ -6,6 +6,7 @@ import Button from "./ui/Button"
 import { login } from "@/action"
 import { useFormState } from "react-dom"
 import { getBlur } from "@/util"
+import Loginsvg from "./ui/svg/Loginsvg"
 const prevState = {
     message: ''
 }
@@ -14,9 +15,9 @@ function Login() {
   return (
       <div className="">
           {/* <NavBar vis={true} /> */}
-          <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
-              <div className="flex items-center justify-center py-12  border-r-2 border-r-foreground">
-                  <div className="mx-auto grid w-[350px] gap-6">
+          <div className="pt-24 w-full lg:grid lg:grid-cols-2 ">
+              <div className="flex items-center justify-center  border-r-foreground">
+                  <div className="mx-auto grid w-max gap-6 border border-input px-9 py-6 rounded-md">
                       <div className="grid gap-2 text-center">
                           <h1 className="text-3xl font-bold">Login</h1>
                           <p className="text-balance text-muted-foreground">
@@ -65,14 +66,15 @@ function Login() {
                       </div>
                   </div>
               </div>
-              <div className="bg-background lg:block">
-                  <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
+              <div className="bg-background lg:block w-full grid place-content-center">
+                  {/* <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60}
                       src="/login.svg"
                       alt="Image"
                       width="1920"
                       height="1080"
                       className="h-full w-96 m-auto  "
-                  />
+                  /> */}
+                  <Loginsvg  className=""/>
               </div>
           </div>
       </div>

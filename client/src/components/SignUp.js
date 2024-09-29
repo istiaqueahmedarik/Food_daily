@@ -8,6 +8,7 @@ import { signup } from '@/action';
 import { useFormState } from 'react-dom';
 import Button from './ui/Button';
 import { getBlur } from '@/util';
+import { Input } from './ui/input';
 const initialState = {
     message: '',
 }
@@ -32,11 +33,11 @@ function SignUp() {
                               <label htmlFor="firstName" className="block text-sm font-medium text-muted-foreground mb-1">
                                   First Name
                               </label>
-                              <input
+                              <Input
                                   type="text"
                                   id="firstName"
                                   name='firstName'
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-Input bg-background text-foreground focus:outline-Input outline-none"
                                   required
 
                               />
@@ -45,11 +46,11 @@ function SignUp() {
                               <label htmlFor="lastName" className="block text-sm font-medium text-muted-foreground mb-1">
                                   Last Name
                               </label>
-                              <input
+                              <Input
                                   type="text"
                                   id="lastName"
                                     name='lastName'
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-Input bg-background text-foreground focus:outline-Input outline-none"
                                   required
                               />
                           </div>
@@ -58,11 +59,11 @@ function SignUp() {
                           <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-1">
                               Email
                           </label>
-                          <input
+                          <Input
                               type="email"
                               id="email"
                                 name='email'
-                              className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
+                              className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-Input bg-background text-foreground focus:outline-Input outline-none"
                               required
                           />
                       </div>
@@ -75,7 +76,7 @@ function SignUp() {
                                   <select
                                       id="country"
                                         name="cityCode"
-                                      className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none appearance-none"
+                                      className="w-full py-1.5 px-4 pr-12 rounded-md border-[0.5px] border-Input bg-background text-foreground focus:outline-Input outline-none appearance-none"
                                   >
                                       <option  value="44" Selected>UK (+44)</option>
                                       <option  value="1">USA (+1)</option>
@@ -303,11 +304,11 @@ function SignUp() {
                               <label htmlFor="mobileNumber" className="block text-sm font-medium text-muted-foreground mb-1">
                                   Mobile Number
                               </label>
-                              <input
+                              <Input
                                   type="tel"
                                   id="mobileNumber"
                                     name='mobileNumber'
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-Input bg-background text-foreground focus:outline-Input outline-none"
                                   required
                               />
                           </div>
@@ -315,11 +316,11 @@ function SignUp() {
                                 <label htmlFor="dob" className="block text-sm font-medium text-muted-foreground mb-1">
                                   Date of Birth
                               </label>
-                                <input
+                                <Input
                                     type="date"
                                     id="dob"
                                         name='dob'
-                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
+                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-Input bg-background text-foreground focus:outline-Input outline-none"
                                   required
                               />
                               
@@ -328,11 +329,11 @@ function SignUp() {
                                 <label htmlFor="address" className="block text-sm font-medium text-muted-foreground mb-1">
                                   Address
                               </label>
-                                <input
+                                <Input
                                     type="text"
                                     id="address"
                                         name='address'
-                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
+                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-Input bg-background text-foreground focus:outline-Input outline-none"
                                   required
                               />
                               </div>
@@ -343,11 +344,11 @@ function SignUp() {
                               Password
                           </label>
                           <div className="relative">
-                              <input
+                              <Input
                                   type={showPassword ? 'text' : 'password'}
                                   id="password"
                                     name='password'
-                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
+                                  className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-Input bg-background text-foreground focus:outline-Input outline-none"
                                   required
                               />
                               <button
@@ -369,11 +370,11 @@ function SignUp() {
                                 Confirm Password
                             </label>
                             <div className="relative">
-                                <input
+                                <Input
                                     type={showPassword ? 'text' : 'password'}
                                     id="confirmPassword"
                                         name='confirmPassword'
-                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-input bg-background text-foreground focus:outline-input outline-none"
+                                    className="w-full py-3 px-4 pr-12 rounded-md border-[0.5px] border-Input bg-background text-foreground focus:outline-Input outline-none"
                                     required
                                 />
                                 <button
