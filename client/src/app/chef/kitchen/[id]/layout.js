@@ -15,7 +15,7 @@ async function layout({ params, children }) {
     {
         'use server'
         const search = formData.get('search')
-        console.log(data)
+        
         const city = data['KITCHEN_CITY_NAME']
         const chef_name = ch['CHEF_NAME']
         // ?city=DHAKA&chef=Istiaque%20Ahmed&kitchen=Hungry%20hungry&price=34,235
