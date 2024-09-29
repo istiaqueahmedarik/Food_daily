@@ -1,85 +1,76 @@
-import { ArrowRight, Beef, CroissantIcon, HandPlatter, Heater, Pizza, Search, Soup, User } from "lucide-react"
+import { ArrowRight, Search, User } from "lucide-react"
 import Image from "next/image"
-import NavBar from "./NavBar"
 import Link from "next/link"
 import { cookies } from "next/headers"
-import HeroCover from "./HeroCover"
 import { redirect } from "next/navigation"
+import { Button3 } from "@/components/ui/button3"
+import { Input } from "@/components/ui/input"
 
 export const dynamic = 'force-static';
 
-async function Hero() {
-    async function search(formData) {
-        "use server"
-        const city = formData.get('city').split(' ').join(',')
-        redirect(`/search?city=${city}`)
-    }
-    return (
-      
-        
-      <div className="min-h-screen relative  text-ring ">
-            
-          <div className="grid place-content-center h-[80vh]">
-                <form action={search} className="max-w-3xl my-auto mx-auto text-center">
-                  <h1 className="text-4xl  mb-8">Discover Home cooked food and more...</h1>
-                    <div className="relative mb-4">
-                        <div class="rounded-lg border border-input p-px shadow-lg shadow-bactext-background/20">
-                                    <input
-                                    type="text"
-                                    placeholder="Enter delivery address"
-                                    className="w-full py-3 px-4 pr-12 rounded-md   bg-background border-none text-foreground focus:outline-none outline-none"
-                                    name="city"
-                                    />
-                        </div>
-                      
-                      <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary text-background p-2 rounded-full">
-                          <ArrowRight size={20} className="" />
-                      </button>
-                  </div>
-                  {cookies().get('token') ? (
-                      <button type="submit" className="flex items-center justify-center mx-auto text-primary border bg-background rounded-md border-input hover:text-ring px-4 py-2">
-                      <Search  size={20} className="mr-2 text-ring" />
-                      Search
-                  </button>
-                  ) : (
-                          <Link href={"/login"} className="flex items-center justify-center mx-auto text-primary border bg-background rounded-md border-input hover:text-ring px-4 py-2">
-                                <User size={20} className="mr-2 text-ring" />
-                              Sign in
-                          </Link>   
-                  )}
-                  
-              </form>
-          </div>
+export default function Hero() {
+  async function search(formData) {
+    "use server"
+    const city = formData.get('city')?.toString().split(' ').join(',') || ''
+    redirect(`/search?city=${city}`)
+  }
 
-              <div className="md:block hidden absolute bottom-0 left-[5rem] w-1/4">
-                  {/* <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" alt="Food plate" width={500} height={500} className="rounded-full" /> */}
-                  <Beef size={300} strokeWidth={0.025} className="text-ring"/>
-              </div>
-
-            <div className="md:block hidden absolute top-20 left-12 w-1/6">
-                  {/* <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" alt="Smartphone" width={500} height={500} className="transform -rotate-12" /> */}
-              <Heater size={300} strokeWidth={0.025} className="text-ring" />
-              </div>
-
-            <div className=" md:block hidden absolute bottom-10 right-10 w-1/4">
-                  {/* <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" alt="Tacos" width={500} height={500}  className="rounded-lg" /> */}
-              <CroissantIcon size={300} strokeWidth={0.02} className="text-ring" />
-              </div>
-
-            <div className=" md:block hidden absolute top-20 right-20 w-1/6">
-                  {/* <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" width={500} height={500} alt="Candy" className="rounded-full" /> 
-              */}
-                <Pizza size={300} strokeWidth={0.02} className="text-ring" />
-          </div>
-
-            <div className=" md:block hidden absolute bottom-0 left-[40%] w-1/6">
-              {/* <Image blurDataURL={getBlur()} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  src="/vercel.svg" width={500} height={500} alt="Candy" className="rounded-full" /> 
-              */}
-              {/* <HandPlatter size={300} strokeWidth={0.025} className="text-ring" /> */}
-          </div>
-          
+  return (
+    <div className="pt-10 min-h-screen relative bg-gradient-to-br from-primary/10 to-secondary/10 text-foreground overflow-hidden">
+      <div className="absolute inset-0 bg-[url('/food-pattern.png')] opacity-5"></div>
+      <div className="container mx-auto px-4 py-16 relative z-10">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-5xl font-bold mb-6 text-primary">
+            Discover Delicious
+            <span className="block text-6xl mt-2 text-foreground">Home-Cooked Food</span>
+          </h1>
+          <p className="text-xl mb-8 text-muted-foreground">Explore a world of flavors, right in your neighborhood</p>
+          <form action={search} className="max-w-2xl mx-auto">
+            <div className="relative mb-6">
+              <Input
+                type="text"
+                placeholder="Enter your delivery address"
+                className="w-full py-6 px-6 pr-12 text-lg"
+                name="city"
+              />
+              <Button3 type="submit" size="icon" className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                <ArrowRight className="h-4 w-4" />
+              </Button3>
+            </div>
+            {cookies().get('token') ? (
+              <Button3 type="submit" size="lg" className="w-full sm:w-auto">
+                <Search className="mr-2 h-5 w-5" />
+                Find Delicious Meals
+              </Button3>
+            ) : (
+              <Button3 asChild size="lg" className="w-full sm:w-auto">
+                <Link href="/login">
+                  <User className="mr-2 h-5 w-5" />
+                  Sign in to Explore
+                </Link>
+              </Button3>
+            )}
+          </form>
+        </div>
       </div>
+
+      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-background to-transparent"></div>
+
+      <Image
+        src="/dish1.svg"
+        alt="Delicious dish"
+        width={350}
+        height={350}
+        className="absolute bottom-10 left-10  hidden lg:block"
+      />
+      <Image
+        src="/dish3.svg"
+        alt="Home-cooked meal"
+        width={300}
+        height={300}
+        className="absolute top-20 right-20 rounded-full shadow-xl hidden lg:block"
+      />
+   
+    </div>
   )
 }
-
-export default Hero

@@ -33,8 +33,10 @@ export default function RootLayout({ children }) {
           defaultTheme="light"
           enableSystem
         >
-        <NavBar/>
-        {children}
+          <NavBar />
+          <div>
+            {children}
+        </div>
           <Toaster />
         </ThemeProvider>
       </body>
