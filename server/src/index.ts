@@ -1226,7 +1226,7 @@ app.post('/jwt/chefOrder', async (c) => {
   const { kid } = await c.req.json<{ kid: string }>()
 
 
-  const result = await runCursorQuery('BEGIN GET_ORDER_DETAILS_BY_CHEF_AND_KITCHEN(:kid, :id, :cursor); END;', { kid, id });
+  const result = await runCursorQuery('BEGIN GET_ORDER_DETAILS_BY_CHEF_AND_KITCHEN(:id, :kid, :cursor); END;', { kid, id });
 
   return c.json({ result });
 })
