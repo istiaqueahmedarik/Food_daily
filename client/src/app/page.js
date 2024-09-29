@@ -13,6 +13,7 @@ import PopFood from "@/components/PopFood";
 import { Suspense } from "react";
 import LoadingSection from "@/components/LoadingSection";
 import { OrderType } from "@/components/OrderType";
+import OTPSent from "@/components/OTP";
 
 // export const dynamic = 'force-static';
 export const experimental_ppr = true;
