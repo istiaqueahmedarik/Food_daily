@@ -9,7 +9,7 @@ import { redirect } from 'next/navigation'
 async function page({params}) {
     // const data = await post_with_token('jwt/getKitchen', { kitchenId: params.id })
     const [kitchen, kitchen_images] = await Promise.all([post('getKitchen', { kitchenId: params.id }), post_with_token('jwt/getKitchenImage', { kitchenId: params.id })])
-    console.log(kitchen)
+    
 
     if (kitchen.error !== undefined || kitchen.result.length === 0) {
         redirect('/404')

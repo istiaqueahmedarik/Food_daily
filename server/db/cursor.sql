@@ -421,6 +421,59 @@ BEGIN
 END;
 /
 
+SELECT
+            KI.ID                        AS KITCHEN_ID,
+            ORDER_ID,
+            FOOD_NAMES,
+            TOTAL,
+            DATE_ADDED,
+            DATE_SHIPPED,
+            DATE_DELIVERED,
+            SHIPPING_ADD,
+            SHIPPING_PHONE,
+            SHIPPING_NAME,
+            GET_ORDER_STATUS(ORD.STATUS) AS ORDER_STATUS
+        FROM
+            (
+                SELECT
+                    C.DELETED_ID                 AS ORDER_ID,
+                    K.ID,
+                    GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES
+                FROM
+                    CART     C
+                    JOIN FOOD F
+                    ON C.FOOD_ID = F.ID
+                    JOIN CATEGORY CAT
+                    ON F.CATEGORY_ID = CAT.ID
+                    JOIN KITCHEN K
+                    ON CAT.KITCHEN_ID = K.ID
+                WHERE
+                    C.DELETED_ID IS NOT NULL
+                GROUP BY
+                    C.DELETED_ID,
+                    K.ID
+            )       Q,
+            ORDERS  ORD,
+            KITCHEN KI,
+            CHEF,
+            USERS
+        WHERE
+            Q.ID = KI.ID
+            AND CHEF.ID = KI.CHEF_ID
+            AND USERS.ID = CHEF.USER_ID
+            AND Q.ORDER_ID = ORD.ID
+            AND CHEF.USER_ID = 'U3'
+            AND KI.ID = 'K1'
+        ORDER BY
+            CASE
+                WHEN ORD.STATUS = 'DELIVERED' THEN
+                    1
+                ELSE
+                    0
+            END ASC,
+            ORD.DATE_ADDED ASC;
+
+
 CREATE OR REPLACE PROCEDURE GET_ORDER_DETAILS_BY_CHEF_AND_KITCHEN (
     P_USER_ID IN USERS.ID%TYPE,
     P_KITCHEN_ID IN KITCHEN.ID%TYPE,
@@ -479,6 +532,10 @@ BEGIN
                     0
             END ASC,
             ORD.DATE_ADDED ASC;
+            EXCEPTION
+    WHEN OTHERS THEN
+        RAISE_APPLICATION_ERROR(-20002, 'An unexpected error occurred: '
+                                        || SQLERRM);
 END;
 /
 
@@ -557,8 +614,8 @@ END;
 /
 
 CREATE OR REPLACE PROCEDURE GET_TOTAL_EARNINGS_BY_DELIVERY_PARTNER (
-    P_DAYS IN NUMBER,
     P_USER_ID IN DELIVERY_PARTNER.USER_ID%TYPE,
+    P_DAYS IN NUMBER,
     P_CURSOR OUT SYS_REFCURSOR
 ) IS
 BEGIN

@@ -30,7 +30,7 @@ async function SmallFood({ res }) {
             price: rawFormData.price,
             image: url1
         }
-        console.log(data);
+        
         await post_with_token('jwt/updateFood', data);
         revalidatePath(`/chef/my/food/${res.food[0]['ID']}/ingredient`);
     }
@@ -40,7 +40,7 @@ async function SmallFood({ res }) {
         const data = {
             fid: res.food[0]['ID']
         }
-        console.log(data);
+        
         await post_with_token('jwt/deleteFood', data);
         redirect('/chef/my');
 
