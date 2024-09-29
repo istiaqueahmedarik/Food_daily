@@ -7,7 +7,7 @@ import { getImage } from '@/util'
 import { Star, StarHalf, ChefHat, Award, MapPin, Utensils } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button3 } from "@/components/ui/button3"
 import { Skeleton } from "@/components/ui/skeleton"
 
 async function ChefProfile({ profile = false, mine = true, path, chef }) {
@@ -71,23 +71,23 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                                 ))}
                             </div>
                             {!profile ? (
-                                <Button asChild className="w-full sm:w-auto transition-all hover:shadow-md">
+                                <Button3 asChild className="w-full sm:w-auto transition-all hover:shadow-md">
                                     <Link href={mine ? '/chef/my' : '#kitchen'}>
                                         <span>{mine ? 'Your Dashboard' : 'View Menu'}</span>
                                     </Link>
-                                </Button>
+                                </Button3>
                             ) : (
                                 <div className="flex flex-wrap gap-4">
-                                    <Button asChild className="w-full sm:w-auto transition-all hover:shadow-md">
+                                    <Button3 asChild className="w-full sm:w-auto transition-all hover:shadow-md">
                                         <Link href="/add_kitchen">
                                             <span>Add Kitchen</span>
                                         </Link>
-                                    </Button>
-                                    <Button asChild variant="outline" className="w-full sm:w-auto transition-all hover:shadow-md">
+                                    </Button3>
+                                    <Button3 asChild variant="outline" className="w-full sm:w-auto transition-all hover:shadow-md">
                                         <Link href="/chef/add_certificate">
                                             <span>Add Certificate</span>
                                         </Link>
-                                    </Button>
+                                    </Button3>
                                 </div>
                             )}
                         </div>
@@ -96,13 +96,12 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                                 <Image
                                     src={data['PROFILE_IMAGE']}
                                     alt={`Profile picture of ${data['NAME']['FIRST_NAME']}`}
-                                    layout="fill"
-                                    objectFit="cover"
                                     placeholder="blur"
                                     blurDataURL={image}
                                     sizes="(max-width: 768px) 100vw, 50vw"
                                     quality={60}
-                                    className="transition-transform duration-300 hover:scale-105"
+                                    fill
+                                    className="transition-transform duration-300 hover:scale-105 object-cover"
                                 />
                             ) : (
                                 <div className="grid grid-cols-2 gap-2 h-full">
@@ -111,12 +110,11 @@ async function ChefProfile({ profile = false, mine = true, path, chef }) {
                                             <Image
                                                 src={image['FOOD_IMAGE']}
                                                 alt={`Chef's Dish ${index + 1}`}
-                                                layout="fill"
-                                                objectFit="cover"
                                                 placeholder="blur"
                                                 blurDataURL={blurImg}
                                                 sizes="(max-width: 768px) 50vw, 25vw"
                                                 quality={60}
+                                                fill
                                                 className="transition-transform duration-300 group-hover:scale-110"
                                             />
                                            

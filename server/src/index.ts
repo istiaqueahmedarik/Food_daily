@@ -755,6 +755,7 @@ app.get('/jwt/getOrders', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI WHERE KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'PREPEARED' AND O.DATE_SHIPPED IS NULL  AND O.DATE_PREPARED IS NOT NULL   AND O.DATE_DELIVERED IS NULL AND O.DATE_ADDED <= SYSDATE ORDER BY O.DATE_ADDED", {});
+  console.log(result)
   return c.json({ result });
 })
 

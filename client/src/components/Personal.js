@@ -32,7 +32,6 @@ async function Personal({ mine = true, path, res }) {
                     <Image
                         src={PROFILE_IMAGE}
                         alt="Profile background"
-                        objectFit="cover"
                         className="mix-blend-overlay"
                         fill
                     />
