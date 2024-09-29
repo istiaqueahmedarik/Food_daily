@@ -584,3 +584,5 @@ BEGIN
             TRUNC(ORDERS.DATE_ADDED);
 END;
 /
+
+SELECT * from ORDERS;
