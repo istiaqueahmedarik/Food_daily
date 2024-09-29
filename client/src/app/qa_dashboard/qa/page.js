@@ -10,7 +10,6 @@ export const experimental_ppr = true;
 async function page() {
     const [kitchens, delivery] = await Promise.all([get_with_token('jwt/verifyKitchens'), get_with_token('jwt/verifyDelivery')])
     if(kitchens.result===undefined) redirect('/profile')
-    
   return (
       <div>
           <div className="h-24"></div>
