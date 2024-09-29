@@ -6,7 +6,7 @@ async function DeliveryStatus({oid}) {
     
     const result = await post_with_token('jwt/orderDetails', { oid });
     const data = result.result[0];
-    console.log(data)
+    
     return (
      
         <div div className = "w-80 border-r flex flex-col" >

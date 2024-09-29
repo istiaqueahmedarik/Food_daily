@@ -1,141 +1,170 @@
-import { get, get_with_token } from '@/action';
-import Link from 'next/link';
+import { get } from '@/action'
+import Link from 'next/link'
 import Image from 'next/image'
 import React, { Suspense } from 'react'
-import KitchenCard from './ui/KitchenCard';
-import { getImage } from '@/util';
-
+import KitchenCard from './ui/KitchenCard'
+import { getImage } from '@/util'
+import { Star, StarHalf, ChefHat, Award, MapPin, Utensils } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 
 async function ChefProfile({ profile = false, mine = true, path, chef }) {
-    if (mine === false)
-        chef = await get(path);
-    const image = await getImage();
-    if (chef.error !== undefined || chef.result === undefined || chef.result.length === 0)
-        return null
-    // const rating = await get(`getChefRating/${chef.result[0]['CHEF_ID']}`)
-    // const bestImages = await get(`bestFood/${chef.result[0]['CHEF_ID']}`)
-    // const category = await get(`bestFoodCategory/${chef.result[0]['CHEF_ID']}`)
-    const [rating, bestImages, category] = await Promise.all([get(`getChefRating/${chef.result[0]['CHEF_ID']}`), get(`bestFood/${chef.result[0]['CHEF_ID']}`), get(`bestFoodCategory/${chef.result[0]['CHEF_ID']}`)])
-    const blurImg = await getImage();
-    const data = chef.result[0]
-    const stars = []
-    for (let i = 0; i < 5; i++) {
-        if (i < rating.Rating)
-            stars.push(<FullStar key={i} />)
-        else if (i === rating.Rating && rating.Rating % 1 !== 0)
-            stars.push(<HalfStar key={i}/>)
-        else
-            stars.push(<EmptyStar key={i}/>)
+    if (mine === false) {
+        chef = await get(path)
     }
-    stars.push(<span className="ml-2" key={rating.Rating}>{rating.Rating}</span>)
+    const image = await getImage()
+    if (chef.error !== undefined || chef.result === undefined || chef.result.length === 0) {
+        return null
+    }
+
+    const [rating, bestImages, category] = await Promise.all([
+        get(`getChefRating/${chef.result[0]['CHEF_ID']}`),
+        get(`bestFood/${chef.result[0]['CHEF_ID']}`),
+        get(`bestFoodCategory/${chef.result[0]['CHEF_ID']}`)
+    ])
+    
+
+    const blurImg = await getImage()
+    const data = chef.result[0]
+
+    const renderStars = (rating) => {
+        const stars = []
+        for (let i = 0; i < 5; i++) {
+            if (i < Math.floor(rating)) {
+                stars.push(<Star key={i} className="w-5 h-5 fill-primary text-primary" />)
+            } else if (i === Math.floor(rating) && rating % 1 !== 0) {
+                stars.push(<StarHalf key={i} className="w-5 h-5 fill-primary text-primary" />)
+            } else {
+                stars.push(<Star key={i} className="w-5 h-5 text-muted-foreground" />)
+            }
+        }
+        return stars
+    }
+
     return (
-        <div className=" m-5 ">
-
-            <div className="bg-background text-foreground border border-input rounded-xl">
-                <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-                        <div className="flex flex-col items-start justify-center">
-                            <div className={`inline-block rounded-full bg-primary px-4 py-1 text-primary-foreground ${profile?'hidden':''}`}>Chef Profile</div>
-                            <h1 className="mt-4 text-4xl font-bold tracking-tight">{data['CHEF_NAME']}</h1>
-                            <span>
-                                <p className="mt-4 text-lg text-muted-foreground flex flex-row">
-                                    {stars}
-
-                                </p>
-                            </span>
-                            <p className="mt-4 text-lg text-muted-foreground">
-                                {data['SPECIALITY']}
-                            </p>
-                            <div className="mt-6 flex flex-wrap gap-4">
-                                {category.result.map((cat, index) => {
-                                    return (
-                                        <div key={index} className="rounded-full bg-muted px-4 py-1 text-sm font-medium text-muted-foreground border border-input">
-                                            {cat['NAME']}
-                                        </div>
-                                    )
-                                })}
-                              
+        <div className="container mx-auto px-4 py-12">
+            <Card className="overflow-hidden bg-gradient-to-br from-card to-background border-none shadow-xl">
+                <CardContent className="p-0">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="p-8 space-y-6">
+                            {!profile && (
+                                <Badge variant="secondary" className="mb-4 bg-primary/10 text-primary">
+                                    <ChefHat className="w-4 h-4 mr-2" />
+                                    <span>Chef Profile</span>
+                                </Badge>
+                            )}
+                            <CardTitle className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                {data['CHEF_NAME']}
+                            </CardTitle>
+                            <div className="flex items-center mb-4" aria-label={`Rating: ${rating.Rating.toFixed(1)} out of 5 stars`}>
+                                {renderStars(rating.Rating)}
+                                <span className="ml-2 text-sm text-muted-foreground">({rating.Rating.toFixed(1)})</span>
                             </div>
-                            <div className={`${profile===true?'hidden':''}`}>
-                                <Link href={`${mine ? '/chef/my' :'#kitchen'}`} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6">
-                                    {mine?'Your Dashboard':'View Menu'}
-                                </Link> 
-                                
+                            <p className="text-lg text-muted-foreground mb-6">{data['SPECIALITY']}</p>
+                            <div className="flex flex-wrap gap-2 mb-6">
+                                {category.result.map((cat, index) => (
+                                    <Badge key={index} variant="outline" className="bg-secondary/20 text-secondary-foreground">
+                                        {cat['NAME']}
+                                    </Badge>
+                                ))}
                             </div>
-                            {profile && <div className="flex flex-wrap gap-5">
-                                <Link href={"/add_kitchen"} className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6'>
-                                    Add Kitchen
-                                </Link>
-                                <Link href={"/chef/add_certificate"} className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 mt-6  '>
-                                    Add Certificate
-                                </Link>
-                            </div>}
-                        </div>
-                        {profile ? <div className='m-auto'>
-
-                            <Image blurDataURL={image} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"  quality={60} src={data['PROFILE_IMAGE']} width="400" height="400" alt={data['FIRST_NAME']} className="rounded-lg object-cover" />
-                        </div>:
-                            <div className={`grid grid-cols-2 gap-4`}>
-                                {bestImages.result.map((image, index) => {
-                                    return (
-                                        <Link href={`/chef/kitchen/food/${image['FOOD_ID']}`} key={index}>
-                                            <Image blurDataURL={blurImg} placeholder='blur' sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" quality={60}
-                                                src={image['FOOD_IMAGE']}
-                                                width="300"
-                                                height="300"
-                                                alt="Chef's Dish 1"
-                                                className="rounded-lg object-cover"
-
-                                            />
+                            {!profile ? (
+                                <Button asChild className="w-full sm:w-auto transition-all hover:shadow-md">
+                                    <Link href={mine ? '/chef/my' : '#kitchen'}>
+                                        <span>{mine ? 'Your Dashboard' : 'View Menu'}</span>
+                                    </Link>
+                                </Button>
+                            ) : (
+                                <div className="flex flex-wrap gap-4">
+                                    <Button asChild className="w-full sm:w-auto transition-all hover:shadow-md">
+                                        <Link href="/add_kitchen">
+                                            <span>Add Kitchen</span>
                                         </Link>
-                                    )
-                                })
-                               
-                                }
+                                    </Button>
+                                    <Button asChild variant="outline" className="w-full sm:w-auto transition-all hover:shadow-md">
+                                        <Link href="/chef/add_certificate">
+                                            <span>Add Certificate</span>
+                                        </Link>
+                                    </Button>
+                                </div>
+                            )}
                         </div>
-                        }
-                        
-                        
+                        <div className="relative h-[400px] md:h-auto overflow-hidden rounded-b-lg md:rounded-r-lg md:rounded-bl-none">
+                            {profile ? (
+                                <Image
+                                    src={data['PROFILE_IMAGE']}
+                                    alt={`Profile picture of ${data['NAME']['FIRST_NAME']}`}
+                                    layout="fill"
+                                    objectFit="cover"
+                                    placeholder="blur"
+                                    blurDataURL={image}
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                    quality={60}
+                                    className="transition-transform duration-300 hover:scale-105"
+                                />
+                            ) : (
+                                <div className="grid grid-cols-2 gap-2 h-full">
+                                    {bestImages.result.slice(0, 4).map((image, index) => (
+                                        <Link href={`/chef/kitchen/food/${image['ID']}`} key={index} className="relative h-full overflow-hidden rounded-lg group">
+                                            <Image
+                                                src={image['FOOD_IMAGE']}
+                                                alt={`Chef's Dish ${index + 1}`}
+                                                layout="fill"
+                                                objectFit="cover"
+                                                placeholder="blur"
+                                                blurDataURL={blurImg}
+                                                sizes="(max-width: 768px) 50vw, 25vw"
+                                                quality={60}
+                                                className="transition-transform duration-300 group-hover:scale-110"
+                                            />
+                                           
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div id='kitchen' className='m-5 :text-white'>
-                <h1 className={`text-2xl font-medium mb-3 ${(chef !== undefined && chef.result[0]['KITCHEN_ID'] !== null && ((profile === false && chef.result[0]['APPROVED']) === 0) === false) ? '' : 'hidden'}`}>{profile ?'Your':'Chef\'s'} Kitchens</h1>
-                {(chef !== undefined && chef.result[0]['KITCHEN_ID'] !== null  && ((profile===false && chef.result[0]['APPROVED'])===0)===false) && <div className='w-full flex flex-wrap gap-6'>
-                    {
-                        chef.result.map((kitchen,index) => { 
-                        return (
-                            <Suspense key={index} fallback={<div>loading..</div>}>
-                                <KitchenCard name={kitchen['KITCHEN_NAME']} image={kitchen['KITCHEN_IMAGE']} address={kitchen['KITCHEN_ADDRESS']} edit={kitchen['KITCHEN_ID']} profile={profile} approved={kitchen['APPROVED']} />
+                </CardContent>
+            </Card>
+
+            {(chef !== undefined && chef.result[0]['KITCHEN_ID'] !== null && ((profile === false && chef.result[0]['APPROVED']) === 0) === false) && (
+                <section className="mt-12 space-y-6" aria-labelledby="kitchens-heading">
+                    <h2 id="kitchens-heading" className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                        {profile ? 'Your' : "Chef's"} Kitchens
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {chef.result.map((kitchen, index) => (
+                            <Suspense key={index} fallback={<KitchenCardSkeleton />}>
+                                <KitchenCard
+                                    name={kitchen['KITCHEN_NAME']}
+                                    image={kitchen['KITCHEN_IMAGE']}
+                                    address={kitchen['KITCHEN_ADDRESS']}
+                                    edit={kitchen['KITCHEN_ID']}
+                                    profile={profile}
+                                    approved={kitchen['APPROVED']}
+                                />
                             </Suspense>
-
-
-                        );
-                    })}
-                </div>}
-            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
         </div>
-
     )
 }
 
+const KitchenCardSkeleton = () => (
+    <Card className="overflow-hidden">
+        <CardContent className="p-0">
+            <Skeleton className="h-48 rounded-t-lg" />
+            <div className="p-4 space-y-4">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-10 w-1/2" />
+            </div>
+        </CardContent>
+    </Card>
+)
+
 export default ChefProfile
-
-const FullStar = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-foreground">
-        <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-    </svg>
-);
-
-const HalfStar = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-foreground">
-        <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-        <path fillRule="evenodd" d="M12 5.173V18.354l4.627 2.826c.996.608 2.231-.29 1.96-1.425l-1.257-5.273 4.117-3.527c.887-.76.415-2.212-.749-2.305l-5.404-.433-2.082-5.006c-.448-1.077-1.976-1.077-2.424 0L10.788 3.21l-5.404.433c-1.164.093-1.636 1.545-.749 2.305l4.117 3.527-1.257 5.273c-.271 1.136.964 2.033 1.96 1.425L12 18.354V5.173z" clipRule="evenodd" fill="white" />
-    </svg>
-);
-
-const EmptyStar = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-300">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-    </svg>
-);

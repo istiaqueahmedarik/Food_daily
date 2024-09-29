@@ -20,7 +20,7 @@ async function CertList({ chef, res, mine, path, path2 }) {
                         </span>
                         <span className="absolute left-0 right-0 bottom-0 h-[325px] bg-gradient-to-b from-background/0 via-background to-background"></span>
                     </div>
-                    <h1 className=" text-4xl font-bold uppercase tracking-widest">{chef.result[0]['FIRST_NAME']} {chef.result[0]['LAST_NAME']}</h1>
+                    <h1 className=" text-4xl font-bold uppercase tracking-widest">{chef.result[0]['NAME']['FIRST_NAME']} {chef.result[0]['NAME']['LAST_NAME']}</h1>
                     <h1 className="mt-8 mb-4 text-base font-bold uppercase tracking-widest">Certificates</h1>
                     <p className="max-w-[40ch] text-foreground/75 sm:max-w-[32ch]">
                         List of all the certificates of the chef.

@@ -186,7 +186,7 @@ const QueryBuilder = ({ tableSchemas, query, updateQuery, depth = 0, parentColum
             value: col.column,
             label: col.alias || col.column
         }))
-        console.log(columns)
+        
 
         const subqueryColumns = query.subqueries.flatMap(sq =>
             sq.query.selectedColumns.map(col => ({
@@ -194,7 +194,7 @@ const QueryBuilder = ({ tableSchemas, query, updateQuery, depth = 0, parentColum
                 label: `${sq.alias}.${col.alias || col.column}`
             }))
         )
-        console.log([...columns, ...subqueryColumns, ...parentColumns])
+        
 
         return [...columns, ...subqueryColumns, ...parentColumns]
     }

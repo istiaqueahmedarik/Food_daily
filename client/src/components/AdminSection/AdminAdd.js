@@ -12,7 +12,7 @@ export default async function AdminAdd() {
     const admins = await get_with_token('jwt/allAdmin')
 
     
-    console.log(admins)
+    
    
     return (
         <div className="mb-5 bg-background p-8">

@@ -13,14 +13,13 @@ export const experimental_ppr = true
 async function page() {
   const res = await get_with_token('jwt/chefDetails');
   
+  
 
   return (
     <div className=" bg-background flex flex-col gap-8">
-      <div className="h-[100vh] m-auto grid place-content-center">
         <Suspense fallback={<div>Loading...</div>}>
           <Personal res={res} />
         </Suspense>
-      </div>
       <Suspense fallback={<div>Loading...</div>}>
         <OrderList />
       </Suspense>

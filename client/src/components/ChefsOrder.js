@@ -34,7 +34,7 @@ export default async function ChefsOrder({ kid }) {
 
     const orders = data.result;
 
-    console.log(data)
+    
 
     return (
         <div className="flex flex-col bg-background m-5 border p-5 rounded-lg">

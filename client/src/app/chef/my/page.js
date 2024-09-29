@@ -13,7 +13,7 @@ async function page() {
 
   return (
     <div className="bg-background">
-          {/* {user.result[0]['FIRST_NAME']} {user.result[0]['LAST_NAME']} {user.result[0]['RATING']} <Star size={30} /> */}
+          {/* {user.result[0]['NAME']['FIRST_NAME']} {user.result[0]['NAME']['LAST_NAME']} {user.result[0]['RATING']} <Star size={30} /> */}
           <ChefProfile profile={true} chef={chef}/>
 
       <CertList chef={chef} res={res} />
