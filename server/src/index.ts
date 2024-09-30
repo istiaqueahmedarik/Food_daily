@@ -194,10 +194,10 @@ app.post('/signup', async (c) => {
       const result = await runQuery(`BEGIN REGISTER_USER(:firstName, :lastName, TO_DATE(:formattedDob, 'YYYY-MM-DD'), :address, :mobile, :cityCode, :email, :password, :type); END;`, { firstName, lastName, formattedDob, address, mobile: mobileNumber, cityCode, email, password, type: 'USER' });
       return c.json({ result, token, email });
     } catch (error) {
-      return c.json({ error, token, email });
+      return c.json({ error: (error as Error).message, token, email });
     }
   } catch (error) {
-    return c.json({ error });
+    return c.json({ error: (error as Error).message });
   }
 });
 
@@ -755,7 +755,7 @@ app.get('/jwt/getOrders', async (c) => {
   const payload = c.get('jwtPayload')
   const { id, email } = payload
   const result = await runQuery("SELECT * FROM ( SELECT C.DELETED_ID, K.ID, GET_FOOD_NAMES(C.DELETED_ID) AS FOOD_NAMES FROM CART C JOIN FOOD F   ON C.FOOD_ID = F.ID JOIN CATEGORY CAT ON F.CATEGORY_ID = CAT.ID JOIN KITCHEN K             ON CAT.KITCHEN_ID = K.ID WHERE C.DELETED_ID IS NOT NULL GROUP BY C.DELETED_ID, K.ID )      Q, ORDERS O, KITCHEN KI WHERE KI.ID = Q.ID AND Q.DELETED_ID = O.ID AND O.STATUS = 'PREPEARED' AND O.DATE_SHIPPED IS NULL  AND O.DATE_PREPARED IS NOT NULL   AND O.DATE_DELIVERED IS NULL AND O.DATE_ADDED <= SYSDATE ORDER BY O.DATE_ADDED", {});
-  
+
   return c.json({ result });
 })
 
@@ -1226,7 +1226,7 @@ app.post('/jwt/chefOrder', async (c) => {
   const { id, email } = payload
   const { kid } = await c.req.json<{ kid: string }>()
 
-  console.log(kid,id);
+  console.log(kid, id);
   const result = await runCursorQuery(`BEGIN GET_ORDER_DETAILS_BY_CHEF_AND_KITCHEN(:id, :kid, :cursor); END;`, { kid, id });
 
   return c.json({ result });
@@ -1537,7 +1537,7 @@ app.post('/jwt/updateCategory', async (c) => {
   const { id } = payload;
   const { cat_id, name, description, image } = await c.req.json<{ cat_id: string, name: string, description: string, image: string }>();
   const result = await runQuery('BEGIN UPDATE_CATEGORY(:cat_id, :name, :description, :image); END;', { cat_id, name, description, image });
-  
+
   return c.json(result);
 })
 
@@ -1644,7 +1644,7 @@ app.post('/jwt/updateFood', async (c) => {
   const payload = c.get('jwtPayload');
   const { id } = payload;
   const { fid, name, description, price, image } = await c.req.json<{ fid: string, name: string, description: string, price: number, image: string }>();
-  
+
   const result = await runQuery('BEGIN UPDATE_FOOD(:fid, :name, :description, :price, :image); END;', { fid, name, description, price, image });
   return c.json(result);
 })
@@ -1655,6 +1655,16 @@ app.post('/jwt/deleteFood', async (c) => {
   const { fid } = await c.req.json<{ fid: string }>();
   const result = await runQuery('BEGIN DELETE_FOOD(:fid); END;', { fid });
   return c.json(result);
+})
+
+
+app.post('/reset-pass', async (c) => {
+  const { email, pass } = await c.req.json<{ email: string, pass: string }>();
+  const result = await runQuery('SELECT * FROM USERS WHERE EMAIL = :email', { email });
+  if (result.length === 0)
+    return c.json({ status: false });
+  await runQuery(`UPDATE USERS SET PASSWORD = :pass WHERE EMAIL = :email`, { email, pass });
+  return c.json({ status: true });
 })
 
 export default {

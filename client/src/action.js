@@ -166,6 +166,7 @@ export async function signup(prevState, formData) {
             message: 'Passwords do not match'
         }
     const response = await post('signup', rawFormData)
+    console.log(response);
     if (response.error !== undefined)
         return {
             message: response.error
